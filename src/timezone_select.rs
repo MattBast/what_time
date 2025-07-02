@@ -7,7 +7,7 @@ use leptos::prelude::*;
 // Still figuring this out.
 // 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
 #[component]
-pub fn TimezoneSelectTwo(
+pub fn TimezoneSelect(
     url_query: Memo<Option<String>>,
     set_url_query: SignalSetter<Option<String>>,
     tz_variants: ArcReadSignal<Vec<Tz>>,
