@@ -1,23 +1,34 @@
 use crate::timezone::{tz_display, tz_to_city, tz_to_country, tz_to_emoji};
+use crate::url_parse::remove_timezone;
 use crate::url_parse::url_query_to_timezones;
 use chrono_tz::{Tz, TZ_VARIANTS};
 use leptos::prelude::*;
+use leptos_router::hooks::query_signal;
 
-// 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
-// Still figuring this out.
-// 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
 #[component]
-pub fn TimezoneSelect(
-    url_query: Memo<Option<String>>,
-    set_url_query: SignalSetter<Option<String>>,
-    tz_variants: ArcReadSignal<Vec<Tz>>,
-    set_tz_variants: ArcWriteSignal<Vec<Tz>>,
-) -> impl IntoView {
+pub fn TimezoneSelect() -> impl IntoView {
+    // Watch the url.
+    let (url_query, set_url_query) = query_signal::<String>("zone");
+
+    // Get a list of all the available timezones to present in the dropdown.
+    let (tz_variants, set_tz_variants) =
+        ArcRwSignal::new(TZ_VARIANTS.iter().map(|tz| tz.clone()).collect()).split();
+    let set_tz_variants_clone = set_tz_variants.clone();
+
     // Get or set the value typed into the search input field.
     let (search_term, set_search_term) = signal(String::new());
 
     // Use this variable to decide if the dropdoiwn should be showing or not.
     let (show_dropdown, set_show_dropdown) = signal(false);
+
+    // Watch the url query to decide which timezones to present in the dropdown.
+    Effect::new(move || {
+        // Trigger these actions when the url "zone" query changes.
+        let query = url_query.get().unwrap_or_default();
+
+        // Remove the timezones in the url from the dropdown options.
+        set_tz_variants_clone.update(|variants| remove_timezone(query, variants));
+    });
 
     // Listen for the `search_term` to be changed
     Effect::new(move || {
