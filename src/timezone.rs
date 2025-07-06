@@ -3,24 +3,38 @@ use chrono::DateTime;
 use chrono::Duration;
 use chrono_tz::Tz;
 
-/// Add 24 future increments to a list of time increments.
-pub fn add_24_future_increments(increments: &mut Vec<TimeIncrement>) {
-    for _ in 1..24 {
-        let mut new_hour = increments.last().unwrap().clone();
+/// Create a Vector of time increments in the future from now for the given `timezone`.
+pub fn new_future_increments(current_future_increments: i32, timezone: &Tz) -> Vec<TimeIncrement> {
+    let mut new_increments = vec![TimeIncrement::now(timezone.clone())];
+
+    for _ in 1..current_future_increments {
+        let mut new_hour = new_increments.last().unwrap().clone();
         new_hour.add(Duration::hours(1));
         new_hour.now = false;
-        increments.push(new_hour);
+        new_increments.push(new_hour);
     }
+
+    // remove now
+    new_increments.remove(0);
+
+    new_increments
 }
 
-/// Add 24 past increments to the front a list of time increments.
-pub fn add_24_past_increments(increments: &mut Vec<TimeIncrement>) {
-    for _ in 1..24 {
-        let mut new_hour = increments.first().unwrap().clone();
+/// Create a Vector of time increments in the past from now for the given `timezone`.
+pub fn new_past_increments(current_future_increments: i32, timezone: &Tz) -> Vec<TimeIncrement> {
+    let mut new_increments = vec![TimeIncrement::now(timezone.clone())];
+
+    for _ in 1..current_future_increments {
+        let mut new_hour = new_increments.first().unwrap().clone();
         new_hour.minus(Duration::hours(1));
         new_hour.now = false;
-        increments.insert(0, new_hour);
+        new_increments.insert(0, new_hour);
     }
+
+    // remove now
+    let _ = new_increments.pop();
+
+    new_increments
 }
 
 #[derive(Debug, Clone, Copy)]

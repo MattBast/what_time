@@ -1,8 +1,10 @@
 use crate::buttons::SideButton;
 use crate::timecard::Timecard;
-use crate::timezone::{add_24_future_increments, add_24_past_increments};
+use crate::timezone::TimeIncrement;
+use crate::timezone::{new_future_increments, new_past_increments};
 use crate::timezone_select::TimezoneSelect;
 use crate::url_parse::url_query_to_time_increments;
+use chrono_tz::Tz;
 use leptos::prelude::*;
 use leptos_router::hooks::query_signal;
 
@@ -29,87 +31,106 @@ pub fn Carousel() -> impl IntoView {
 
 #[component]
 pub fn CarouselInner() -> impl IntoView {
-    let timezones = ArcRwSignal::new(Vec::new());
+    let (url_query, _set_url_query) = query_signal::<String>("zone");
 
-    let (get_timezones, set_timezones) = timezones.split();
+    let (get_timezones, set_timezones) = signal(Vec::new());
 
     // Listen for the `zone` url query to change and when it does, re-render the timezones.
-    let (url_query, _set_url_query) = query_signal::<String>("zone");
     Effect::new(move || {
         // Trigger these actions when the url "zone" query changes.
         let query = url_query.get().unwrap_or_default();
 
         // Add the timezones from url to the carousel.
-        timezones.set(url_query_to_time_increments(query.clone()));
+        set_timezones.set(url_query_to_time_increments(query.clone()));
     });
 
-    let set_timezones_2 = set_timezones.clone();
-
-    // Some reminder code to add increments to the url parameters
-    // let (q, set_q) = query_signal::<i32>("past_increments");
-    // let (q, set_q) = query_signal::<i32>("future_increments");
-
     view! {
-        // When clicked, this button adds 24 past future time increments to all timezones
         <SideButton
             on:click=move |_| {
 
-                set_timezones.update(|tz_list| {
-                    for timezone in tz_list {
-                        timezone.update(|i| {
-                            add_24_past_increments(i);
-                        });
-                    }
-                });
+                // Update the url query to instruct the app to add 24 time increments
+                // to all presented timezones.
+                let (i, set_i) = query_signal::<i32>("past_increments");
+                let current_i = i.get_untracked().unwrap_or_default();
+                set_i.set(Some(current_i + 24));
 
             }
         >
             "+ 24 Hours"
         </SideButton>
 
-        // Creates a card for every time increment present.
+        // Create a line of tiezone increments for every timezone present.
         <div class="overflow-scroll mx-8 sm:mx-10 snap-x snap-mandatory scroll-smooth">
 
             <For
                 each=move || get_timezones.get()
-                key=|timezone| timezone.get_untracked().first().unwrap().timezone.clone()
-                children=move|increments| {
+                key=|timezone| timezone.clone()
+                children=move|timezone| {
 
                     view! {
-                        <div class="flex gap-5 py-4 sm:gap-8">
-
-                            <For
-                                each=move || increments.get()
-                                key=|increment| increment.datetime.clone()
-                                let(hour)
-                            >
-
-                                <Timecard hour/>
-
-                            </For>
-
-                        </div>
+                        <TimezoneLine timezone/>
                     }
                 }
             />
 
         </div>
 
-        // When clicked, this button adds 24 future future time increments to all timezones
         <SideButton
             on:click=move |_| {
 
-                set_timezones_2.update(|tz_list| {
-                    for timezone in tz_list {
-                        timezone.update(|i| {
-                            add_24_future_increments(i);
-                        });
-                    }
-                });
+                // Update the url query to instruct the app to add 24 time increments
+                // to all presented timezones.s
+                let (i, set_i) = query_signal::<i32>("future_increments");
+                let current_i = i.get_untracked().unwrap_or_default();
+                set_i.set(Some(current_i + 24));
 
             }
         >
             "+ 24 Hours"
         </SideButton>
+    }
+}
+
+#[component]
+pub fn TimezoneLine(timezone: Tz) -> impl IntoView {
+    let (past_increments, _) = query_signal::<i32>("past_increments");
+    let (future_increments, _) = query_signal::<i32>("future_increments");
+
+    // Create a vector of [TimeIncrement] for the Timezone.
+    let (increments, set_increments) = signal(Vec::new());
+
+    // Add or remove time increments when the url query changes.
+    Effect::new(move || {
+        // Watch the future and past increment url queries
+        let current_past_increments = past_increments.get().unwrap_or_default();
+        let current_future_increments = future_increments.get().unwrap_or_default();
+
+        // Create a vector [TimeIncrement] for the length specified in the url.
+        let mut new_past_increments = new_past_increments(current_past_increments, &timezone);
+        let mut new_future_increments = new_future_increments(current_future_increments, &timezone);
+        let mut now = vec![TimeIncrement::now(timezone)];
+
+        new_past_increments.append(&mut now);
+        new_past_increments.append(&mut new_future_increments);
+
+        // Set the increments to instruct the page to change.
+        set_increments.set(new_past_increments);
+    });
+
+    view! {
+        <div class="flex gap-5 py-4 sm:gap-8">
+
+            // Creates a card for every time increment present.
+            <For
+                each=move || increments.get()
+                key=|increment| increment.datetime.clone()
+                let(hour)
+            >
+
+                <Timecard hour/>
+
+            </For>
+
+        </div>
     }
 }
