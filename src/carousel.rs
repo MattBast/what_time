@@ -5,8 +5,10 @@ use crate::timezone::{new_future_increments, new_past_increments};
 use crate::timezone_select::TimezoneSelect;
 use crate::url_parse::url_query_to_time_increments;
 use chrono_tz::Tz;
+use leptos::html::Div;
 use leptos::prelude::*;
 use leptos_router::hooks::query_signal;
+use leptos_use::use_element_visibility;
 
 #[component]
 pub fn Carousel() -> impl IntoView {
@@ -44,50 +46,60 @@ pub fn CarouselInner() -> impl IntoView {
         set_timezones.set(url_query_to_time_increments(query.clone()));
     });
 
-    view! {
-        <SideButton
-            on:click=move |_| {
+    // Load more time increments when the right spinner is visible.
+    let leftSpinnerRef = NodeRef::<Div>::new();
+    let rightSpinnerRef = NodeRef::<Div>::new();
 
+    #[cfg(feature = "hydrate")]
+    {
+        let leftSpinnerVisible = use_element_visibility(leftSpinnerRef);
+
+        Effect::new(move || {
+            if leftSpinnerVisible.get() {
                 // Update the url query to instruct the app to add 24 time increments
                 // to all presented timezones.
                 let (i, set_i) = query_signal::<i32>("past_increments");
                 let current_i = i.get_untracked().unwrap_or_default();
                 set_i.set(Some(current_i + 24));
-
             }
-        >
-            "+ 24 Hours"
-        </SideButton>
+        });
 
-        // Create a line of tiezone increments for every timezone present.
-        <div class="overflow-scroll mx-8 sm:mx-10 snap-x snap-mandatory scroll-smooth">
+        let rightSpinnerVisible = use_element_visibility(rightSpinnerRef);
 
-            <For
-                each=move || get_timezones.get()
-                key=|timezone| timezone.clone()
-                children=move|timezone| {
-
-                    view! {
-                        <TimezoneLine timezone/>
-                    }
-                }
-            />
-
-        </div>
-
-        <SideButton
-            on:click=move |_| {
-
+        Effect::new(move || {
+            if rightSpinnerVisible.get() {
                 // Update the url query to instruct the app to add 24 time increments
                 // to all presented timezones.s
                 let (i, set_i) = query_signal::<i32>("future_increments");
                 let current_i = i.get_untracked().unwrap_or_default();
                 set_i.set(Some(current_i + 24));
-
             }
-        >
-            "+ 24 Hours"
-        </SideButton>
+        });
+    }
+
+    view! {
+        // Create a line of timezone increments for every timezone present.
+        <div class="flex overflow-scroll mx-8 sm:mx-10 snap-x snap-mandatory scroll-smooth">
+
+            <SideButton node_ref=leftSpinnerRef/>
+
+            <div class="flex-1">
+                <For
+                    each=move || get_timezones.get()
+                    key=|timezone| timezone.clone()
+                    children=move|timezone| {
+
+                        view! {
+                            <TimezoneLine timezone/>
+                        }
+                    }
+                />
+            </div>
+
+            <SideButton node_ref=rightSpinnerRef/>
+        </div>
+
+
     }
 }
 
