@@ -8,7 +8,6 @@ use chrono_tz::Tz;
 use leptos::html::Div;
 use leptos::prelude::*;
 use leptos_router::hooks::query_signal;
-use leptos_use::use_element_visibility;
 
 #[component]
 pub fn Carousel() -> impl IntoView {
@@ -50,8 +49,12 @@ pub fn CarouselInner() -> impl IntoView {
     let leftSpinnerRef = NodeRef::<Div>::new();
     let rightSpinnerRef = NodeRef::<Div>::new();
 
+    // Element visibility only works on the client side. Adding this config
+    // ensures that it never runs on the server.
     #[cfg(feature = "hydrate")]
     {
+        use leptos_use::use_element_visibility;
+
         let leftSpinnerVisible = use_element_visibility(leftSpinnerRef);
 
         Effect::new(move || {

@@ -1,10 +1,11 @@
-use axum::Router;
-use leptos::prelude::*;
-use leptos_axum::{generate_route_list, LeptosRoutes};
-use leptos_tailwind::app::{shell, App};
-
+#[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
+    use axum::Router;
+    use leptos::prelude::*;
+    use leptos_axum::{generate_route_list, LeptosRoutes};
+    use leptos_tailwind::app::{shell, App};
+
     // Setting this to None means we'll be using cargo-leptos and its env vars
     let conf = get_configuration(None).unwrap();
     let leptos_options = conf.leptos_options;
