@@ -55,18 +55,40 @@ pub fn CarouselInner() -> impl IntoView {
     {
         use leptos_use::use_element_visibility;
 
+        // When the left spinner is visible, add more past time increments.
         let leftSpinnerVisible = use_element_visibility(leftSpinnerRef);
 
         Effect::new(move || {
             if leftSpinnerVisible.get() {
+                // Store the current scroll position before adding new content
+                let scroll_container = leftSpinnerRef
+                    .get_untracked()
+                    .unwrap()
+                    .parent_element()
+                    .unwrap();
+                let current_scroll_left = scroll_container.scroll_left();
+
                 // Update the url query to instruct the app to add 24 time increments
                 // to all presented timezones.
                 let (i, set_i) = query_signal::<i32>("past_increments");
                 let current_i = i.get_untracked().unwrap_or_default();
                 set_i.set(Some(current_i + 24));
+
+                // After the DOM updates, adjust the scroll position
+                // Each timecard is 160px wide (w-40 = 10rem = 160px) plus gap
+                // Estimate ~200px per card including gaps
+                let new_content_width = 24 * 200; // Approximate width of 24 new cards
+
+                // Use request_animation_frame to wait for the DOM to be updated.
+                request_animation_frame(move || {
+                    // Then adjust the scroll position so the user is scrolled back
+                    // to the cards they saw before the new past increments were added.
+                    scroll_container.set_scroll_left(current_scroll_left + new_content_width);
+                });
             }
         });
 
+        // When the right spinner is visible, add more future time increments.
         let rightSpinnerVisible = use_element_visibility(rightSpinnerRef);
 
         Effect::new(move || {
@@ -82,7 +104,7 @@ pub fn CarouselInner() -> impl IntoView {
 
     view! {
         // Create a line of timezone increments for every timezone present.
-        <div class="flex overflow-scroll mx-8 sm:mx-10 snap-x snap-mandatory scroll-smooth">
+        <div class="flex overflow-scroll mx-8 sm:mx-10 snap-x snap-mandatory scroll-smooth w-full">
 
             <SideButton node_ref=leftSpinnerRef/>
 
@@ -133,7 +155,7 @@ pub fn TimezoneLine(timezone: Tz) -> impl IntoView {
     });
 
     view! {
-        <div class="flex gap-5 py-4 sm:gap-8">
+        <div class="flex gap-5 py-4 sm:gap-8 justify-center">
 
             // Creates a card for every time increment present.
             <For
