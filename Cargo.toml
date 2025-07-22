@@ -26,7 +26,10 @@ http = "1.1"
 chrono = { version = "0.4", features = ["js-sys", "wasm-bindgen"] }
 chrono-tz = "0.10"
 log = "0.4"
-leptos-use = { version = "0.16", features = ["use_element_visibility"] }
+leptos-use = { version = "0.16", features = [
+    "use_element_visibility",
+    "use_element_bounding",
+] }
 
 [features]
 hydrate = ["leptos/hydrate"]

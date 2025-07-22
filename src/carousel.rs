@@ -8,6 +8,7 @@ use chrono_tz::Tz;
 use leptos::html::Div;
 use leptos::prelude::*;
 use leptos_router::hooks::query_signal;
+use leptos_use::{use_element_bounding, UseElementBoundingReturn};
 
 #[component]
 pub fn Carousel() -> impl IntoView {
@@ -77,7 +78,7 @@ pub fn CarouselInner() -> impl IntoView {
                 // After the DOM updates, adjust the scroll position
                 // Each timecard is 160px wide (w-40 = 10rem = 160px) plus gap
                 // Estimate ~200px per card including gaps
-                let new_content_width = 24 * 200; // Approximate width of 24 new cards
+                let new_content_width = 24 * 200; // Approximate width of new cards
 
                 // Use request_animation_frame to wait for the DOM to be updated.
                 request_animation_frame(move || {
@@ -103,28 +104,29 @@ pub fn CarouselInner() -> impl IntoView {
     }
 
     view! {
-        // Create a line of timezone increments for every timezone present.
-        <div class="flex overflow-scroll mx-8 sm:mx-10 snap-x snap-mandatory scroll-smooth w-full">
+        <div class="relative w-full">
+            // Create a line of timezone increments for every timezone present.
+            <div class="flex overflow-scroll mx-8 sm:mx-10 snap-x snap-mandatory scroll-smooth w-auto">
 
-            <SideButton node_ref=leftSpinnerRef/>
+                <SideButton node_ref=leftSpinnerRef/>
 
-            <div class="flex-1">
-                <For
-                    each=move || get_timezones.get()
-                    key=|timezone| timezone.clone()
-                    children=move|timezone| {
+                <div class="flex-1">
+                    <For
+                        each=move || get_timezones.get()
+                        key=|timezone| timezone.clone()
+                        children=move|timezone| {
 
-                        view! {
-                            <TimezoneLine timezone/>
+                            view! {
+                                <TimezoneLine timezone/>
+                            }
                         }
-                    }
-                />
+                    />
+                </div>
+
+                <SideButton node_ref=rightSpinnerRef/>
             </div>
 
-            <SideButton node_ref=rightSpinnerRef/>
         </div>
-
-
     }
 }
 
@@ -135,6 +137,9 @@ pub fn TimezoneLine(timezone: Tz) -> impl IntoView {
 
     // Create a vector of [TimeIncrement] for the Timezone.
     let (increments, set_increments) = signal(Vec::new());
+
+    // Create a center detector element
+    let center_detector_ref = NodeRef::<Div>::new();
 
     // Add or remove time increments when the url query changes.
     Effect::new(move || {
@@ -154,8 +159,22 @@ pub fn TimezoneLine(timezone: Tz) -> impl IntoView {
         set_increments.set(new_past_increments);
     });
 
+    // Use element visibility to detect when the center detector is visible
+    let UseElementBoundingReturn { right, left, .. } = use_element_bounding(center_detector_ref);
+
     view! {
-        <div class="flex gap-5 py-4 sm:gap-8 justify-center">
+        <div class="flex gap-5 py-4 sm:gap-8 justify-center content-center h-48">
+
+            // Highlight time increments in the centre of the screen
+            <div
+                node_ref=center_detector_ref
+                class="
+                    absolute left-1/2 -translate-x-1/2 -inset-x-4 -inset-y-6
+                    bg-zinc-100 sm:rounded-2xl dark:bg-zinc-800/50
+                    opacity-0 scale-95 hover:opacity-100 hover:scale-100 transition
+                    z-0 pointer-events-none w-50
+                " // remove pointer-events-none if we want hover events. Including it though makes scrolling difficult if the mouse is over it.
+            />
 
             // Creates a card for every time increment present.
             <For
@@ -164,7 +183,9 @@ pub fn TimezoneLine(timezone: Tz) -> impl IntoView {
                 let(hour)
             >
 
-                <Timecard hour/>
+                <Timecard hour centre_left=left centre_right=right/>
+
+
 
             </For>
 
