@@ -21,7 +21,10 @@ pub fn Carousel() -> impl IntoView {
             when=move || !url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty()
             fallback=|| view! { <div></div> }
         >
-            <div class="flex justify-between mt-16 sm:mt-20 w-full">
+            <div
+                class="flex justify-between w-full transition"
+                class=(["mt-16", "sm:mt-20"], move || url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty())
+            >
                 <CarouselInner/>
             </div>
         </Show>
