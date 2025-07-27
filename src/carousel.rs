@@ -56,8 +56,13 @@ pub fn CarouselInner() -> impl IntoView {
     {
         use leptos_use::use_element_visibility;
 
+        const ADD_INCREMENTS: i32 = 24;
+
         // When the left spinner is visible, add more past time increments.
         let leftSpinnerVisible = use_element_visibility(leftSpinnerRef);
+
+        let (past, set_past) = query_signal::<i32>("past_increments");
+        let (future, set_future) = query_signal::<i32>("future_increments");
 
         Effect::new(move || {
             if leftSpinnerVisible.get() {
@@ -71,14 +76,13 @@ pub fn CarouselInner() -> impl IntoView {
 
                 // Update the url query to instruct the app to add 24 time increments
                 // to all presented timezones.
-                let (i, set_i) = query_signal::<i32>("past_increments");
-                let current_i = i.get_untracked().unwrap_or_default();
-                set_i.set(Some(current_i + 24));
+                let current_past = past.get_untracked().unwrap_or_default();
+                set_past.set(Some(current_past + ADD_INCREMENTS));
 
                 // After the DOM updates, adjust the scroll position
                 // Each timecard is 160px wide (w-40 = 10rem = 160px) plus gap
                 // Estimate ~200px per card including gaps
-                let new_content_width = 24 * 200; // Approximate width of new cards
+                let new_content_width = ADD_INCREMENTS * 200; // Approximate width of new cards
 
                 // Use request_animation_frame to wait for the DOM to be updated.
                 request_animation_frame(move || {
@@ -95,10 +99,9 @@ pub fn CarouselInner() -> impl IntoView {
         Effect::new(move || {
             if rightSpinnerVisible.get() {
                 // Update the url query to instruct the app to add 24 time increments
-                // to all presented timezones.s
-                let (i, set_i) = query_signal::<i32>("future_increments");
-                let current_i = i.get_untracked().unwrap_or_default();
-                set_i.set(Some(current_i + 24));
+                // to all presented timezones.
+                let current_future = future.get_untracked().unwrap_or_default();
+                set_future.set(Some(current_future + ADD_INCREMENTS));
             }
         });
     }
