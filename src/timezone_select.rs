@@ -75,7 +75,7 @@ pub fn TimezoneSelect() -> impl IntoView {
                 type="text"
                 placeholder="Search and add timezones..."
                 class="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-                value=search_term
+                prop:value=search_term
                 // When the contents of the input is changed, update the `search_term`.
                 // This tells the component to update the list if timezones in the
                 // dropdown.
