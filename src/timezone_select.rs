@@ -106,29 +106,7 @@ pub fn TimezoneSelect() -> impl IntoView {
                         let display_name = format!("{} {}", tz_to_emoji(&tz), tz_to_city(&tz));
 
                         view! {
-                            <div
-                                class="w-full text-left px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border-none bg-transparent cursor-pointer"
-                                // When clicked, the timezone is added to the url query.
-                                // There is logic elsewhere in the app to listen to the
-                                // query and update the carousel with the added timezone.
-                                on:click=move |_| {
-                                    let current_timezones = url_query.get_untracked().unwrap_or_default();
-                                    if current_timezones.is_empty() {
-                                        set_url_query.set(Some(url_value.clone()));
-                                    } else {
-                                        set_url_query.set(Some(current_timezones + "," + &url_value));
-                                    }
-
-                                    // Empty the search term and hide the dropdown.
-                                    set_search_term.set(String::new());
-                                    set_show_dropdown.set(false);
-                                }
-                            >
-                                <div class="flex justify-between items-center">
-                                    <span class="font-medium">{display_name}</span>
-                                    <span class="text-sm text-zinc-500 dark:text-zinc-400">{tz_country}</span>
-                                </div>
-                            </div>
+                            <TimezoneSelectOption display_name tz_country url_value url_query set_url_query set_search_term set_show_dropdown/>
                         }
                     }
                 />
@@ -143,5 +121,42 @@ pub fn TimezoneSelect() -> impl IntoView {
                 on:click=move |_| set_show_dropdown.set(false)
             ></div>
         </Show>
+    }
+}
+
+#[component]
+pub fn TimezoneSelectOption(
+    display_name: String,
+    tz_country: String,
+    url_value: String,
+    url_query: Memo<Option<String>>,
+    set_url_query: SignalSetter<Option<String>>,
+    set_search_term: WriteSignal<String>,
+    set_show_dropdown: WriteSignal<bool>,
+) -> impl IntoView {
+    view! {
+        <div
+            class="w-full text-left px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border-none bg-transparent cursor-pointer"
+            // When clicked, the timezone is added to the url query.
+            // There is logic elsewhere in the app to listen to the
+            // query and update the carousel with the added timezone.
+            on:click=move |_| {
+                let current_timezones = url_query.get_untracked().unwrap_or_default();
+                if current_timezones.is_empty() {
+                    set_url_query.set(Some(url_value.clone()));
+                } else {
+                    set_url_query.set(Some(current_timezones + "," + &url_value));
+                }
+
+                // Empty the search term and hide the dropdown.
+                set_search_term.set(String::new());
+                set_show_dropdown.set(false);
+            }
+        >
+            <div class="flex justify-between items-center">
+                <span class="font-medium">{display_name}</span>
+                <span class="text-sm text-zinc-500 dark:text-zinc-400">{tz_country}</span>
+            </div>
+        </div>
     }
 }
