@@ -112,7 +112,7 @@ pub fn CarouselInner() -> impl IntoView {
     view! {
         <div class="relative w-full">
             // Create a line of timezone increments for every timezone present.
-            <div class="flex overflow-scroll mx-8 sm:mx-10 snap-x snap-mandatory scroll-smooth w-auto">
+            <div class="flex overflow-scroll no-scrollbar mx-8 sm:mx-10 snap-x snap-mandatory scroll-smooth w-auto">
 
                 <SideButton node_ref=leftSpinnerRef/>
 
