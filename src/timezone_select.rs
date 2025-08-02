@@ -1,3 +1,4 @@
+use crate::app::ZONE;
 use crate::timezone::{tz_display, tz_to_city, tz_to_country, tz_to_emoji};
 use crate::url_parse::remove_timezone;
 use crate::url_parse::url_query_to_timezones;
@@ -9,7 +10,7 @@ use leptos_router::hooks::query_signal;
 #[component]
 pub fn TimezoneSelect() -> impl IntoView {
     // Watch the url.
-    let (url_query, set_url_query) = query_signal::<String>("zone");
+    let (url_query, set_url_query) = query_signal::<String>(ZONE);
 
     // Get a list of all the available timezones to present in the dropdown.
     let (tz_variants, set_tz_variants) =

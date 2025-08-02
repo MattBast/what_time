@@ -1,3 +1,4 @@
+use crate::app::{FUTURE_INCREMENTS, PAST_INCREMENTS, ZONE};
 use crate::buttons::SideButton;
 use crate::timecard::Timecard;
 use crate::timezone::TimeIncrement;
@@ -13,7 +14,7 @@ use leptos_use::{use_element_bounding, UseElementBoundingReturn};
 #[component]
 pub fn Carousel() -> impl IntoView {
     // Watch the url query to decide whether to show the carousel or not.
-    let (url_query, _set_url_query) = query_signal::<String>("zone");
+    let (url_query, _set_url_query) = query_signal::<String>(ZONE);
 
     view! {
         // Only show CarouselInner if there are timezones
@@ -36,7 +37,7 @@ pub fn Carousel() -> impl IntoView {
 
 #[component]
 pub fn CarouselInner() -> impl IntoView {
-    let (url_query, _set_url_query) = query_signal::<String>("zone");
+    let (url_query, _set_url_query) = query_signal::<String>(ZONE);
 
     let (get_timezones, set_timezones) = signal(Vec::new());
 
@@ -64,8 +65,8 @@ pub fn CarouselInner() -> impl IntoView {
         // When the left spinner is visible, add more past time increments.
         let leftSpinnerVisible = use_element_visibility(leftSpinnerRef);
 
-        let (past, set_past) = query_signal::<i32>("past_increments");
-        let (future, set_future) = query_signal::<i32>("future_increments");
+        let (past, set_past) = query_signal::<i32>(PAST_INCRMENTS);
+        let (future, set_future) = query_signal::<i32>(FUTURE_INCRMENTS);
 
         Effect::new(move || {
             if leftSpinnerVisible.get() {
@@ -138,8 +139,8 @@ pub fn CarouselInner() -> impl IntoView {
 
 #[component]
 pub fn TimezoneLine(timezone: Tz) -> impl IntoView {
-    let (past_increments, _) = query_signal::<i32>("past_increments");
-    let (future_increments, _) = query_signal::<i32>("future_increments");
+    let (past_increments, _) = query_signal::<i32>(PAST_INCREMENTS);
+    let (future_increments, _) = query_signal::<i32>(FUTURE_INCREMENTS);
 
     // Create a vector of [TimeIncrement] for the Timezone.
     let (increments, set_increments) = signal(Vec::new());

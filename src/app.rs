@@ -8,6 +8,13 @@ use leptos_router::{
     path,
 };
 
+/// Defines the name of the "zone" url parameter
+pub const ZONE: &str = "zone";
+/// Defines the name of the "future_increments" url parameter
+pub const FUTURE_INCREMENTS: &str = "future_increments";
+/// Defines the name of the "past_increments" url parameter
+pub const PAST_INCREMENTS: &str = "past_increments";
+
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
         <!DOCTYPE html>
@@ -69,7 +76,7 @@ fn Home() -> impl IntoView {
 #[component]
 fn Introtext() -> impl IntoView {
     // Watch the url query to decide whether to show the text or not.
-    let (url_query, _set_url_query) = query_signal::<String>("zone");
+    let (url_query, _set_url_query) = query_signal::<String>(ZONE);
 
     view! {
         <div
@@ -98,7 +105,7 @@ fn Introtext() -> impl IntoView {
 #[component]
 fn Logo() -> impl IntoView {
     // Watch the url query to decide whether to shrink the logo or not.
-    let (url_query, _set_url_query) = query_signal::<String>("zone");
+    let (url_query, _set_url_query) = query_signal::<String>(ZONE);
 
     view! {
         <div
