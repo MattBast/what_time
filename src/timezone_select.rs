@@ -3,6 +3,7 @@ use crate::url_parse::remove_timezone;
 use crate::url_parse::url_query_to_timezones;
 use chrono_tz::{Tz, TZ_VARIANTS};
 use leptos::prelude::*;
+use leptos_icons::Icon;
 use leptos_router::hooks::query_signal;
 
 #[component]
@@ -14,6 +15,9 @@ pub fn TimezoneSelect() -> impl IntoView {
     let (tz_variants, set_tz_variants) =
         ArcRwSignal::new(TZ_VARIANTS.iter().map(|tz| tz.clone()).collect()).split();
     let set_tz_variants_clone = set_tz_variants.clone();
+
+    // A list of the timezones that have been selected.
+    let (selected_tz_variants, set_selected_tz_variants) = ArcRwSignal::new(Vec::new()).split();
 
     // Get or set the value typed into the search input field.
     let (search_term, set_search_term) = signal(String::new());
@@ -27,7 +31,10 @@ pub fn TimezoneSelect() -> impl IntoView {
         let query = url_query.get().unwrap_or_default();
 
         // Remove the timezones in the url from the dropdown options.
-        set_tz_variants_clone.update(|variants| remove_timezone(query, variants));
+        set_tz_variants_clone.update(|variants| remove_timezone(query.clone(), variants));
+
+        // And add them to the selected timezones list
+        set_selected_tz_variants.set(url_query_to_timezones(query));
     });
 
     // Listen for the `search_term` to be changed
@@ -94,6 +101,42 @@ pub fn TimezoneSelect() -> impl IntoView {
                 class="absolute z-50 w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-600 rounded-md shadow-lg max-h-60 overflow-y-auto"
                 class:hidden=move || !show_dropdown.get()
             >
+                <For
+                    each=move || selected_tz_variants.get()
+                    key=|tz| tz.to_string().clone()
+                    children=move|tz| {
+
+                        let tz_string = tz.to_string();
+                        let tz_country = tz_to_country(&tz);
+                        let url_value = tz_string.replace("/", "__");
+                        let emoji = tz_to_emoji(&tz);
+                        let city = tz_to_city(&tz);
+
+                        view! {
+                            <TimezoneSelectOption
+                                emoji
+                                city
+                                tz_country
+                                selected=true
+                                // When clicked, the timezone is removed from the url query.
+                                // There is logic elsewhere in the app to listen to the
+                                // query and remove the timezone from the carousel.
+                                on:click=move |_| {
+                                    let mut current_timezones = url_query.get_untracked().unwrap_or_default();
+                                    current_timezones = current_timezones.replace(&url_value, "");
+
+                                    set_url_query.set(Some(current_timezones));
+
+                                    // Empty the search term and hide the dropdown.
+                                    set_search_term.set(String::new());
+                                    set_show_dropdown.set(false);
+                                }
+                            />
+                        }
+                    }
+                />
+
+
                 // Add an option per timezone not already showing
                 <For
                     each=move || tz_variants.get()
@@ -103,10 +146,31 @@ pub fn TimezoneSelect() -> impl IntoView {
                         let tz_string = tz.to_string();
                         let tz_country = tz_to_country(&tz);
                         let url_value = tz_string.replace("/", "__");
-                        let display_name = format!("{} {}", tz_to_emoji(&tz), tz_to_city(&tz));
+                        let emoji = tz_to_emoji(&tz);
+                        let city = tz_to_city(&tz);
 
                         view! {
-                            <TimezoneSelectOption display_name tz_country url_value url_query set_url_query set_search_term set_show_dropdown/>
+                            <TimezoneSelectOption
+                                emoji
+                                city
+                                tz_country
+                                selected=false
+                                // When clicked, the timezone is added to the url query.
+                                // There is logic elsewhere in the app to listen to the
+                                // query and update the carousel with the added timezone.
+                                on:click=move |_| {
+                                    let current_timezones = url_query.get_untracked().unwrap_or_default();
+                                    if current_timezones.is_empty() {
+                                        set_url_query.set(Some(url_value.clone()));
+                                    } else {
+                                        set_url_query.set(Some(current_timezones + "," + &url_value));
+                                    }
+
+                                    // Empty the search term and hide the dropdown.
+                                    set_search_term.set(String::new());
+                                    set_show_dropdown.set(false);
+                                }
+                            />
                         }
                     }
                 />
@@ -126,36 +190,47 @@ pub fn TimezoneSelect() -> impl IntoView {
 
 #[component]
 pub fn TimezoneSelectOption(
-    display_name: String,
+    emoji: String,
+    city: String,
     tz_country: String,
-    url_value: String,
-    url_query: Memo<Option<String>>,
-    set_url_query: SignalSetter<Option<String>>,
-    set_search_term: WriteSignal<String>,
-    set_show_dropdown: WriteSignal<bool>,
+    selected: bool,
 ) -> impl IntoView {
     view! {
         <div
-            class="w-full text-left px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border-none bg-transparent cursor-pointer"
-            // When clicked, the timezone is added to the url query.
-            // There is logic elsewhere in the app to listen to the
-            // query and update the carousel with the added timezone.
-            on:click=move |_| {
-                let current_timezones = url_query.get_untracked().unwrap_or_default();
-                if current_timezones.is_empty() {
-                    set_url_query.set(Some(url_value.clone()));
-                } else {
-                    set_url_query.set(Some(current_timezones + "," + &url_value));
-                }
-
-                // Empty the search term and hide the dropdown.
-                set_search_term.set(String::new());
-                set_show_dropdown.set(false);
-            }
+            class="group w-full text-left px-4 py-2 border-none cursor-pointer text-zinc-900 dark:text-zinc-100"
+            class=(["bg-teal-100", "dark:bg-teal-700", "hover:bg-red-100", "dark:hover:bg-red-700"], selected)
+            class=(["bg-transparent", "hover:bg-zinc-100", "dark:hover:bg-zinc-700"], !selected)
         >
             <div class="flex justify-between items-center">
-                <span class="font-medium">{display_name}</span>
-                <span class="text-sm text-zinc-500 dark:text-zinc-400">{tz_country}</span>
+                <div>
+                    <span class="font-medium">{emoji}</span>
+                    <span class="font-medium">" "</span>
+                    <span class="font-medium">{city}</span>
+                </div>
+
+                {if selected {
+                    view! {
+                        <span
+                            class="
+                                text-2xl font-bold text-teal-500 dark:text-teal-400
+                                group-hover:text-red-500 group-hover:dark:text-red-400
+                            "
+                        >
+                            <span class="group-hover:hidden">
+                                <Icon icon=icondata::BiCheckRegular />
+                            </span>
+                            <span class="hidden group-hover:inline">
+                                <Icon icon=icondata::BiTrashRegular />
+                            </span>
+                        </span>
+                    }.into_any()
+                } else {
+                    view! {
+                        <span class="text-sm text-zinc-500 dark:text-zinc-400">
+                            {tz_country}
+                        </span>
+                    }.into_any()
+                }}
             </div>
         </div>
     }
