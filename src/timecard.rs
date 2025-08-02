@@ -1,6 +1,8 @@
+use crate::app::CURRENT_TIME;
 use crate::timezone::TimeIncrement;
 use leptos::html::Div;
 use leptos::prelude::*;
+use leptos_router::hooks::query_signal;
 use leptos_use::{use_element_bounding, UseElementBoundingReturn};
 
 #[component]
@@ -22,9 +24,13 @@ pub fn Timecard(
     // Use element visibility to detect when the center detector is visible
     let UseElementBoundingReturn { right, left, .. } = use_element_bounding(card_ref);
 
+    // Use to set the presented time in the url
+    let (_current_time, set_current_time) = query_signal::<i64>(CURRENT_TIME);
+
     Effect::new(move || {
         if left.get() > centre_left.get() && right.get() < centre_right.get() {
             is_highlighted.set(true);
+            set_current_time.set(Some(hour.timestamp()))
         } else {
             is_highlighted.set(false);
         }

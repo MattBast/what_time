@@ -14,6 +14,8 @@ pub const ZONE: &str = "zone";
 pub const FUTURE_INCREMENTS: &str = "future_increments";
 /// Defines the name of the "past_increments" url parameter
 pub const PAST_INCREMENTS: &str = "past_increments";
+/// Defines the name of the "current_time" url parameter
+pub const CURRENT_TIME: &str = "current_time";
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {

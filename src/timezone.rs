@@ -113,6 +113,11 @@ impl TimeIncrement {
     pub fn display_date(&self) -> String {
         self.datetime.format("%e %B %Y").to_string()
     }
+
+    /// Return the number of seconds since January 1, 1970 0:00:00 UTC (aka “UNIX timestamp”)
+    pub fn timestamp(&self) -> i64 {
+        self.datetime.timestamp()
+    }
 }
 
 /// Returns a tuple of the timezone displayable components as this: (emoji, city, country)

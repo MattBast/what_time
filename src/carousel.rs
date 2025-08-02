@@ -65,8 +65,8 @@ pub fn CarouselInner() -> impl IntoView {
         // When the left spinner is visible, add more past time increments.
         let leftSpinnerVisible = use_element_visibility(leftSpinnerRef);
 
-        let (past, set_past) = query_signal::<i32>(PAST_INCRMENTS);
-        let (future, set_future) = query_signal::<i32>(FUTURE_INCRMENTS);
+        let (past, set_past) = query_signal::<i32>(PAST_INCREMENTS);
+        let (future, set_future) = query_signal::<i32>(FUTURE_INCREMENTS);
 
         Effect::new(move || {
             if leftSpinnerVisible.get() {
@@ -172,7 +172,7 @@ pub fn TimezoneLine(timezone: Tz) -> impl IntoView {
     view! {
         <div class="flex gap-5 py-4 sm:gap-8 justify-center content-center h-48">
 
-            // Highlight time increments in the centre of the screen
+            // Track which time increment is in the centre of the screen
             <div
                 node_ref=center_detector_ref
                 class="
@@ -191,8 +191,6 @@ pub fn TimezoneLine(timezone: Tz) -> impl IntoView {
             >
 
                 <Timecard hour centre_left=left centre_right=right/>
-
-
 
             </For>
 
