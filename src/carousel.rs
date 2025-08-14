@@ -1,4 +1,4 @@
-use crate::app::{FUTURE_INCREMENTS, PAST_INCREMENTS, ZONE};
+use crate::app::{CURRENT_TIME, FUTURE_INCREMENTS, PAST_INCREMENTS, ZONE};
 use crate::buttons::SideButton;
 use crate::timecard::Timecard;
 use crate::timezone::TimeIncrement;
@@ -22,6 +22,8 @@ pub fn Carousel() -> impl IntoView {
             when=move || !url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty()
             fallback=|| view! { <div></div> }
         >
+            <TimePicker/>
+
             <div
                 class="flex justify-between w-full transition"
                 class=(["mt-16", "sm:mt-20"], move || url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty())
@@ -32,6 +34,43 @@ pub fn Carousel() -> impl IntoView {
 
         // A select element that allows the user to add timezones to the carousel
         <TimezoneSelect/>
+    }
+}
+
+#[component]
+pub fn TimePicker() -> impl IntoView {
+    // Watch the url query to decide whether to show the carousel or not.
+    let (current_time, _set_current_time) = query_signal::<i64>(CURRENT_TIME);
+    let (input_date, set_input_date) = signal(String::new());
+    let (input_time, set_input_time) = signal(String::new());
+
+    // Listen for the `current_time` url query to change and when it does, change the value of the input.
+    Effect::new(move || {
+        // Trigger these actions when the url "current_time" query changes.
+        let timestamp = current_time.get().unwrap_or_default();
+
+        let ti = TimeIncrement::from_timestamp(timestamp);
+
+        set_input_date.set(ti.input_date());
+        set_input_time.set(ti.input_time());
+    });
+
+    view! {
+        <div class="flex w-full gap-5 justify-end content-end">
+            <input
+                class="px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500  dark:[color-scheme:dark] cursor-pointer"
+                type="date"
+                name="date-picker"
+                prop:value=input_date
+            />
+
+            <input
+                class="px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500  dark:[color-scheme:dark] cursor-pointer"
+                type="time"
+                name="time-picker"
+                prop:value=input_time
+            />
+        </div>
     }
 }
 
@@ -142,6 +181,10 @@ pub fn TimezoneLine(timezone: Tz) -> impl IntoView {
     let (past_increments, _) = query_signal::<i32>(PAST_INCREMENTS);
     let (future_increments, _) = query_signal::<i32>(FUTURE_INCREMENTS);
 
+    // Use to identify which time increment is in the centre of the screen
+    // and decide what past and future increments to add to the line.
+    let (current_time, _) = query_signal::<i64>(CURRENT_TIME);
+
     // Create a vector of [TimeIncrement] for the Timezone.
     let (increments, set_increments) = signal(Vec::new());
 
@@ -150,6 +193,18 @@ pub fn TimezoneLine(timezone: Tz) -> impl IntoView {
 
     // Add or remove time increments when the url query changes.
     Effect::new(move || {
+        // 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
+        // Try something like this:
+        // When `future_increments.get()` changes, get the `current_time.get_untracked()`
+        // get a TimeIncrement `if let Some(dt) = DateTime::from_timestamp(timestamp, 0)`
+        // then `TimeIncrement::new(timezone, dt.hour())`. Then add the 24 new hours
+        // and remove the all but 24 hours before the `current_time`. That should
+        // keep the count of time increments lower.
+        //
+        // I'll then need to figure out something similar but more advanced for the
+        // past_increments.
+        // 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
+
         // Watch the future and past increment url queries
         let current_past_increments = past_increments.get().unwrap_or_default();
         let current_future_increments = future_increments.get().unwrap_or_default();

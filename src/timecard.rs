@@ -30,7 +30,9 @@ pub fn Timecard(
     Effect::new(move || {
         if left.get() > centre_left.get() && right.get() < centre_right.get() {
             is_highlighted.set(true);
-            set_current_time.set(Some(hour.timestamp()))
+
+            // Wait for the user to stop scrolling before changing the time in the url
+            request_animation_frame(move || set_current_time.set(Some(hour.timestamp())));
         } else {
             is_highlighted.set(false);
         }

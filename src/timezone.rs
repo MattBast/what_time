@@ -68,6 +68,18 @@ impl TimeIncrement {
         }
     }
 
+    pub fn from_timestamp(timestamp: i64) -> Self {
+        if let Some(datetime) = DateTime::from_timestamp(timestamp, 0) {
+            Self {
+                datetime: datetime.with_timezone(&Tz::UTC),
+                timezone: Tz::UTC,
+                now: false,
+            }
+        } else {
+            Self::now(Tz::UTC)
+        }
+    }
+
     pub fn get_hour(&self) -> u32 {
         self.datetime.hour()
     }
@@ -116,7 +128,17 @@ impl TimeIncrement {
 
     /// Return the number of seconds since January 1, 1970 0:00:00 UTC (aka “UNIX timestamp”)
     pub fn timestamp(&self) -> i64 {
-        self.datetime.timestamp()
+        self.datetime.to_utc().timestamp()
+    }
+
+    /// The date in the format required for the html date input
+    pub fn input_date(&self) -> String {
+        self.datetime.format("%Y-%m-%d").to_string()
+    }
+
+    /// The time in the format required for the html time input
+    pub fn input_time(&self) -> String {
+        self.datetime.format("%H:00").to_string()
     }
 }
 
