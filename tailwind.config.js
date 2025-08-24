@@ -4,6 +4,7 @@ module.exports = {
     relative: true,
     files: ["*.html", "./src/**/*.rs"],
   },
+  darkMode: "class",
   safelist: ["hidden"],
   theme: {
     extend: {},

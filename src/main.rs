@@ -33,7 +33,6 @@ pub fn App() -> impl IntoView {
 
     view! {
         <Stylesheet id="leptos" href="/style/output.css"/>
-        // <Link rel="shortcut icon" type_="image/ico" href="/favicon.ico"/>
         <Router>
             <Routes fallback=|| "Page not found.">
                 <Route path=StaticSegment("") view=Home/>
@@ -47,18 +46,5 @@ pub fn TheRouter() -> impl IntoView {
         <Routes fallback=|| "404">
             <Route path=path!("/") view=Home/>
         </Routes>
-
-        // <Router>
-        //     <Title text="What Time"/>
-        //     <main>
-        //         <Routes fallback=|| "Page not found.">
-        //             <ParentRoute path=path!("/") view=Home>
-        //                 <Route path=path!("") view=|| view! {
-        //                     ""
-        //                 }/>
-        //             </ParentRoute>
-        //         </Routes>
-        //     </main>
-        // </Router>
     }
 }
