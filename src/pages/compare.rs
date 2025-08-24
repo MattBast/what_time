@@ -1,10 +1,9 @@
 use crate::components::{DarkModeToggle, IntroSubtitle, IntroTitle, Introtext, Logo};
-use crate::pages::Carousel;
 use leptos::prelude::*;
 use leptos_meta::*;
 
 #[component]
-pub fn Home() -> impl IntoView {
+pub fn Compare() -> impl IntoView {
     view! {
         <Title text="What Time"/>
         <main>
@@ -15,11 +14,9 @@ pub fn Home() -> impl IntoView {
                 <Logo/>
 
                 <Introtext>
-                    <IntroTitle>"Time Carousel"</IntroTitle>
-                    <IntroSubtitle>"Want to know the difference between two or more timezones? Add some timezones below to compare them hour by hour."</IntroSubtitle>
+                    <IntroTitle>"Compare Timezones"</IntroTitle>
+                    <IntroSubtitle>"Want to know the difference between two or more timezones? Add some timezones below to see the difference."</IntroSubtitle>
                 </Introtext>
-
-                <Carousel/>
 
                 // This does nothing until the routes change to put a component in it.
                 // <Outlet/>
