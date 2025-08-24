@@ -1,15 +1,25 @@
-# Leptos with Axum + TailwindCSS Template
+# What Time
 
-This is a template demonstrating how to integrate [TailwindCSS](https://tailwindcss.com/) with the [Leptos](https://github.com/leptos-rs/leptos) web framework, Axum server, and the [cargo-leptos](https://github.com/akesson/cargo-leptos) tool.
+Run this command to open the website in dev mode and listen for changes in the codebase. The page will reload whenever a change is detected:
+```bash
+trunk serve --open
+```
 
-## Getting Started
+May also need to install these if the above fails:
+```bash
+cargo install trunk
+rustup target add wasm32-unknown-unknown
+cargo install cargo-generate
+```
 
-See the [Examples README](../README.md) for setup and run instructions.
+If there's an error relating to tailwinds, try this:
+```bash
+export TRUNK_TOOLS_TAILWINDCSS="4.1.0"
+```
 
-## Quick Start
-
-Run `cargo leptos watch` to run this example.
-
-# Tailwind Migration
-
-If you're updating from Tailwind 3 to Tailwind 4, it would be informative to view the [tailwind migration document](https://tailwindcss.com/docs/installation/tailwind-cli) as things have changed.
+Sometimes port 3000 gets reserved after running leptos commands a gew times.
+So if the "Address already in use" error appears, try killing the process
+occupying the port. Start by find the process PID:
+```bash
+lsof -i :3000
+```

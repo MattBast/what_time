@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @tailwind utilities;
 
-/* add the code bellow */
+/* Custom utilities */
 @layer utilities {
     /* Hide scrollbar for Chrome, Safari and Opera */
     .no-scrollbar::-webkit-scrollbar {

@@ -3,7 +3,7 @@
   "description": "<picture>\r     <source srcset=\"https://raw.githubusercontent.com/leptos-rs/leptos/main/docs/logos/Leptos_logo_Solid_White.svg\" media=\"(prefers-color-scheme: dark)\">\r     <img src=\"https://raw.githubusercontent.com/leptos-rs/leptos/main/docs/logos/Leptos_logo_RGB.svg\" alt=\"Leptos Logo\">\r </picture>",
   "devDependencies": {
     "@tailwindcss/cli": "^4.0.17",
-    "tailwindcss": "^4.1.6"
+    "tailwindcss": "^4.1.12"
   },
   "keywords": [],
   "license": "ISC",

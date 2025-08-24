@@ -9,6 +9,7 @@ use chrono_tz::Tz;
 use leptos::html::Div;
 use leptos::prelude::*;
 use leptos_router::hooks::query_signal;
+use leptos_use::use_element_visibility;
 use leptos_use::{use_element_bounding, UseElementBoundingReturn};
 
 #[component]
@@ -93,61 +94,54 @@ pub fn CarouselInner() -> impl IntoView {
     let leftSpinnerRef = NodeRef::<Div>::new();
     let rightSpinnerRef = NodeRef::<Div>::new();
 
-    // Element visibility only works on the client side. Adding this config
-    // ensures that it never runs on the server.
-    #[cfg(feature = "hydrate")]
-    {
-        use leptos_use::use_element_visibility;
+    const ADD_INCREMENTS: i32 = 24;
 
-        const ADD_INCREMENTS: i32 = 24;
+    // When the left spinner is visible, add more past time increments.
+    let leftSpinnerVisible = use_element_visibility(leftSpinnerRef);
 
-        // When the left spinner is visible, add more past time increments.
-        let leftSpinnerVisible = use_element_visibility(leftSpinnerRef);
+    let (past, set_past) = query_signal::<i32>(PAST_INCREMENTS);
+    let (future, set_future) = query_signal::<i32>(FUTURE_INCREMENTS);
 
-        let (past, set_past) = query_signal::<i32>(PAST_INCREMENTS);
-        let (future, set_future) = query_signal::<i32>(FUTURE_INCREMENTS);
+    Effect::new(move || {
+        if leftSpinnerVisible.get() {
+            // Store the current scroll position before adding new content
+            let scroll_container = leftSpinnerRef
+                .get_untracked()
+                .unwrap()
+                .parent_element()
+                .unwrap();
+            let current_scroll_left = scroll_container.scroll_left();
 
-        Effect::new(move || {
-            if leftSpinnerVisible.get() {
-                // Store the current scroll position before adding new content
-                let scroll_container = leftSpinnerRef
-                    .get_untracked()
-                    .unwrap()
-                    .parent_element()
-                    .unwrap();
-                let current_scroll_left = scroll_container.scroll_left();
+            // Update the url query to instruct the app to add 24 time increments
+            // to all presented timezones.
+            let current_past = past.get_untracked().unwrap_or_default();
+            set_past.set(Some(current_past + ADD_INCREMENTS));
 
-                // Update the url query to instruct the app to add 24 time increments
-                // to all presented timezones.
-                let current_past = past.get_untracked().unwrap_or_default();
-                set_past.set(Some(current_past + ADD_INCREMENTS));
+            // After the DOM updates, adjust the scroll position
+            // Each timecard is 160px wide (w-40 = 10rem = 160px) plus gap
+            // Estimate ~200px per card including gaps
+            let new_content_width = ADD_INCREMENTS * 200; // Approximate width of new cards
 
-                // After the DOM updates, adjust the scroll position
-                // Each timecard is 160px wide (w-40 = 10rem = 160px) plus gap
-                // Estimate ~200px per card including gaps
-                let new_content_width = ADD_INCREMENTS * 200; // Approximate width of new cards
+            // Use request_animation_frame to wait for the DOM to be updated.
+            request_animation_frame(move || {
+                // Then adjust the scroll position so the user is scrolled back
+                // to the cards they saw before the new past increments were added.
+                scroll_container.set_scroll_left(current_scroll_left + new_content_width);
+            });
+        }
+    });
 
-                // Use request_animation_frame to wait for the DOM to be updated.
-                request_animation_frame(move || {
-                    // Then adjust the scroll position so the user is scrolled back
-                    // to the cards they saw before the new past increments were added.
-                    scroll_container.set_scroll_left(current_scroll_left + new_content_width);
-                });
-            }
-        });
+    // When the right spinner is visible, add more future time increments.
+    let rightSpinnerVisible = use_element_visibility(rightSpinnerRef);
 
-        // When the right spinner is visible, add more future time increments.
-        let rightSpinnerVisible = use_element_visibility(rightSpinnerRef);
-
-        Effect::new(move || {
-            if rightSpinnerVisible.get() {
-                // Update the url query to instruct the app to add 24 time increments
-                // to all presented timezones.
-                let current_future = future.get_untracked().unwrap_or_default();
-                set_future.set(Some(current_future + ADD_INCREMENTS));
-            }
-        });
-    }
+    Effect::new(move || {
+        if rightSpinnerVisible.get() {
+            // Update the url query to instruct the app to add 24 time increments
+            // to all presented timezones.
+            let current_future = future.get_untracked().unwrap_or_default();
+            set_future.set(Some(current_future + ADD_INCREMENTS));
+        }
+    });
 
     view! {
         <div class="relative w-full">
@@ -183,7 +177,7 @@ pub fn TimezoneLine(timezone: Tz) -> impl IntoView {
 
     // Use to identify which time increment is in the centre of the screen
     // and decide what past and future increments to add to the line.
-    let (current_time, _) = query_signal::<i64>(CURRENT_TIME);
+    // let (current_time, _) = query_signal::<i64>(CURRENT_TIME);
 
     // Create a vector of [TimeIncrement] for the Timezone.
     let (increments, set_increments) = signal(Vec::new());

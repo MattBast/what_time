@@ -3,10 +3,7 @@ use crate::url_parse::url_query_to_time_increments;
 use leptos::prelude::*;
 use leptos_meta::*;
 use leptos_router::hooks::query_signal;
-use leptos_router::{
-    components::{Outlet, ParentRoute, Route, Router, Routes},
-    path,
-};
+use leptos_use::{use_color_mode, ColorMode, UseColorModeReturn};
 
 /// Defines the name of the "zone" url parameter
 pub const ZONE: &str = "zone";
@@ -17,61 +14,26 @@ pub const PAST_INCREMENTS: &str = "past_increments";
 /// Defines the name of the "current_time" url parameter
 pub const CURRENT_TIME: &str = "current_time";
 
-pub fn shell(options: LeptosOptions) -> impl IntoView {
-    view! {
-        <!DOCTYPE html>
-        <html lang="en">
-            <head>
-                <meta charset="utf-8"/>
-                <meta name="viewport" content="width=device-width, initial-scale=1"/>
-                <AutoReload options=options.clone() />
-                <HydrationScripts options/>
-                <link rel="stylesheet" id="leptos" href="/pkg/leptos_tailwind.css"/>
-                <link rel="shortcut icon" type="image/ico" href="/favicon.ico"/>
-                <MetaTags/>
-            </head>
-            <body class="bg-zinc-50 dark:bg-black">
-                <App/>
-            </body>
-        </html>
-    }
-}
-
 #[component]
-pub fn App() -> impl IntoView {
-    provide_meta_context();
-
+pub fn Home() -> impl IntoView {
     view! {
-        <Router>
-            <Title text="What Time"/>
-            <main>
-                <Routes fallback=|| "Page not found.">
-                    <ParentRoute path=path!("/") view=Home>
-                        <Route path=path!("") view=|| view! {
-                            ""
-                        }/>
-                    </ParentRoute>
-                </Routes>
-            </main>
-        </Router>
-    }
-}
+        <Title text="What Time"/>
+        <main>
+            <div class="font-sans flex flex-col justify-center min-h-screen px-4 sm:px-8 lg:px-12">
 
-#[component]
-fn Home() -> impl IntoView {
-    view! {
-        <div class="font-sans flex flex-col justify-center min-h-screen px-4 sm:px-8 lg:px-12">
+                // <DarkModeToggle/>
 
-            <Logo/>
+                <Logo/>
 
-            <Introtext/>
+                <Introtext/>
 
-            <Carousel/>
+                <Carousel/>
 
-            // This does nothing until the routes change to put a component in it.
-            <Outlet/>
+                // This does nothing until the routes change to put a component in it.
+                // <Outlet/>
 
-        </div>
+            </div>
+        </main>
     }
 }
 
@@ -158,5 +120,31 @@ fn Logo() -> impl IntoView {
                 </svg>
             </div>
         </div>
+    }
+}
+
+/// Allow the user to toggle between light and dark mode
+#[component]
+fn DarkModeToggle() -> impl IntoView {
+    let UseColorModeReturn {
+        mode, // Signal<ColorMode::dark | ColorMode::light>
+        set_mode,
+        ..
+    } = use_color_mode();
+
+    view! {
+        <button
+            on:click=move |_| {
+                let new_mode = match mode.get_untracked() {
+                    ColorMode::Dark => ColorMode::Light,
+                    ColorMode::Light => ColorMode::Dark,
+                    _ => ColorMode::Light,
+                };
+
+                set_mode.set(new_mode);
+            }
+        >
+            "Go dark"
+        </button>
     }
 }
