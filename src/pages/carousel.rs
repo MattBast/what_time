@@ -1,10 +1,8 @@
-use crate::app::{CURRENT_TIME, FUTURE_INCREMENTS, PAST_INCREMENTS, ZONE};
-use crate::buttons::SideButton;
-use crate::timecard::Timecard;
+use crate::components::{SideButton, Timecard, TimezoneSelect};
 use crate::timezone::TimeIncrement;
 use crate::timezone::{new_future_increments, new_past_increments};
-use crate::timezone_select::TimezoneSelect;
 use crate::url_parse::url_query_to_time_increments;
+use crate::{CURRENT_TIME, FUTURE_INCREMENTS, PAST_INCREMENTS, ZONE};
 use chrono_tz::Tz;
 use leptos::html::Div;
 use leptos::prelude::*;

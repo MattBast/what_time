@@ -1,7 +1,7 @@
-use crate::app::ZONE;
 use crate::timezone::{tz_display, tz_to_city, tz_to_country, tz_to_emoji};
 use crate::url_parse::remove_timezone;
 use crate::url_parse::url_query_to_timezones;
+use crate::ZONE;
 use chrono_tz::{Tz, TZ_VARIANTS};
 use leptos::prelude::*;
 use leptos_icons::Icon;

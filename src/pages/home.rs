@@ -1,19 +1,11 @@
-use crate::carousel::Carousel;
+use crate::pages::Carousel;
 use crate::url_parse::url_query_to_time_increments;
+use crate::ZONE;
 use leptos::logging::log;
 use leptos::prelude::*;
 use leptos_meta::*;
 use leptos_router::hooks::query_signal;
 use leptos_use::{use_color_mode, ColorMode, UseColorModeReturn};
-
-/// Defines the name of the "zone" url parameter
-pub const ZONE: &str = "zone";
-/// Defines the name of the "future_increments" url parameter
-pub const FUTURE_INCREMENTS: &str = "future_increments";
-/// Defines the name of the "past_increments" url parameter
-pub const PAST_INCREMENTS: &str = "past_increments";
-/// Defines the name of the "current_time" url parameter
-pub const CURRENT_TIME: &str = "current_time";
 
 #[component]
 pub fn Home() -> impl IntoView {
