@@ -14,26 +14,24 @@ pub fn DarkModeToggle() -> impl IntoView {
     log!("Hello toggle");
 
     view! {
-        <div class="fixed top-5 right-5">
-            <button
-                type="button"
-                aria-label="Switch to dark theme"
-                class="group cursor-pointer rounded-full bg-white/90 px-3 py-2 shadow-lg ring-1 shadow-zinc-800/5 ring-zinc-900/5 backdrop-blur-sm transition dark:bg-zinc-800/90 dark:ring-white/10 dark:hover:ring-white/20"
-                on:click=move |_| {
-                    let new_mode = match mode.get_untracked() {
-                        ColorMode::Dark => ColorMode::Light,
-                        ColorMode::Light => ColorMode::Dark,
-                        _ => ColorMode::Dark,
-                    };
+        <button
+            type="button"
+            aria-label="Switch to dark theme"
+            class="group cursor-pointer rounded-full bg-white/90 px-3 py-2 shadow-lg ring-1 shadow-zinc-800/5 ring-zinc-900/5 backdrop-blur-sm transition dark:bg-zinc-800/90 dark:ring-white/10 dark:hover:ring-white/20"
+            on:click=move |_| {
+                let new_mode = match mode.get_untracked() {
+                    ColorMode::Dark => ColorMode::Light,
+                    ColorMode::Light => ColorMode::Dark,
+                    _ => ColorMode::Dark,
+                };
 
-                    log!("Setting mode to: {:?}", new_mode);
-                    set_mode.set(new_mode);
-                }
-            >
-                <LightModeSvg/>
-                <DarkModeSvg/>
-            </button>
-        </div>
+                log!("Setting mode to: {:?}", new_mode);
+                set_mode.set(new_mode);
+            }
+        >
+            <LightModeSvg/>
+            <DarkModeSvg/>
+        </button>
     }
 }
 
