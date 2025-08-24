@@ -3,73 +3,170 @@ use leptos::prelude::*;
 /// Allow the user to toggle between light and dark mode
 #[component]
 pub fn Nav() -> impl IntoView {
+    let (show_dropdown, set_show_dropdown) = signal(false);
+
     view! {
-        <div class="flex flex-1 justify-end md:justify-center">
-            <div
-                class="pointer-events-auto md:hidden"
+        // Small screen menu
+        <div
+            class="pointer-events-auto md:hidden"
+            data-headlessui-state=""
+        >
+            // Button to open dropdown navigation menu
+            <button
+                on:click=move |_| set_show_dropdown.set(true)
+                class="group flex items-center rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-zinc-800 shadow-lg ring-1 shadow-zinc-800/5 ring-zinc-900/5 backdrop-blur-sm dark:bg-zinc-800/90 dark:text-zinc-200 dark:ring-white/10 dark:hover:ring-white/20"
+                type="button"
+                aria-expanded="false"
                 data-headlessui-state=""
+                id="headlessui-popover-button-_R_3dkmlb_"
             >
-                <button
-                    class="group flex items-center rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-zinc-800 shadow-lg ring-1 shadow-zinc-800/5 ring-zinc-900/5 backdrop-blur-sm dark:bg-zinc-800/90 dark:text-zinc-200 dark:ring-white/10 dark:hover:ring-white/20"
-                    type="button"
-                    aria-expanded="false"
-                    data-headlessui-state=""
-                    id="headlessui-popover-button-_R_3dkmlb_"
+                "Menu"
+                <svg
+                    viewBox="0 0 8 6"
+                    aria-hidden="true"
+                    class="ml-3 h-auto w-2 stroke-zinc-500 group-hover:stroke-zinc-700 dark:group-hover:stroke-zinc-400"
                 >
-                    "Menu"
-                    <svg
-                        viewBox="0 0 8 6"
-                        aria-hidden="true"
-                        class="ml-3 h-auto w-2 stroke-zinc-500 group-hover:stroke-zinc-700 dark:group-hover:stroke-zinc-400"
+                    <path
+                        d="M1.75 1.75 4 4.25l2.25-2.5"
+                        fill="none"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
                     >
-                        <path
-                            d="M1.75 1.75 4 4.25l2.25-2.5"
-                            fill="none"
-                            stroke-width="1.5"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        >
-                        </path>
-                    </svg>
-                </button>
+                    </path>
+                </svg>
+            </button>
+
+            // Blurred cover for page when menu is open
+            <div
+                class="fixed inset-0 z-50 bg-zinc-800/40 backdrop-blur-xs duration-150 data-closed:opacity-0 data-enter:ease-out data-leave:ease-in dark:bg-black/80"
+                class=("hidden", move || !show_dropdown.get())
+                id="headlessui-popover-backdrop-_R_5dkmlb_"
+                aria-hidden="true"
+                data-headlessui-state="open"
+                data-open=""
+                style=""
+            >
             </div>
 
-            <nav class="pointer-events-auto hidden md:block">
-
-                <ul
-                    class="flex rounded-full bg-white/90 px-3 text-sm font-medium text-zinc-800 shadow-lg ring-1 shadow-zinc-800/5 ring-zinc-900/5 backdrop-blur-sm dark:bg-zinc-800/90 dark:text-zinc-200 dark:ring-white/10"
-                >
-
-                    <li>
-                        <a
-                            class="relative block px-3 py-2 transition hover:text-teal-500 dark:hover:text-teal-400"
-                            href="/"
+            // Popup navigation menu
+            <div
+                class="fixed inset-x-4 top-8 z-50 origin-top rounded-3xl bg-white p-8 ring-1 ring-zinc-900/5 duration-150 data-closed:scale-95 data-closed:opacity-0 data-enter:ease-out data-leave:ease-in dark:bg-zinc-900 dark:ring-zinc-800"
+                class=("hidden", move || !show_dropdown.get())
+                id="headlessui-popover-panel-_R_7dkmlb_"
+                tabindex="-1"
+                data-headlessui-state="open"
+                data-open=""
+                style="--button-width: 88.671875px;"
+            >
+                <div class="flex flex-row-reverse items-center justify-between">
+                    // Button to close the dropdown menu
+                    <button
+                        on:click=move |_| set_show_dropdown.set(false)
+                        aria-label="Close menu"
+                        class="-m-1 p-1"
+                        type="button"
+                        data-headlessui-state="open active"
+                        data-open=""
+                        data-active=""
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                            class="h-6 w-6 text-zinc-500 dark:text-zinc-400"
                         >
-                            "Home"
-                        </a>
-                    </li>
+                            <path
+                                d="m17.25 6.75-10.5 10.5M6.75 6.75l10.5 10.5"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                            </path>
+                        </svg>
+                    </button>
 
-                    <li>
-                        <a
-                            class="relative block px-3 py-2 transition hover:text-teal-500 dark:hover:text-teal-400"
-                            href="/compare"
-                        >
-                            "Compare"
-                        </a>
-                    </li>
+                    <h2 class="text-sm font-medium text-zinc-600 dark:text-zinc-400">"Navigation"</h2>
+                </div>
 
-                    <li>
-                        <a
-                            class="relative block px-3 py-2 transition hover:text-teal-500 dark:hover:text-teal-400"
-                            href="/carousel"
-                        >
-                            "Carousel"
-                        </a>
-                    </li>
+                <nav class="mt-6">
+                    <ul class="-my-2 divide-y divide-zinc-100 text-base text-zinc-800 dark:divide-zinc-100/5 dark:text-zinc-300">
+                        <li>
+                            <a
+                                class="block py-2"
+                                data-headlessui-state="open active"
+                                data-open=""
+                                data-active=""
+                                href="/"
+                            >
+                                "Home"
+                            </a>
+                        </li>
 
-                </ul>
-            </nav>
+                        <li>
+                            <a
+                                class="block py-2"
+                                data-headlessui-state="open active"
+                                data-open=""
+                                data-active=""
+                                href="/compare"
+                            >
+                                "Compare"
+                            </a>
+                        </li>
 
+                        <li>
+                            <a
+                                class="block py-2"
+                                data-headlessui-state="open active"
+                                data-open=""
+                                data-active=""
+                                href="/carousel"
+                            >
+                                "Carousel"
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
         </div>
+
+        // Large screen menu
+        <nav class="pointer-events-auto hidden md:block">
+
+            <ul
+                class="flex rounded-full bg-white/90 px-3 text-sm font-medium text-zinc-800 shadow-lg ring-1 shadow-zinc-800/5 ring-zinc-900/5 backdrop-blur-sm dark:bg-zinc-800/90 dark:text-zinc-200 dark:ring-white/10"
+            >
+
+                <li>
+                    <a
+                        class="relative block px-3 py-2 transition hover:text-teal-500 dark:hover:text-teal-400"
+                        href="/"
+                    >
+                        "Home"
+                    </a>
+                </li>
+
+                <li>
+                    <a
+                        class="relative block px-3 py-2 transition hover:text-teal-500 dark:hover:text-teal-400"
+                        href="/compare"
+                    >
+                        "Compare"
+                    </a>
+                </li>
+
+                <li>
+                    <a
+                        class="relative block px-3 py-2 transition hover:text-teal-500 dark:hover:text-teal-400"
+                        href="/carousel"
+                    >
+                        "Carousel"
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
     }
 }
