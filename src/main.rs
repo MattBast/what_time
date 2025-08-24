@@ -11,8 +11,8 @@ use crate::pages::*;
 use leptos::mount::mount_to_body;
 use leptos::prelude::*;
 use leptos_meta::*;
-use leptos_router::components::{Route, Router, Routes};
-use leptos_router::{path, StaticSegment};
+use leptos_router::components::{ParentRoute, Route, Router, Routes};
+use leptos_router::path;
 
 /// Defines the name of the "zone" url parameter
 pub const ZONE: &str = "zone";
@@ -38,20 +38,18 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
+        <Title text="What Time"/>
         <Stylesheet id="leptos" href="/style/output.css"/>
         <Router>
-            <Routes fallback=|| "Page not found.">
-                <Route path=StaticSegment("") view=Home/>
-            </Routes>
+            <main>
+                <Routes fallback=|| "Page not found.">
+                    <ParentRoute path=path!("") view=Wrapper>
+                        <Route path=path!("/") view=Home/>
+                        <Route path=path!("/carousel") view=Carousel/>
+                        <Route path=path!("/compare") view=Compare/>
+                    </ParentRoute>
+                </Routes>
+            </main>
         </Router>
-    }
-}
-
-#[component]
-pub fn TheRouter() -> impl IntoView {
-    view! {
-        <Routes fallback=|| "404">
-            <Route path=path!("/") view=Home/>
-        </Routes>
     }
 }

@@ -1,3 +1,4 @@
+use crate::components::{IntroSubtitle, IntroTitle, Introtext};
 use crate::components::{SideButton, Timecard, TimezoneSelect};
 use crate::timezone::TimeIncrement;
 use crate::timezone::{new_future_increments, new_past_increments};
@@ -16,6 +17,11 @@ pub fn Carousel() -> impl IntoView {
     let (url_query, _set_url_query) = query_signal::<String>(ZONE);
 
     view! {
+        <Introtext>
+            <IntroTitle>"Time Carousel"</IntroTitle>
+            <IntroSubtitle>"Want to know the difference between two or more timezones? Add some timezones below to compare them hour by hour."</IntroSubtitle>
+        </Introtext>
+
         // Only show CarouselInner if there are timezones
         <Show
             when=move || !url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty()
