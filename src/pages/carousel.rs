@@ -9,7 +9,7 @@ use leptos::html::Div;
 use leptos::prelude::*;
 use leptos_router::hooks::query_signal;
 use leptos_use::use_element_visibility;
-use leptos_use::{use_element_bounding, UseElementBoundingReturn};
+// use leptos_use::{use_element_bounding, UseElementBoundingReturn};
 
 #[component]
 pub fn Carousel() -> impl IntoView {
@@ -219,8 +219,8 @@ pub fn TimezoneLine(timezone: Tz) -> impl IntoView {
         set_increments.set(new_past_increments);
     });
 
-    // Use element visibility to detect when the center detector is visible
-    let UseElementBoundingReturn { right, left, .. } = use_element_bounding(center_detector_ref);
+    // // Use element visibility to detect when the center detector is visible
+    // let UseElementBoundingReturn { right, left, .. } = use_element_bounding(center_detector_ref);
 
     view! {
         <div class="flex gap-5 py-4 sm:gap-8 justify-center content-center h-48">
@@ -243,7 +243,11 @@ pub fn TimezoneLine(timezone: Tz) -> impl IntoView {
                 let(hour)
             >
 
-                <Timecard hour centre_left=left centre_right=right/>
+                <Timecard
+                    hour
+                    // centre_left=left
+                    // centre_right=right
+                />
 
             </For>
 
