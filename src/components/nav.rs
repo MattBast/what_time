@@ -1,4 +1,6 @@
+use crate::ZONE;
 use leptos::prelude::*;
+use leptos_router::hooks::use_location;
 
 /// Allow the user to toggle between light and dark mode
 #[component]
@@ -107,11 +109,15 @@ pub fn Nav() -> impl IntoView {
 
 #[component]
 pub fn LargeNavLink(href: String, children: Children) -> impl IntoView {
+    // Watch url query parameters so they can be included in the
+    // href and not lost when the user clicks this link.
+    let location = use_location();
+
     view! {
         <li>
             <a
                 class="relative block px-3 py-2 transition hover:text-teal-500 dark:hover:text-teal-400"
-                href=href
+                href=move || format!("{}?{}", href, location.search.get())
             >
                 {children()}
             </a>
@@ -125,6 +131,10 @@ pub fn SmallNavLink(
     set_show_dropdown: WriteSignal<bool>,
     children: Children,
 ) -> impl IntoView {
+    // Watch url query parameters so they can be included in the
+    // href and not lost when the user clicks this link.
+    let location = use_location();
+
     view! {
         <li>
             <a
@@ -133,7 +143,7 @@ pub fn SmallNavLink(
                 data-headlessui-state="open active"
                 data-open=""
                 data-active=""
-                href=href
+                href=move || format!("{}?{}", href, location.search.get())
             >
                 {children()}
             </a>
