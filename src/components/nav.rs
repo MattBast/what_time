@@ -18,7 +18,6 @@ pub fn Nav() -> impl IntoView {
                 type="button"
                 aria-expanded="false"
                 data-headlessui-state=""
-                id="headlessui-popover-button-_R_3dkmlb_"
             >
                 "Menu"
                 <svg
@@ -38,22 +37,12 @@ pub fn Nav() -> impl IntoView {
             </button>
 
             // Blurred cover for page when menu is open
-            <div
-                class="fixed inset-0 z-50 bg-zinc-800/40 backdrop-blur-xs duration-150 data-closed:opacity-0 data-enter:ease-out data-leave:ease-in dark:bg-black/80"
-                class=("hidden", move || !show_dropdown.get())
-                id="headlessui-popover-backdrop-_R_5dkmlb_"
-                aria-hidden="true"
-                data-headlessui-state="open"
-                data-open=""
-                style=""
-            >
-            </div>
+            <BlurredScreen show_screen=show_dropdown/>
 
             // Popup navigation menu
             <div
-                class="fixed inset-x-4 top-8 z-50 origin-top rounded-3xl bg-white p-8 ring-1 ring-zinc-900/5 duration-150 data-closed:scale-95 data-closed:opacity-0 data-enter:ease-out data-leave:ease-in dark:bg-zinc-900 dark:ring-zinc-800"
+                class="fixed inset-x-4 top-8 z-51 origin-top rounded-3xl bg-white p-8 ring-1 ring-zinc-900/5 duration-150 data-closed:scale-95 data-closed:opacity-0 data-enter:ease-out data-leave:ease-in dark:bg-zinc-900 dark:ring-zinc-800"
                 class=("hidden", move || !show_dropdown.get())
-                id="headlessui-popover-panel-_R_7dkmlb_"
                 tabindex="-1"
                 data-headlessui-state="open"
                 data-open=""
@@ -92,41 +81,9 @@ pub fn Nav() -> impl IntoView {
 
                 <nav class="mt-6">
                     <ul class="-my-2 divide-y divide-zinc-100 text-base text-zinc-800 dark:divide-zinc-100/5 dark:text-zinc-300">
-                        <li>
-                            <a
-                                class="block py-2"
-                                data-headlessui-state="open active"
-                                data-open=""
-                                data-active=""
-                                href="/"
-                            >
-                                "Home"
-                            </a>
-                        </li>
-
-                        <li>
-                            <a
-                                class="block py-2"
-                                data-headlessui-state="open active"
-                                data-open=""
-                                data-active=""
-                                href="/compare"
-                            >
-                                "Compare"
-                            </a>
-                        </li>
-
-                        <li>
-                            <a
-                                class="block py-2"
-                                data-headlessui-state="open active"
-                                data-open=""
-                                data-active=""
-                                href="/carousel"
-                            >
-                                "Carousel"
-                            </a>
-                        </li>
+                        <SmallNavLink href="/".into() set_show_dropdown>"Home"</SmallNavLink>
+                        <SmallNavLink href="/compare".into() set_show_dropdown>"Compare"</SmallNavLink>
+                        <SmallNavLink href="/carousel".into() set_show_dropdown>"Carousel"</SmallNavLink>
                     </ul>
                 </nav>
             </div>
@@ -139,34 +96,64 @@ pub fn Nav() -> impl IntoView {
                 class="flex rounded-full bg-white/90 px-3 text-sm font-medium text-zinc-800 shadow-lg ring-1 shadow-zinc-800/5 ring-zinc-900/5 backdrop-blur-sm dark:bg-zinc-800/90 dark:text-zinc-200 dark:ring-white/10"
             >
 
-                <li>
-                    <a
-                        class="relative block px-3 py-2 transition hover:text-teal-500 dark:hover:text-teal-400"
-                        href="/"
-                    >
-                        "Home"
-                    </a>
-                </li>
-
-                <li>
-                    <a
-                        class="relative block px-3 py-2 transition hover:text-teal-500 dark:hover:text-teal-400"
-                        href="/compare"
-                    >
-                        "Compare"
-                    </a>
-                </li>
-
-                <li>
-                    <a
-                        class="relative block px-3 py-2 transition hover:text-teal-500 dark:hover:text-teal-400"
-                        href="/carousel"
-                    >
-                        "Carousel"
-                    </a>
-                </li>
+            <LargeNavLink href="/".into()>"Home"</LargeNavLink>
+            <LargeNavLink href="/compare".into()>"Compare"</LargeNavLink>
+            <LargeNavLink href="/carousel".into()>"Carousel"</LargeNavLink>
 
             </ul>
         </nav>
+    }
+}
+
+#[component]
+pub fn LargeNavLink(href: String, children: Children) -> impl IntoView {
+    view! {
+        <li>
+            <a
+                class="relative block px-3 py-2 transition hover:text-teal-500 dark:hover:text-teal-400"
+                href=href
+            >
+                {children()}
+            </a>
+        </li>
+    }
+}
+
+#[component]
+pub fn SmallNavLink(
+    href: String,
+    set_show_dropdown: WriteSignal<bool>,
+    children: Children,
+) -> impl IntoView {
+    view! {
+        <li>
+            <a
+                class="block py-2"
+                on:click=move |_| set_show_dropdown.set(false)
+                data-headlessui-state="open active"
+                data-open=""
+                data-active=""
+                href=href
+            >
+                {children()}
+            </a>
+        </li>
+    }
+}
+
+/// A screen that when activated blurs the screen into the background so a popup can be placed on top.
+#[component]
+pub fn BlurredScreen(show_screen: ReadSignal<bool>) -> impl IntoView {
+    view! {
+        // Blurred cover for page when menu is open
+        <div
+            class="fixed inset-0 z-51 bg-zinc-800/40 backdrop-blur-xs duration-150 data-closed:opacity-0 data-enter:ease-out data-leave:ease-in dark:bg-black/80"
+            class=("hidden", move || !show_screen.get())
+            aria-hidden="true"
+            data-headlessui-state="open"
+            data-open=""
+            style=""
+        >
+        </div>
     }
 }
