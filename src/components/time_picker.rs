@@ -1,5 +1,6 @@
 use crate::timezone::TimeIncrement;
 use crate::CURRENT_TIME;
+use chrono_tz::Tz;
 use leptos::prelude::*;
 use leptos_router::hooks::query_signal;
 
@@ -13,9 +14,10 @@ pub fn TimePicker() -> impl IntoView {
     // Listen for the `current_time` url query to change and when it does, change the value of the input.
     Effect::new(move || {
         // Trigger these actions when the url "current_time" query changes.
-        let timestamp = current_time.get().unwrap_or_default();
-
-        let ti = TimeIncrement::from_timestamp(timestamp);
+        let ti = match current_time.get() {
+            Some(timestamp) => TimeIncrement::from_timestamp(timestamp),
+            None => TimeIncrement::now(Tz::UCT),
+        };
 
         set_input_date.set(ti.input_date());
         set_input_time.set(ti.input_time());

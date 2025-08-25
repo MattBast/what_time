@@ -1,5 +1,6 @@
-use crate::components::{IntroSubtitle, IntroTitle, Introtext};
-use crate::components::{Timecard, TimezoneSelect};
+use crate::components::{
+    IntroSubtitle, IntroTitle, Introtext, TimePicker, Timecard, TimezoneSelect,
+};
 use crate::timezone::TimeIncrement;
 use crate::url_parse::url_query_to_time_increments;
 use crate::{CURRENT_TIME, ZONE};
@@ -22,6 +23,8 @@ pub fn Compare() -> impl IntoView {
             when=move || !url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty()
             fallback=|| view! { <div></div> }
         >
+            <TimePicker/>
+
             <div
                 class="flex justify-between w-full transition"
                 class=(["mt-16", "sm:mt-20"], move || url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty())
