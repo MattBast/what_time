@@ -69,7 +69,7 @@ pub fn CompareInner() -> impl IntoView {
                         };
 
                         view! {
-                            <Timecard>
+                            <Timecard large=true>
                                 <TimecardHeader>
                                     {move || hour().display_header()}
                                 </TimecardHeader>
