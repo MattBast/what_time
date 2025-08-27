@@ -1,6 +1,5 @@
 use chrono::prelude::*;
-use chrono::DateTime;
-use chrono::Duration;
+use chrono::{DateTime, Duration};
 use chrono_tz::Tz;
 
 /// Create a Vector of time increments in the future from now for the given `timezone`.
@@ -68,15 +67,15 @@ impl TimeIncrement {
         }
     }
 
-    pub fn from_timestamp(timestamp: i64) -> Self {
+    pub fn from_timestamp(timestamp: i64, timezone: Tz) -> Self {
         if let Some(datetime) = DateTime::from_timestamp(timestamp, 0) {
             Self {
-                datetime: datetime.with_timezone(&Tz::UTC),
-                timezone: Tz::UTC,
+                datetime: datetime.with_timezone(&timezone),
+                timezone,
                 now: false,
             }
         } else {
-            Self::now(Tz::UTC)
+            Self::now(timezone)
         }
     }
 
@@ -107,7 +106,7 @@ impl TimeIncrement {
     /// Print the time rounded to the nearest increment. Most timezones
     /// round to a whole hour but some like India and Nepal round to
     /// half and quarter hours.
-    pub fn display_time(&self) -> String {
+    pub fn display_time_rounded(&self) -> String {
         // Change the datetime back to the UTC timezone, remove the minutes
         // and then add the timezone back on to add the timezone hour and
         // minute increments.
@@ -115,8 +114,18 @@ impl TimeIncrement {
             .datetime
             .to_utc()
             .with_minute(0)
-            .unwrap()
+            .unwrap_or_default()
             .with_timezone(&self.timezone);
+
+        rounded_datetime.format("%H:%M").to_string()
+    }
+
+    /// Print the time.
+    pub fn display_time(&self) -> String {
+        // Change the datetime back to the UTC timezone, remove the minutes
+        // and then add the timezone back on to add the timezone hour and
+        // minute increments.
+        let rounded_datetime = self.datetime.to_utc().with_timezone(&self.timezone);
 
         rounded_datetime.format("%H:%M").to_string()
     }
@@ -137,8 +146,14 @@ impl TimeIncrement {
     }
 
     /// The time in the format required for the html time input
-    pub fn input_time(&self) -> String {
+    /// rounded to the nearest hour.
+    pub fn input_time_rounded(&self) -> String {
         self.datetime.format("%H:00").to_string()
+    }
+
+    /// The time in the format required for the html time input
+    pub fn input_time(&self) -> String {
+        self.datetime.format("%H:%M").to_string()
     }
 }
 

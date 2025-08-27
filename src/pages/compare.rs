@@ -1,5 +1,6 @@
 use crate::components::{
-    IntroSubtitle, IntroTitle, Introtext, TimePicker, Timecard, TimezoneSelect,
+    IntroSubtitle, IntroTitle, Introtext, TimePicker, Timecard, TimecardDate, TimecardHeader,
+    TimecardTime, TimezoneSelect,
 };
 use crate::timezone::TimeIncrement;
 use crate::url_parse::url_query_to_time_increments;
@@ -62,13 +63,23 @@ pub fn CompareInner() -> impl IntoView {
                     each=move || get_timezones.get()
                     key=|timezone| timezone.clone()
                     children=move|timezone| {
-                        let hour = match current_time.get() {
-                            Some(timestamp) => TimeIncrement::from_timestamp(timestamp),
+                        let hour = move || match current_time.get() {
+                            Some(timestamp) => TimeIncrement::from_timestamp(timestamp, timezone),
                             None => TimeIncrement::now(timezone),
                         };
 
                         view! {
-                            <Timecard hour/>
+                            <Timecard>
+                                <TimecardHeader>
+                                    {move || hour().display_header()}
+                                </TimecardHeader>
+                                <TimecardTime>
+                                    {move || hour().display_time()}
+                                </TimecardTime>
+                                <TimecardDate>
+                                    {move || hour().display_date()}
+                                </TimecardDate>
+                            </Timecard>
                         }
                     }
                 />

@@ -1,4 +1,3 @@
-use leptos::logging::log;
 use leptos::prelude::*;
 use leptos_use::{use_color_mode, ColorMode, UseColorModeReturn};
 
@@ -10,8 +9,6 @@ pub fn DarkModeToggle() -> impl IntoView {
         set_mode,
         ..
     } = use_color_mode();
-
-    log!("Hello toggle");
 
     view! {
         <button
@@ -25,7 +22,6 @@ pub fn DarkModeToggle() -> impl IntoView {
                     _ => ColorMode::Dark,
                 };
 
-                log!("Setting mode to: {:?}", new_mode);
                 set_mode.set(new_mode);
             }
         >

@@ -1,5 +1,6 @@
 use crate::timezone::TimeIncrement;
 use crate::CURRENT_TIME;
+use chrono::DateTime;
 use chrono_tz::Tz;
 use leptos::prelude::*;
 use leptos_router::hooks::query_signal;
@@ -7,7 +8,7 @@ use leptos_router::hooks::query_signal;
 #[component]
 pub fn TimePicker() -> impl IntoView {
     // Watch the url query to decide whether to show the carousel or not.
-    let (current_time, _set_current_time) = query_signal::<i64>(CURRENT_TIME);
+    let (current_time, set_current_time) = query_signal::<i64>(CURRENT_TIME);
     let (input_date, set_input_date) = signal(String::new());
     let (input_time, set_input_time) = signal(String::new());
 
@@ -15,7 +16,7 @@ pub fn TimePicker() -> impl IntoView {
     Effect::new(move || {
         // Trigger these actions when the url "current_time" query changes.
         let ti = match current_time.get() {
-            Some(timestamp) => TimeIncrement::from_timestamp(timestamp),
+            Some(timestamp) => TimeIncrement::from_timestamp(timestamp, Tz::UCT),
             None => TimeIncrement::now(Tz::UCT),
         };
 
@@ -30,6 +31,14 @@ pub fn TimePicker() -> impl IntoView {
                 type="date"
                 name="date-picker"
                 prop:value=input_date
+                on:input:target=move |ev| {
+                    let date = ev.target().value();
+                    set_input_date.set(date);
+
+                    let dt_str = format!("{} {}:00.000 +0000", input_date.get_untracked(), input_time.get_untracked());
+                    let dt = DateTime::parse_from_str(&dt_str, "%Y-%m-%d %H:%M:%S%.3f %z").unwrap();
+                    set_current_time.set(Some(dt.timestamp()));
+                }
             />
 
             <input
@@ -37,6 +46,14 @@ pub fn TimePicker() -> impl IntoView {
                 type="time"
                 name="time-picker"
                 prop:value=input_time
+                on:input:target=move |ev| {
+                    let time = ev.target().value();
+                    set_input_time.set(time);
+
+                    let dt_str = format!("{} {}:00.000 +0000", input_date.get_untracked(), input_time.get_untracked());
+                    let dt = DateTime::parse_from_str(&dt_str, "%Y-%m-%d %H:%M:%S%.3f %z").unwrap();
+                    set_current_time.set(Some(dt.timestamp()));
+                }
             />
         </div>
     }

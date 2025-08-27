@@ -1,5 +1,6 @@
 use crate::components::{
-    IntroSubtitle, IntroTitle, Introtext, SideButton, TimePicker, Timecard, TimezoneSelect,
+    IntroSubtitle, IntroTitle, Introtext, SideButton, TimePicker, Timecard, TimecardDate,
+    TimecardHeader, TimecardTime, TimezoneSelect,
 };
 use crate::timezone::TimeIncrement;
 use crate::timezone::{new_future_increments, new_past_increments};
@@ -207,11 +208,17 @@ pub fn TimezoneLine(timezone: Tz) -> impl IntoView {
                 let(hour)
             >
 
-                <Timecard
-                    hour
-                    // centre_left=left
-                    // centre_right=right
-                />
+                <Timecard>
+                    <TimecardHeader>
+                        {hour.display_header()}
+                    </TimecardHeader>
+                    <TimecardTime>
+                        {hour.display_time()}
+                    </TimecardTime>
+                    <TimecardDate>
+                        {hour.display_date()}
+                    </TimecardDate>
+                </Timecard>
 
             </For>
 
