@@ -1,3 +1,4 @@
+use crate::components::Button;
 use crate::timezone::TimeIncrement;
 use crate::CURRENT_TIME;
 use chrono::DateTime;
@@ -26,6 +27,15 @@ pub fn TimePicker() -> impl IntoView {
 
     view! {
         <div class="flex w-full gap-5 justify-end content-end">
+            <Button
+                on:click=move |_| {
+                    let dt = TimeIncrement::now(Tz::UCT);
+                    set_current_time.set(Some(dt.timestamp()));
+                }
+            >
+                "Now"
+            </Button>
+
             <input
                 class="px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500  dark:[color-scheme:dark] cursor-pointer"
                 type="date"
