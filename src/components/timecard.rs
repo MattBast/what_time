@@ -10,7 +10,7 @@ pub fn Timecard(
 
     view! {
         <div
-            class=("scale-105", move || is_highlighted.get())
+            class=("scale-100", move || is_highlighted.get())
             class=("scale-75", move || !is_highlighted.get())
             class="rounded-2xl border border-zinc-100 dark:border-zinc-700/40 w-40 content-center relative snap-center z-1 transition"
         >
