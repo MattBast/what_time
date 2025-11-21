@@ -15,38 +15,35 @@ pub fn Wrapper() -> impl IntoView {
         )
         >
 
-            <div class="fixed top-5 left-0 right-0">
-                <div class="mx-auto w-full max-w-7xl">
-                    <div class="relative px-4 sm:px-8">
-                        <div class="mx-auto max-w-2xl lg:max-w-5xl">
-                            <div class="relative flex gap-4">
-                                <div class="flex flex-1">
-                                    // {!url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty().then(|| view! {
-                                        <Logo small=true/>
-                                    // })}
-                                </div>
-                                // <div class="flex flex-1 justify-end md:justify-center">
-                                //     <Nav/>
-                                // </div>
-                                <div class="flex justify-end md:flex-1">
-                                    <DarkModeToggle/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            // This was a logo that was present before any timezone comparison took place.
-            // ----------------------------------------------------------------------------
-            // <div class="flex justify-start w-full transition-all duration-700 ease-in-out delay-800">
-            //     {move || url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty().then(|| view! {
-            //         <Logo/>
-            //     })}
-            // </div>
+            <Header/>
 
             <Outlet/>
 
+        </div>
+    }
+}
+
+#[component]
+fn Header() -> impl IntoView {
+    view! {
+        <div class="fixed top-5 left-0 right-0">
+            <div class="mx-auto w-full max-w-7xl">
+                <div class="relative px-4 sm:px-8">
+                        <div class="relative flex gap-4">
+                            <div class="flex flex-1">
+                                // {!url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty().then(|| view! {
+                                    <Logo small=true/>
+                                // })}
+                            </div>
+                            // <div class="flex flex-1 justify-end md:justify-center">
+                            //     <Nav/>
+                            // </div>
+                            <div class="flex justify-end md:flex-1">
+                                <DarkModeToggle/>
+                            </div>
+                        </div>
+                </div>
+            </div>
         </div>
     }
 }
