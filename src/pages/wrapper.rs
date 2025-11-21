@@ -15,6 +15,20 @@ pub fn Wrapper() -> impl IntoView {
         )
         >
 
+            // Top-right radial
+            <div class="pointer-events-none fixed top-0 right-0 w-[40rem] h-[40rem] blur-3xl
+                        bg-[radial-gradient(circle_at_top_right,theme(colors.teal.50),transparent_70%)]
+                        dark:bg-none
+            ">
+            </div>
+
+            // Bottom-left radial
+            <div class="pointer-events-none fixed bottom-0 left-0 w-[40rem] h-[40rem] blur-3xl
+                        bg-[radial-gradient(circle_at_bottom_left,theme(colors.teal.50),transparent_70%)]
+                        dark:bg-none
+            ">
+            </div>
+
             <Header/>
 
             <Outlet/>
