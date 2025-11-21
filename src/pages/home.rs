@@ -1,5 +1,7 @@
-use crate::components::{InlineLi, IntroSubtitle, IntroTitle, Introtext, TimezoneSelect};
-use crate::pages::CompareInner;
+use crate::components::{
+    InlineLi, IntroSubtitle, IntroTitle, Introtext, TimePicker, TimezoneSelect,
+};
+use crate::pages::Compare;
 use crate::url_parse::url_query_to_time_increments;
 use crate::ZONE;
 use leptos::prelude::*;
@@ -42,9 +44,11 @@ pub fn Home() -> impl IntoView {
                 </BackgroundBlur>
             }
         >
+            <TimePicker/>
+
             <BackgroundBlur>
                 <div class="pt-24">
-                    <CompareInner/>
+                    <Compare/>
                 </div>
             </BackgroundBlur>
         </Show>

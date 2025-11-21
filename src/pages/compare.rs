@@ -1,7 +1,4 @@
-use crate::components::{
-    IntroSubtitle, IntroTitle, Introtext, TimePicker, Timecard, TimecardDate, TimecardHeader,
-    TimecardTime, TimezoneSelect,
-};
+use crate::components::{Timecard, TimecardDate, TimecardHeader, TimecardTime};
 use crate::timezone::TimeIncrement;
 use crate::url_parse::url_query_to_time_increments;
 use crate::{CURRENT_TIME, ZONE};
@@ -10,37 +7,6 @@ use leptos_router::hooks::query_signal;
 
 #[component]
 pub fn Compare() -> impl IntoView {
-    // Watch the url query to decide whether to show the carousel or not.
-    let (url_query, _set_url_query) = query_signal::<String>(ZONE);
-
-    view! {
-        <Introtext>
-            <IntroTitle>"Compare Timezones"</IntroTitle>
-            <IntroSubtitle>"Want to know the difference between two or more timezones? Add some timezones below to see the difference."</IntroSubtitle>
-        </Introtext>
-
-        // Only show CompareInner if there are timezones
-        <Show
-            when=move || !url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty()
-            fallback=|| view! { <div></div> }
-        >
-            <TimePicker/>
-
-            <div
-                class=(["mt-16", "sm:mt-20"], move || url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty())
-                class=(["mt-6", "sm:mt-8"], move || !url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty())
-            >
-                <CompareInner/>
-            </div>
-        </Show>
-
-        // A select element that allows the user to add timezones to the carousel
-        <TimezoneSelect/>
-    }
-}
-
-#[component]
-pub fn CompareInner() -> impl IntoView {
     // Watch the url to decide which timezones to include and what times to compare.
     let (url_query, _set_url_query) = query_signal::<String>(ZONE);
     let (current_time, _set_current_time) = query_signal::<i64>(CURRENT_TIME);
