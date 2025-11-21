@@ -1,17 +1,19 @@
-use crate::components::{DarkModeToggle, Logo, Nav};
-use crate::url_parse::url_query_to_time_increments;
-use crate::ZONE;
+use crate::components::{DarkModeToggle, Logo};
 use leptos::prelude::*;
 use leptos_router::components::Outlet;
-use leptos_router::hooks::query_signal;
 
 #[component]
 pub fn Wrapper() -> impl IntoView {
-    // Watch the url query to decide whether to shrink the logo or not.
-    let (url_query, _set_url_query) = query_signal::<String>(ZONE);
-
     view! {
-        <div class="font-sans flex flex-col justify-center min-h-screen px-4 sm:px-8 lg:px-12">
+        <div class=format!(
+            "{} {} {} {}",
+            "font-sans flex flex-col justify-center min-h-screen px-4 sm:px-8 lg:px-12",
+            "bg-size-[16px_16px]", // repeating dot background
+            // "bg-[radial-gradient(#f4f4f5_1px,transparent_1px)]", // zinc-100
+            "bg-[radial-gradient(#e4e4e7_1px,transparent_1px)]", // zinc-200
+            "dark:bg-[radial-gradient(#18181b_1px,transparent_1px)]", // zinc-800
+        )
+        >
 
             <div class="fixed top-5 left-0 right-0">
                 <div class="mx-auto w-full max-w-7xl">
@@ -23,9 +25,9 @@ pub fn Wrapper() -> impl IntoView {
                                         <Logo small=true/>
                                     // })}
                                 </div>
-                                <div class="flex flex-1 justify-end md:justify-center">
-                                    <Nav/>
-                                </div>
+                                // <div class="flex flex-1 justify-end md:justify-center">
+                                //     <Nav/>
+                                // </div>
                                 <div class="flex justify-end md:flex-1">
                                     <DarkModeToggle/>
                                 </div>
@@ -35,11 +37,13 @@ pub fn Wrapper() -> impl IntoView {
                 </div>
             </div>
 
-            <div class="flex justify-start w-full transition-all duration-700 ease-in-out delay-800">
-                {move || url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty().then(|| view! {
-                    <Logo/>
-                })}
-            </div>
+            // This was a logo that was present before any timezone comparison took place.
+            // ----------------------------------------------------------------------------
+            // <div class="flex justify-start w-full transition-all duration-700 ease-in-out delay-800">
+            //     {move || url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty().then(|| view! {
+            //         <Logo/>
+            //     })}
+            // </div>
 
             <Outlet/>
 
