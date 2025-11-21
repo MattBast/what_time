@@ -77,7 +77,7 @@ pub fn TimezoneSelect() -> impl IntoView {
     });
 
     view! {
-        <div class="relative mt-8 w-full">
+        <div class="relative w-full">
             // A search input where the user can type and search for a timezone.
             <input
                 type="text"
