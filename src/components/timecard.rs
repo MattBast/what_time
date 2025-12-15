@@ -1,16 +1,10 @@
 use leptos::prelude::*;
 
 #[component]
-pub fn Timecard(children: Children, #[prop(optional)] large: bool) -> impl IntoView {
-    let is_highlighted = RwSignal::new(large);
-
+pub fn Timecard(children: Children) -> impl IntoView {
     view! {
         <div
-            class=("scale-100", move || is_highlighted.get())
-            class=("scale-75", move || !is_highlighted.get())
-            class="
-                rounded-2xl p-8 content-center relative snap-center z-1 transition
-            "
+            class="rounded-2xl p-8 content-center relative snap-center z-1 transition"
         >
             <div class="p-6 flex-none text-center">
                 {children()}

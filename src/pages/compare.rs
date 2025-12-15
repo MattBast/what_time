@@ -36,7 +36,7 @@ pub fn Compare() -> impl IntoView {
                         children=move|timezone| {
 
                             view! {
-                                <Timecard large=true>
+                                <Timecard>
                                     <TimecardHeader>
                                         {move || timezone.display_header()}
                                     </TimecardHeader>
