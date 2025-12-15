@@ -1,4 +1,5 @@
 #![allow(non_snake_case)]
+#![deny(clippy::unwrap_used)]
 
 // modules
 pub mod components;
@@ -45,7 +46,6 @@ pub fn App() -> impl IntoView {
                 <Routes fallback=|| "Page not found.">
                     <ParentRoute path=path!("") view=Wrapper>
                         <Route path=path!("/") view=Home/>
-                        <Route path=path!("/carousel") view=Carousel/>
                         <Route path=path!("/compare") view=Compare/>
                     </ParentRoute>
                 </Routes>
