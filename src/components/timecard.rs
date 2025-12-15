@@ -12,7 +12,9 @@ pub fn Timecard(
         <div
             class=("scale-100", move || is_highlighted.get())
             class=("scale-75", move || !is_highlighted.get())
-            class="rounded-2xl border border-zinc-100 dark:border-zinc-700/40 w-40 content-center relative snap-center z-1 transition"
+            class="
+                rounded-2xl p-8 content-center relative snap-center z-1 transition
+            "
         >
             // add a pinging dot if this is the current time
             {ping.then(||view! {
@@ -22,7 +24,7 @@ pub fn Timecard(
                 </span>
             })}
 
-            <div class="p-6 w-40 flex-none">
+            <div class="p-6 flex-none text-center">
                 {children()}
             </div>
         </div>
@@ -32,25 +34,25 @@ pub fn Timecard(
 #[component]
 pub fn TimecardHeader(children: Children) -> impl IntoView {
     view! {
-        <p class="my-2 text-sm text-zinc-600 dark:text-zinc-400">
+        <h5 class="text-2xl my-2 text-zinc-600 dark:text-zinc-400">
             {children()}
-        </p>
+        </h5>
     }
 }
 
 #[component]
 pub fn TimecardTime(children: Children) -> impl IntoView {
     view! {
-        <h2 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+        <h1 class="text-5xl sm:text-6xl font-semibold text-zinc-900 dark:text-zinc-100">
             {children()}
-        </h2>
+        </h1>
     }
 }
 
 #[component]
 pub fn TimecardDate(children: Children) -> impl IntoView {
     view! {
-        <p class="text-sm text-zinc-600 dark:text-zinc-400">
+        <p class="text-xs my-2 text-zinc-600 dark:text-zinc-400">
             {children()}
         </p>
     }

@@ -1,4 +1,4 @@
-use crate::components::{Timecard, TimecardDate, TimecardHeader, TimecardTime};
+use crate::components::{BackgroundBlur, Timecard, TimecardDate, TimecardHeader, TimecardTime};
 use crate::timezone::TimeIncrement;
 use crate::url_parse::url_query_to_time_increments;
 use crate::{CURRENT_TIME, ZONE};
@@ -23,31 +23,35 @@ pub fn Compare() -> impl IntoView {
     });
 
     view! {
-        <div class="w-full flex flex-wrap justify-center gap-2 transition">
-            <For
-                each=move || get_timezones.get()
-                key=|timezone| timezone.clone()
-                children=move|timezone| {
-                    let hour = move || match current_time.get() {
-                        Some(timestamp) => TimeIncrement::from_timestamp(timestamp, timezone),
-                        None => TimeIncrement::now(timezone),
-                    };
+        <div class="w-full">
+            <BackgroundBlur>
+                <div class="flex flex-wrap justify-center gap-2">
+                    <For
+                        each=move || get_timezones.get()
+                        key=|timezone| timezone.clone()
+                        children=move|timezone| {
+                            let hour = move || match current_time.get() {
+                                Some(timestamp) => TimeIncrement::from_timestamp(timestamp, timezone),
+                                None => TimeIncrement::now(timezone),
+                            };
 
-                    view! {
-                        <Timecard large=true>
-                            <TimecardHeader>
-                                {move || hour().display_header()}
-                            </TimecardHeader>
-                            <TimecardTime>
-                                {move || hour().display_time()}
-                            </TimecardTime>
-                            <TimecardDate>
-                                {move || hour().display_date()}
-                            </TimecardDate>
-                        </Timecard>
-                    }
-                }
-            />
+                            view! {
+                                <Timecard large=true>
+                                    <TimecardHeader>
+                                        {move || hour().display_header()}
+                                    </TimecardHeader>
+                                    <TimecardTime>
+                                        {move || hour().display_time()}
+                                    </TimecardTime>
+                                    <TimecardDate>
+                                        {move || hour().display_date()}
+                                    </TimecardDate>
+                                </Timecard>
+                            }
+                        }
+                    />
+                </div>
+            </BackgroundBlur>
         </div>
     }
 }

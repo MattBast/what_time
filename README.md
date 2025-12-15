@@ -30,6 +30,9 @@ lsof -i :3000
 - No more than two or three lines of text before adding a newline.
 - Prefer bullet points ideally with icons instead of disc bullets.
 
+### Type Scale
+- Use the Major Third scale rule for deciding the size of text. Start with default of 16px.
+- Use [Typescale](https://typescale.com/) as a shortcut for calculating Text Size
 
 ### Spacing between groups of elements
 - Rule of 8px. I.e. go up from 8px, to 16px, to 24px etc
