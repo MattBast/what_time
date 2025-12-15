@@ -1,6 +1,6 @@
 use crate::components::{BackgroundBlur, Timecard, TimecardDate, TimecardHeader, TimecardTime};
 use crate::timezone::TimeIncrement;
-use crate::url_parse::url_query_to_time_increments;
+use crate::url_parse::url_query_to_timezones;
 use crate::{CURRENT_TIME, ZONE};
 use leptos::prelude::*;
 use leptos_router::hooks::query_signal;
@@ -18,8 +18,7 @@ pub fn Compare() -> impl IntoView {
         // Trigger these actions when the url "zone" query changes.
         let query = url_query.get().unwrap_or_default();
 
-        // Add the timezones from url to the carousel.
-        set_timezones.set(url_query_to_time_increments(query.clone()));
+        set_timezones.set(url_query_to_timezones(query.clone()));
     });
 
     view! {
@@ -31,8 +30,8 @@ pub fn Compare() -> impl IntoView {
                         key=|timezone| timezone.clone()
                         children=move|timezone| {
                             let hour = move || match current_time.get() {
-                                Some(timestamp) => TimeIncrement::from_timestamp(timestamp, timezone),
-                                None => TimeIncrement::now(timezone),
+                                Some(timestamp) => TimeIncrement::from_timestamp(timestamp, timezone.clone()),
+                                None => TimeIncrement::now(timezone.clone()),
                             };
 
                             view! {

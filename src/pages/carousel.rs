@@ -4,7 +4,7 @@ use crate::components::{
 };
 use crate::timezone::TimeIncrement;
 use crate::timezone::{new_future_increments, new_past_increments};
-use crate::url_parse::url_query_to_time_increments;
+use crate::url_parse::url_query_to_timezones;
 use crate::{FUTURE_INCREMENTS, PAST_INCREMENTS, ZONE};
 use chrono_tz::Tz;
 use leptos::html::Div;
@@ -26,14 +26,14 @@ pub fn Carousel() -> impl IntoView {
 
         // Only show CarouselInner if there are timezones
         <Show
-            when=move || !url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty()
+            when=move || !url_query_to_timezones(url_query.get().unwrap_or_default()).is_empty()
             fallback=|| view! { <div></div> }
         >
             <TimePicker/>
 
             <div
                 class="flex justify-between w-full transition"
-                class=(["mt-16", "sm:mt-20"], move || url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty())
+                class=(["mt-16", "sm:mt-20"], move || url_query_to_timezones(url_query.get().unwrap_or_default()).is_empty())
             >
                 <CarouselInner/>
             </div>
@@ -56,7 +56,7 @@ pub fn CarouselInner() -> impl IntoView {
         let query = url_query.get().unwrap_or_default();
 
         // Add the timezones from url to the carousel.
-        set_timezones.set(url_query_to_time_increments(query.clone()));
+        set_timezones.set(url_query_to_timezones(query.clone()));
     });
 
     // Load more time increments when the right spinner is visible.

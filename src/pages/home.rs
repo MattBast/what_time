@@ -2,7 +2,7 @@ use crate::components::{
     BackgroundBlur, InlineLi, IntroSubtitle, IntroTitle, Introtext, TimePicker, TimezoneSelect,
 };
 use crate::pages::Compare;
-use crate::url_parse::url_query_to_time_increments;
+use crate::url_parse::url_query_to_timezones;
 use crate::ZONE;
 use leptos::prelude::*;
 use leptos_router::hooks::query_signal;
@@ -35,7 +35,7 @@ pub fn Home() -> impl IntoView {
         // </div>
 
         <Show
-            when=move || !url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty()
+            when=move || !url_query_to_timezones(url_query.get().unwrap_or_default()).is_empty()
             fallback=|| view! {
                 <BackgroundBlur>
                     <div class="pt-24">

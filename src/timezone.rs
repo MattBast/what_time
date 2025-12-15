@@ -168,6 +168,7 @@ impl Ord for TimeIncrement {
             .to_string()
             .parse::<u32>()
             .unwrap();
+
         let other_offset = other
             .datetime
             .format("%z")
