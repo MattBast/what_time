@@ -1,5 +1,5 @@
 use crate::components::{
-    InlineLi, IntroSubtitle, IntroTitle, Introtext, TimePicker, TimezoneSelect,
+    BackgroundBlur, InlineLi, IntroSubtitle, IntroTitle, Introtext, TimePicker, TimezoneSelect,
 };
 use crate::pages::Compare;
 use crate::url_parse::url_query_to_time_increments;
@@ -45,12 +45,7 @@ pub fn Home() -> impl IntoView {
             }
         >
             <TimePicker/>
-
-            <BackgroundBlur>
-                <div class="pt-24">
-                    <Compare/>
-                </div>
-            </BackgroundBlur>
+            <Compare/>
         </Show>
 
         <BackgroundBlur>
@@ -76,14 +71,5 @@ fn WelcomeText() -> impl IntoView {
                 </ul>
             </IntroSubtitle>
         </Introtext>
-    }
-}
-
-#[component]
-fn BackgroundBlur(children: Children) -> impl IntoView {
-    view! {
-        <div class="bg-radial from-white dark:from-black from-20%">
-            {children()}
-        </div>
     }
 }
