@@ -17,13 +17,12 @@ pub fn Compare() -> impl IntoView {
         // Trigger these actions when the url "zone" query changes.
         let query = url_query.get().unwrap_or_default();
 
-        let mut timezones = url_query_to_time_increments(query.clone(), current_time.get());
+        let mut timezones =
+            url_query_to_time_increments(query.clone(), current_time.get_untracked());
         timezones.sort();
 
         // Add the timezones from url to the carousel.
         set_timezones.set(timezones);
-
-        // set_timezones.set(url_query_to_timezones(query.clone()));
     });
 
     view! {
