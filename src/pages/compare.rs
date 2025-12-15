@@ -1,6 +1,5 @@
 use crate::components::{BackgroundBlur, Timecard, TimecardDate, TimecardHeader, TimecardTime};
-use crate::timezone::TimeIncrement;
-use crate::url_parse::url_query_to_timezones;
+use crate::url_parse::url_query_to_time_increments;
 use crate::{CURRENT_TIME, ZONE};
 use leptos::prelude::*;
 use leptos_router::hooks::query_signal;
@@ -18,7 +17,13 @@ pub fn Compare() -> impl IntoView {
         // Trigger these actions when the url "zone" query changes.
         let query = url_query.get().unwrap_or_default();
 
-        set_timezones.set(url_query_to_timezones(query.clone()));
+        let mut timezones = url_query_to_time_increments(query.clone(), current_time.get());
+        timezones.sort();
+
+        // Add the timezones from url to the carousel.
+        set_timezones.set(timezones);
+
+        // set_timezones.set(url_query_to_timezones(query.clone()));
     });
 
     view! {
@@ -27,23 +32,19 @@ pub fn Compare() -> impl IntoView {
                 <div class="flex flex-wrap justify-center gap-2">
                     <For
                         each=move || get_timezones.get()
-                        key=|timezone| timezone.clone()
+                        key=|timezone| timezone.timezone.clone()
                         children=move|timezone| {
-                            let hour = move || match current_time.get() {
-                                Some(timestamp) => TimeIncrement::from_timestamp(timestamp, timezone.clone()),
-                                None => TimeIncrement::now(timezone.clone()),
-                            };
 
                             view! {
                                 <Timecard large=true>
                                     <TimecardHeader>
-                                        {move || hour().display_header()}
+                                        {move || timezone.display_header()}
                                     </TimecardHeader>
                                     <TimecardTime>
-                                        {move || hour().display_time()}
+                                        {move || timezone.display_time()}
                                     </TimecardTime>
                                     <TimecardDate>
-                                        {move || hour().display_date()}
+                                        {move || timezone.display_date()}
                                     </TimecardDate>
                                 </Timecard>
                             }

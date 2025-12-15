@@ -166,14 +166,14 @@ impl Ord for TimeIncrement {
             .datetime
             .format("%z")
             .to_string()
-            .parse::<u32>()
+            .parse::<i32>()
             .unwrap();
 
         let other_offset = other
             .datetime
             .format("%z")
             .to_string()
-            .parse::<u32>()
+            .parse::<i32>()
             .unwrap();
 
         self_offset.cmp(&other_offset)
