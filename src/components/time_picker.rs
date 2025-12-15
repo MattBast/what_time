@@ -46,8 +46,9 @@ pub fn TimePicker() -> impl IntoView {
                     set_input_date.set(date);
 
                     let dt_str = format!("{} {}:00.000 +0000", input_date.get_untracked(), input_time.get_untracked());
-                    let dt = DateTime::parse_from_str(&dt_str, "%Y-%m-%d %H:%M:%S%.3f %z").unwrap();
-                    set_current_time.set(Some(dt.timestamp()));
+                    if let Ok(dt) = DateTime::parse_from_str(&dt_str, "%Y-%m-%d %H:%M:%S%.3f %z") {
+                        set_current_time.set(Some(dt.timestamp()))
+                    };
                 }
             />
 
@@ -61,8 +62,9 @@ pub fn TimePicker() -> impl IntoView {
                     set_input_time.set(time);
 
                     let dt_str = format!("{} {}:00.000 +0000", input_date.get_untracked(), input_time.get_untracked());
-                    let dt = DateTime::parse_from_str(&dt_str, "%Y-%m-%d %H:%M:%S%.3f %z").unwrap();
-                    set_current_time.set(Some(dt.timestamp()));
+                    if let Ok(dt) = DateTime::parse_from_str(&dt_str, "%Y-%m-%d %H:%M:%S%.3f %z") {
+                        set_current_time.set(Some(dt.timestamp()))
+                    };
                 }
             />
         </div>

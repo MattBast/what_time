@@ -13,8 +13,7 @@ pub fn TimezoneSelect() -> impl IntoView {
     let (url_query, set_url_query) = query_signal::<String>(ZONE);
 
     // Get a list of all the available timezones to present in the dropdown.
-    let (tz_variants, set_tz_variants) =
-        ArcRwSignal::new(TZ_VARIANTS.iter().map(|tz| tz.clone()).collect()).split();
+    let (tz_variants, set_tz_variants) = ArcRwSignal::new(TZ_VARIANTS.to_vec()).split();
     let set_tz_variants_clone = set_tz_variants.clone();
 
     // A list of the timezones that have been selected.

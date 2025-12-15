@@ -17,8 +17,8 @@ pub fn url_query_to_time_increments(
     zones
         .iter()
         .map(|timezone| match current_time {
-            Some(timestamp) => TimeIncrement::from_timestamp(timestamp, timezone.clone()),
-            None => TimeIncrement::now(timezone.clone()),
+            Some(timestamp) => TimeIncrement::from_timestamp(timestamp, *timezone),
+            None => TimeIncrement::now(*timezone),
         })
         .collect()
 }

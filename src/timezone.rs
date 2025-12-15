@@ -1,41 +1,8 @@
+use anyhow::{Context, Result};
 use chrono::prelude::*;
 use chrono::{DateTime, Duration};
 use chrono_tz::Tz;
 use std::cmp::Ordering;
-
-/// Create a Vector of time increments in the future from now for the given `timezone`.
-pub fn new_future_increments(current_future_increments: i32, timezone: &Tz) -> Vec<TimeIncrement> {
-    let mut new_increments = vec![TimeIncrement::now(timezone.clone())];
-
-    for _ in 1..current_future_increments {
-        let mut new_hour = new_increments.last().unwrap().clone();
-        new_hour.add(Duration::hours(1));
-        new_hour.now = false;
-        new_increments.push(new_hour);
-    }
-
-    // remove now
-    new_increments.remove(0);
-
-    new_increments
-}
-
-/// Create a Vector of time increments in the past from now for the given `timezone`.
-pub fn new_past_increments(current_future_increments: i32, timezone: &Tz) -> Vec<TimeIncrement> {
-    let mut new_increments = vec![TimeIncrement::now(timezone.clone())];
-
-    for _ in 1..current_future_increments {
-        let mut new_hour = new_increments.first().unwrap().clone();
-        new_hour.minus(Duration::hours(1));
-        new_hour.now = false;
-        new_increments.insert(0, new_hour);
-    }
-
-    // remove now
-    let _ = new_increments.pop();
-
-    new_increments
-}
 
 #[derive(Debug, Clone, Copy)]
 pub struct TimeIncrement {
@@ -55,17 +22,17 @@ impl TimeIncrement {
         }
     }
 
-    pub fn new(timezone: Tz, new_hour: u32) -> Self {
+    pub fn new(timezone: Tz, new_hour: u32) -> Result<Self> {
         let datetime = Utc::now()
             .with_timezone(&timezone)
             .with_hour(new_hour)
-            .unwrap();
+            .context("Number provided is not an hour")?;
 
-        Self {
+        Ok(Self {
             datetime,
             timezone,
             now: false,
-        }
+        })
     }
 
     pub fn from_timestamp(timestamp: i64, timezone: Tz) -> Self {
@@ -85,11 +52,11 @@ impl TimeIncrement {
     }
 
     pub fn add(&mut self, duration: Duration) {
-        self.datetime = self.datetime + duration;
+        self.datetime += duration;
     }
 
     pub fn minus(&mut self, duration: Duration) {
-        self.datetime = self.datetime - duration;
+        self.datetime -= duration;
     }
 
     /// Print an emoji, city name and timezone code to inform the user
@@ -100,7 +67,7 @@ impl TimeIncrement {
             "{} {} ({})",
             tz_to_emoji(&self.timezone),
             tz_to_city(&self.timezone),
-            time.format("%Z").to_string(),
+            time.format("%Z"),
         )
     }
 
@@ -160,6 +127,9 @@ impl TimeIncrement {
 
 /// Allow for vectors of timezones to be sorted by their Offset i.e.
 /// the UTC+01:00 part of a timestamp.
+///
+/// If the offset cannot be parsed as a number, it will default to 0,
+/// aka, UTC.
 impl Ord for TimeIncrement {
     fn cmp(&self, other: &Self) -> Ordering {
         let self_offset = self
@@ -167,14 +137,14 @@ impl Ord for TimeIncrement {
             .format("%z")
             .to_string()
             .parse::<i32>()
-            .unwrap();
+            .unwrap_or_default();
 
         let other_offset = other
             .datetime
             .format("%z")
             .to_string()
             .parse::<i32>()
-            .unwrap();
+            .unwrap_or_default();
 
         self_offset.cmp(&other_offset)
     }
@@ -2021,6 +1991,7 @@ mod tests {
         let mut timezones = vec![
             TimeIncrement::now(Tz::Europe__Paris),
             TimeIncrement::now(Tz::Europe__London),
+            TimeIncrement::now(Tz::America__Atikokan),
         ];
 
         timezones.sort();
@@ -2028,6 +1999,7 @@ mod tests {
         assert_eq!(
             timezones,
             vec![
+                TimeIncrement::now(Tz::America__Atikokan),
                 TimeIncrement::now(Tz::Europe__London),
                 TimeIncrement::now(Tz::Europe__Paris)
             ]

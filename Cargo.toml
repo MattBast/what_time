@@ -5,6 +5,7 @@ edition = "2021"
 rust-version = "1.84"
 
 [dependencies]
+anyhow = "1.0"
 axum = { version = "0.8", optional = true }
 console_error_panic_hook = "0.1.7"
 leptos = { version = "0.8", features = ["csr"] }

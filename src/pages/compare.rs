@@ -32,7 +32,7 @@ pub fn Compare() -> impl IntoView {
                 <div class="flex flex-wrap justify-center gap-2">
                     <For
                         each=move || get_timezones.get()
-                        key=|timezone| timezone.timezone.clone()
+                        key=|timezone| timezone.timezone
                         children=move|timezone| {
 
                             view! {

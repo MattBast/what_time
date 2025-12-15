@@ -24,6 +24,14 @@ occupying the port. Start by find the process PID:
 lsof -i :3000
 ```
 
+## Checks
+Run the following commands to check code quality and run tests:
+```bash
+cargo check
+cargo clippy -- -D warnings
+cargo test
+```
+
 ## UX rules
 
 ### Blocks of text
