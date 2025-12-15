@@ -1,6 +1,7 @@
 use chrono::prelude::*;
 use chrono::{DateTime, Duration};
 use chrono_tz::Tz;
+use std::cmp::Ordering;
 
 /// Create a Vector of time increments in the future from now for the given `timezone`.
 pub fn new_future_increments(current_future_increments: i32, timezone: &Tz) -> Vec<TimeIncrement> {
@@ -156,6 +157,41 @@ impl TimeIncrement {
         self.datetime.format("%H:%M").to_string()
     }
 }
+
+/// Allow for vectors of timezones to be sorted by their Offset i.e.
+/// the UTC+01:00 part of a timestamp.
+impl Ord for TimeIncrement {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let self_offset = self
+            .datetime
+            .format("%z")
+            .to_string()
+            .parse::<u32>()
+            .unwrap();
+        let other_offset = other
+            .datetime
+            .format("%z")
+            .to_string()
+            .parse::<u32>()
+            .unwrap();
+
+        self_offset.cmp(&other_offset)
+    }
+}
+
+impl PartialOrd for TimeIncrement {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for TimeIncrement {
+    fn eq(&self, other: &Self) -> bool {
+        self.timezone == other.timezone
+    }
+}
+
+impl Eq for TimeIncrement {}
 
 /// Returns a tuple of the timezone displayable components as this: (emoji, city, country)
 pub fn tz_display(timezone: &Tz) -> (String, String, String) {
@@ -1973,4 +2009,27 @@ pub fn tz_to_emoji(timezone: &Tz) -> String {
         Tz::Zulu => "",
     }
     .to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_timezones_can_be_sorted() {
+        let mut timezones = vec![
+            TimeIncrement::now(Tz::Europe__Paris),
+            TimeIncrement::now(Tz::Europe__London),
+        ];
+
+        timezones.sort();
+
+        assert_eq!(
+            timezones,
+            vec![
+                TimeIncrement::now(Tz::Europe__London),
+                TimeIncrement::now(Tz::Europe__Paris)
+            ]
+        );
+    }
 }
