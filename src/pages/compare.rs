@@ -1,4 +1,7 @@
-use crate::components::{BackgroundBlur, Timecard, TimecardDate, TimecardHeader, TimecardTime};
+use crate::components::{
+    get_current_time, BackgroundBlur, TimeInput, Timecard, TimecardDate, TimecardHeader,
+    TimecardTime,
+};
 use crate::url_parse::url_query_to_time_increments;
 use crate::{CURRENT_TIME, ZONE};
 use leptos::prelude::*;
@@ -8,7 +11,7 @@ use leptos_router::hooks::query_signal;
 pub fn Compare() -> impl IntoView {
     // Watch the url to decide which timezones to include and what times to compare.
     let (url_query, _set_url_query) = query_signal::<String>(ZONE);
-    let (current_time, _set_current_time) = query_signal::<i64>(CURRENT_TIME);
+    let (current_time, set_current_time) = query_signal::<i64>(CURRENT_TIME);
 
     let (get_timezones, set_timezones) = signal(Vec::new());
 
@@ -34,17 +37,26 @@ pub fn Compare() -> impl IntoView {
                         key=|timezone| timezone.timezone
                         children=move|timezone| {
 
+                            let display_time = move || get_current_time(current_time.get(), timezone.timezone).format("%H:%M").to_string();
+
                             view! {
                                 <Timecard>
                                     <TimecardHeader>
                                         {move || timezone.display_header()}
                                     </TimecardHeader>
                                     <TimecardTime>
-                                        {move || timezone.display_time()}
+                                        {move || display_time()}
                                     </TimecardTime>
                                     <TimecardDate>
                                         {move || timezone.display_date()}
                                     </TimecardDate>
+
+                                    // This should be hidden and when the TimecardTime is clicked on, this is opened
+                                    <TimeInput
+                                        current_time
+                                        set_current_time
+                                        timezone=timezone.timezone
+                                    ></TimeInput>
                                 </Timecard>
                             }
                         }
