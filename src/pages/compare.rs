@@ -1,5 +1,5 @@
 use crate::components::{
-    BackgroundBlur, TimeInput, Timecard, TimecardDate, TimecardHeader, TimecardTime,
+    BackgroundBlur, DateInput, TimeInput, Timecard, TimecardDate, TimecardHeader, TimecardTime,
 };
 use crate::url_parse::url_query_to_time_increments;
 use crate::{CURRENT_TIME, ZONE};
@@ -51,7 +51,11 @@ pub fn Compare() -> impl IntoView {
                                     </TimecardTime>
 
                                     <TimecardDate>
-                                        {move || timezone.display_date()}
+                                        <DateInput
+                                            current_time
+                                            set_current_time
+                                            timezone=timezone.timezone
+                                        ></DateInput>
                                     </TimecardDate>
 
                                 </Timecard>
