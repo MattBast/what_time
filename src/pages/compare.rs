@@ -1,6 +1,5 @@
 use crate::components::{
-    get_current_time, BackgroundBlur, TimeInput, Timecard, TimecardDate, TimecardHeader,
-    TimecardTime,
+    BackgroundBlur, TimeInput, Timecard, TimecardDate, TimecardHeader, TimecardTime,
 };
 use crate::url_parse::url_query_to_time_increments;
 use crate::{CURRENT_TIME, ZONE};
@@ -37,26 +36,24 @@ pub fn Compare() -> impl IntoView {
                         key=|timezone| timezone.timezone
                         children=move|timezone| {
 
-                            let display_time = move || get_current_time(current_time.get(), timezone.timezone).format("%H:%M").to_string();
-
                             view! {
                                 <Timecard>
                                     <TimecardHeader>
                                         {move || timezone.display_header()}
                                     </TimecardHeader>
+
                                     <TimecardTime>
-                                        {move || display_time()}
+                                        <TimeInput
+                                            current_time
+                                            set_current_time
+                                            timezone=timezone.timezone
+                                        ></TimeInput>
                                     </TimecardTime>
+
                                     <TimecardDate>
                                         {move || timezone.display_date()}
                                     </TimecardDate>
 
-                                    // This should be hidden and when the TimecardTime is clicked on, this is opened
-                                    <TimeInput
-                                        current_time
-                                        set_current_time
-                                        timezone=timezone.timezone
-                                    ></TimeInput>
                                 </Timecard>
                             }
                         }

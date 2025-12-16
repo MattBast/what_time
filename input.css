@@ -13,4 +13,10 @@
         -ms-overflow-style: none; /* IE and Edge */
         scrollbar-width: none; /* Firefox */
     }
+
+    /* Removes the clock icon in time inputs */
+    .time-input-no-icon::-webkit-calendar-picker-indicator {
+        background: none;
+        display: none;
+    }
 }
