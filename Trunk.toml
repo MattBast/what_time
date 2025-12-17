@@ -1,2 +1,5 @@
 [serve]
 port = 3000
+
+[tools]
+tailwindcss = "4.1.0"
