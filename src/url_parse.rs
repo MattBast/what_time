@@ -51,7 +51,7 @@ pub fn remove_timezone(query: String, variants: &mut Vec<Tz>) {
     }
 }
 
-/// Parse a list of timezines into a `current_time` url query.
+/// Parse a list of timezones into a `current_time` url query.
 pub fn tz_vec_to_url_query(timezones: Vec<Tz>) -> String {
     timezones
         .iter()
@@ -78,6 +78,8 @@ pub fn remove_timezone_from_url_query(url_query: Option<String>, tz: Tz) -> Stri
 
 #[cfg(test)]
 mod tests {
+    use chrono_tz::TZ_VARIANTS;
+
     use super::*;
 
     #[test]
@@ -121,6 +123,27 @@ mod tests {
     }
 
     #[test]
+    fn test_no_timezones_parsed_into_url_query() {
+        let new_url_query = tz_vec_to_url_query(vec![]);
+        assert_eq!(new_url_query, "".to_string());
+    }
+
+    #[test]
+    fn test_one_timezone_parsed_into_url_query() {
+        let new_url_query = tz_vec_to_url_query(vec![Tz::Europe__Amsterdam]);
+        assert_eq!(new_url_query, "Europe__Amsterdam".to_string());
+    }
+
+    #[test]
+    fn test_two_timezones_parsed_into_url_query() {
+        let new_url_query = tz_vec_to_url_query(vec![Tz::Europe__Amsterdam, Tz::Europe__Andorra]);
+        assert_eq!(
+            new_url_query,
+            "Europe__Amsterdam,Europe__Andorra".to_string()
+        );
+    }
+
+    #[test]
     fn test_add_timezone_to_url_query() {
         let new_url_query = add_timezone_to_url_query(
             Some("Europe__London,Europe__Paris".into()),
@@ -156,5 +179,20 @@ mod tests {
         );
 
         assert_eq!(new_url_query, "Europe__London,Europe__Paris".to_string());
+    }
+
+    #[test]
+    fn test_variants_filtered_by_url_query() {
+        let mut all_timezones = TZ_VARIANTS.clone().to_vec();
+
+        remove_timezone(
+            "Europe__London,Europe__Paris,Europe__Dublin".into(),
+            &mut all_timezones,
+        );
+
+        assert_eq!(all_timezones.len(), TZ_VARIANTS.len() - 3);
+        assert!(!all_timezones.contains(&Tz::Europe__London));
+        assert!(!all_timezones.contains(&Tz::Europe__Paris));
+        assert!(!all_timezones.contains(&Tz::Europe__Dublin));
     }
 }
