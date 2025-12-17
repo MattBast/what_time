@@ -1,6 +1,8 @@
 use crate::timezone::{tz_display, tz_to_city, tz_to_country, tz_to_emoji};
-use crate::url_parse::remove_timezone;
-use crate::url_parse::url_query_to_timezones;
+use crate::url_parse::{
+    add_timezone_to_url_query, remove_timezone, remove_timezone_from_url_query,
+    url_query_to_timezones,
+};
 use crate::ZONE;
 use chrono_tz::{Tz, TZ_VARIANTS};
 use leptos::prelude::*;
@@ -41,37 +43,21 @@ pub fn TimezoneSelect() -> impl IntoView {
     Effect::new(move || {
         // Get the latest value typed into the select input field.
         // Trigger filter functionality whenever it changes.
-        let search = search_term.get().to_lowercase();
+        let search_term_str = search_term.get();
 
         // Get all the timezones present in the url query
         let query = url_query.get().unwrap_or_default();
         let timezones_from_url = url_query_to_timezones(query);
 
-        // Filter the timezones to include only the ones who contain
-        // the substring typed into the search input field. Also don't
-        // present timezones that are present in the url.
-        if !search.is_empty() {
-            let filtered: Vec<Tz> = TZ_VARIANTS
-                .iter()
-                .filter(|tz| {
-                    let (_emoji, city, country) = tz_display(tz);
-
-                    format!("{} {}", city.to_lowercase(), country.to_lowercase()).contains(&search)
-                        && !timezones_from_url.contains(tz)
-                })
-                .copied()
-                .collect();
-            set_tz_variants.set(filtered);
-        }
-        // If nothing is typed into the search field, present all timezones
-        // that are not already in the url query.
-        else {
-            let filtered: Vec<Tz> = TZ_VARIANTS
-                .iter()
-                .filter(|tz| !timezones_from_url.contains(tz))
-                .copied()
-                .collect();
-            set_tz_variants.set(filtered);
+        if !search_term_str.is_empty() {
+            // Filter the timezones to include only the ones who contain
+            // the substring typed into the search input field. Also don't
+            // present timezones that are present in the url.
+            set_tz_variants.set(get_tz_in_search_term(search_term_str, timezones_from_url));
+        } else {
+            // If nothing is typed into the search field, present all timezones
+            // that are not already in the url query.
+            set_tz_variants.set(get_tz_not_in_url_query(timezones_from_url));
         }
     });
 
@@ -106,25 +92,17 @@ pub fn TimezoneSelect() -> impl IntoView {
                     key=|tz| tz.to_string().clone()
                     children=move|tz| {
 
-                        let tz_string = tz.to_string();
-                        let tz_country = tz_to_country(&tz);
-                        let url_value = tz_string.replace("/", "__");
-                        let emoji = tz_to_emoji(&tz);
-                        let city = tz_to_city(&tz);
-
                         view! {
                             <TimezoneSelectOption
-                                emoji
-                                city
-                                tz_country
+                                emoji=tz_to_emoji(&tz)
+                                city=tz_to_city(&tz)
+                                tz_country=tz_to_country(&tz)
                                 selected=true
                                 // When clicked, the timezone is removed from the url query.
                                 // There is logic elsewhere in the app to listen to the
                                 // query and remove the timezone from the carousel.
                                 on:click=move |_| {
-                                    let mut current_timezones = url_query.get_untracked().unwrap_or_default();
-                                    current_timezones = current_timezones.replace(&url_value, "");
-
+                                    let current_timezones = remove_timezone_from_url_query(url_query.get_untracked(), tz.clone());
                                     set_url_query.set(Some(current_timezones));
 
                                     // Empty the search term and hide the dropdown.
@@ -143,28 +121,18 @@ pub fn TimezoneSelect() -> impl IntoView {
                     key=|tz| tz.to_string().clone()
                     children=move|tz| {
 
-                        let tz_string = tz.to_string();
-                        let tz_country = tz_to_country(&tz);
-                        let url_value = tz_string.replace("/", "__");
-                        let emoji = tz_to_emoji(&tz);
-                        let city = tz_to_city(&tz);
-
                         view! {
                             <TimezoneSelectOption
-                                emoji
-                                city
-                                tz_country
+                                emoji=tz_to_emoji(&tz)
+                                city=tz_to_city(&tz)
+                                tz_country=tz_to_country(&tz)
                                 selected=false
                                 // When clicked, the timezone is added to the url query.
                                 // There is logic elsewhere in the app to listen to the
                                 // query and update the carousel with the added timezone.
                                 on:click=move |_| {
-                                    let current_timezones = url_query.get_untracked().unwrap_or_default();
-                                    if current_timezones.is_empty() {
-                                        set_url_query.set(Some(url_value.clone()));
-                                    } else {
-                                        set_url_query.set(Some(current_timezones + "," + &url_value));
-                                    }
+                                    let new_url = add_timezone_to_url_query(url_query.get_untracked(), tz.clone());
+                                    set_url_query.set(Some(new_url));
 
                                     // Empty the search term and hide the dropdown.
                                     set_search_term.set(String::new());
@@ -233,5 +201,101 @@ pub fn TimezoneSelectOption(
                 }}
             </div>
         </div>
+    }
+}
+
+/// Return a list of all available timezones not present in the url query.
+fn get_tz_not_in_url_query(timezones_from_url: Vec<Tz>) -> Vec<Tz> {
+    TZ_VARIANTS
+        .iter()
+        .filter(|tz| !timezones_from_url.contains(tz))
+        .copied()
+        .collect()
+}
+
+/// Return a list of all timezones that match a search term and are not present in the url query.
+fn get_tz_in_search_term(search_term: String, timezones_from_url: Vec<Tz>) -> Vec<Tz> {
+    TZ_VARIANTS
+        .iter()
+        .filter(|tz| {
+            let (_emoji, city, country) = tz_display(tz);
+
+            format!("{} {}", city.to_lowercase(), country.to_lowercase())
+                .contains(&search_term.to_lowercase())
+                && !timezones_from_url.contains(tz)
+        })
+        .copied()
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_all_timezones_when_url_query_is_empty() {
+        let timezones = get_tz_not_in_url_query(Vec::new());
+        assert_eq!(timezones, TZ_VARIANTS);
+    }
+
+    #[test]
+    fn test_get_all_but_one_timezone_when_url_query_contains_one_timezone() {
+        let timezones = get_tz_not_in_url_query(vec![Tz::Europe__London]);
+
+        assert_eq!(timezones.len(), TZ_VARIANTS.len() - 1);
+        assert!(!timezones.contains(&Tz::Europe__London));
+    }
+
+    #[test]
+    fn test_get_all_but_two_timezones_when_url_query_contains_two_timezones() {
+        let timezones = get_tz_not_in_url_query(vec![Tz::Europe__London, Tz::Europe__Amsterdam]);
+
+        assert_eq!(timezones.len(), TZ_VARIANTS.len() - 2);
+        assert!(!timezones.contains(&Tz::Europe__London));
+        assert!(!timezones.contains(&Tz::Europe__Amsterdam));
+    }
+
+    #[test]
+    fn test_get_timezone_when_city_is_searched_for() {
+        let timezones = get_tz_in_search_term("london".into(), Vec::new());
+        assert_eq!(timezones, vec![Tz::Europe__London]);
+    }
+
+    #[test]
+    fn test_get_timezone_when_cased_city_is_searched_for() {
+        let timezones = get_tz_in_search_term("London".into(), Vec::new());
+        assert_eq!(timezones, vec![Tz::Europe__London]);
+    }
+
+    #[test]
+    fn test_get_timezone_when_partial_typed_city_is_searched_for() {
+        let timezones = get_tz_in_search_term("lond".into(), Vec::new());
+        assert_eq!(timezones, vec![Tz::Europe__London]);
+    }
+
+    #[test]
+    fn test_get_many_timezones_when_partial_typed_city_is_searched_for() {
+        let timezones = get_tz_in_search_term("lon".into(), Vec::new());
+        assert_eq!(
+            timezones,
+            vec![
+                Tz::America__BlancSablon,
+                Tz::America__Miquelon,
+                Tz::Arctic__Longyearbyen,
+                Tz::Europe__London
+            ]
+        );
+    }
+
+    #[test]
+    fn test_get_one_timezone_when_country_is_searched_for() {
+        let timezones = get_tz_in_search_term("belgium".into(), Vec::new());
+        assert_eq!(timezones, vec![Tz::Europe__Brussels]);
+    }
+
+    #[test]
+    fn test_get_many_timezones_when_country_is_searched_for() {
+        let timezones = get_tz_in_search_term("germany".into(), Vec::new());
+        assert_eq!(timezones, vec![Tz::Europe__Berlin, Tz::Europe__Busingen]);
     }
 }

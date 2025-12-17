@@ -1,5 +1,4 @@
 use crate::components::Button;
-use crate::timezone::TimeIncrement;
 use crate::CURRENT_TIME;
 use chrono::offset::LocalResult::Single;
 use chrono::prelude::*;
@@ -15,16 +14,15 @@ pub fn TimePicker() -> impl IntoView {
 
     view! {
         <div class="flex w-full gap-5 justify-end content-end">
-            <Button
-                on:click=move |_| {
-                    let dt = TimeIncrement::now(Tz::UCT);
-                    set_current_time.set(Some(dt.timestamp()));
-                }
-            >
+            <Button on:click=move |_| set_current_time.set(now_timestamp())>
                 "Now"
             </Button>
         </div>
     }
+}
+
+fn now_timestamp() -> Option<i64> {
+    Some(Utc::now().timestamp())
 }
 
 #[component]

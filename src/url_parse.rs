@@ -51,6 +51,31 @@ pub fn remove_timezone(query: String, variants: &mut Vec<Tz>) {
     }
 }
 
+/// Parse a list of timezines into a `current_time` url query.
+pub fn tz_vec_to_url_query(timezones: Vec<Tz>) -> String {
+    timezones
+        .iter()
+        .map(|tz| tz.to_string().replace("/", "__"))
+        .collect::<Vec<String>>()
+        .join(",")
+}
+
+/// Take the `current_time` query and add a new timezone to it.
+pub fn add_timezone_to_url_query(url_query: Option<String>, tz: Tz) -> String {
+    let mut timezones = url_query_to_timezones(url_query.unwrap_or_default());
+    timezones.push(tz);
+
+    tz_vec_to_url_query(timezones)
+}
+
+/// Take the `current_time` query and remove the specified timezone from it.
+pub fn remove_timezone_from_url_query(url_query: Option<String>, tz: Tz) -> String {
+    let mut timezones = url_query_to_timezones(url_query.unwrap_or_default());
+    timezones.retain(|value| *value != tz);
+
+    tz_vec_to_url_query(timezones)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -93,5 +118,43 @@ mod tests {
                 TimeIncrement::now(Tz::America__Atikokan)
             ]
         );
+    }
+
+    #[test]
+    fn test_add_timezone_to_url_query() {
+        let new_url_query = add_timezone_to_url_query(
+            Some("Europe__London,Europe__Paris".into()),
+            Tz::Europe__Dublin,
+        );
+
+        assert_eq!(
+            new_url_query,
+            "Europe__London,Europe__Paris,Europe__Dublin".to_string()
+        );
+    }
+
+    #[test]
+    fn test_add_timezone_to_empty_url_query() {
+        let new_url_query = add_timezone_to_url_query(None, Tz::Europe__Dublin);
+
+        assert_eq!(new_url_query, "Europe__Dublin".to_string());
+    }
+
+    #[test]
+    fn test_add_timezone_to_url_query_with_extra_commas() {
+        let new_url_query =
+            add_timezone_to_url_query(Some("Europe__London,,,".into()), Tz::Europe__Dublin);
+
+        assert_eq!(new_url_query, "Europe__London,Europe__Dublin".to_string());
+    }
+
+    #[test]
+    fn test_remove_timezone_from_url_query() {
+        let new_url_query = remove_timezone_from_url_query(
+            Some("Europe__London,Europe__Paris,Europe__Dublin".into()),
+            Tz::Europe__Dublin,
+        );
+
+        assert_eq!(new_url_query, "Europe__London,Europe__Paris".to_string());
     }
 }
