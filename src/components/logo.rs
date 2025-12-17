@@ -33,7 +33,6 @@ pub fn Logo(#[prop(optional)] small: bool) -> impl IntoView {
                 </defs>
                 <g
                     stroke-width="16"
-                    // stroke="#27272a"
                     fill="none"
                 >
                     <circle r="150" cx="400" cy="400" filter="url(#nnneon-filter)">

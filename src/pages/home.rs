@@ -13,27 +13,6 @@ pub fn Home() -> impl IntoView {
     let (url_query, _set_url_query) = query_signal::<String>(ZONE);
 
     view! {
-        // ---------------------------------------------------------------------------------
-        // An experiement to make the text and timezones fade in and out
-        // ---------------------------------------------------------------------------------
-        // <div
-        //     // Hide the page title and description when there are timezones in the url.
-        //     class="transition-all duration-700 ease-out origin-top"
-        //     class=(["opacity-0", "-translate-y-2"], move || !url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty())
-        //     class=(["opacity-100", "translate-y-0"], move || url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty())
-        // >
-        //     <WelcomeText/>
-        // </div>
-
-        // <div
-        //     // Hide the page title and description when there are timezones in the url.
-        //     class="transition-all duration-700 ease-out origin-top"
-        //     class=(["opacity-0", "-translate-y-2"], move || url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty())
-        //     class=(["opacity-100", "translate-y-0"], move || !url_query_to_time_increments(url_query.get().unwrap_or_default()).is_empty())
-        // >
-        //     <CompareInner/>
-        // </div>
-
         <Show
             when=move || !url_query_to_timezones(url_query.get().unwrap_or_default()).is_empty()
             fallback=|| view! {

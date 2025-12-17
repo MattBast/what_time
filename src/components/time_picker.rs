@@ -6,11 +6,8 @@ use chrono::offset::LocalResult::Single;
 use chrono::prelude::*;
 use chrono::{DateTime, TimeDelta};
 use chrono_tz::Tz;
-use leptos::ev::{Event, Targeted};
 use leptos::prelude::*;
-use leptos::web_sys::HtmlInputElement;
 use leptos_router::hooks::query_signal;
-use log::info;
 
 #[component]
 pub fn TimePicker() -> impl IntoView {
@@ -113,7 +110,7 @@ fn update_current_date(ev: String, current_time: Option<i64>, timezone: Tz) -> i
 fn update_current_time(ev: String, current_time: Option<i64>, timezone: Tz) -> i64 {
     let last_date = utc_to_local_timezone(current_time, timezone);
 
-    let diff = get_time_diff(ev, last_date, timezone);
+    let diff = get_time_diff(ev, last_date);
 
     let utc = utc_to_local_timezone(current_time, Tz::UTC);
     let new_utc = utc + diff;
@@ -134,7 +131,7 @@ fn get_date_diff(ev: String, last_date: DateTime<Tz>, timezone: Tz) -> TimeDelta
     TimeDelta::zero()
 }
 
-fn get_time_diff(ev: String, last_date: DateTime<Tz>, timezone: Tz) -> TimeDelta {
+fn get_time_diff(ev: String, last_date: DateTime<Tz>) -> TimeDelta {
     if let Ok(naive_time) = event_to_time(ev) {
         if let Single(new_date) = last_date.with_time(naive_time) {
             return new_date - last_date;
