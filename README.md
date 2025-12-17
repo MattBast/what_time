@@ -12,7 +12,8 @@ rustup target add wasm32-unknown-unknown
 cargo install cargo-generate
 ```
 
-If there's an error relating to tailwinds, try this:
+If there's an error relating to tailwinds, check the `Trunk.toml` file for the version number.
+If that doesn't work, try this:
 ```bash
 export TRUNK_TOOLS_TAILWINDCSS="4.1.0"
 ```
@@ -30,6 +31,7 @@ Run the following commands to check code quality and run tests:
 cargo check
 cargo clippy -- -D warnings
 cargo test
+cargo machete --with-metadata
 ```
 
 ## UX rules

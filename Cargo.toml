@@ -6,38 +6,14 @@ rust-version = "1.84"
 
 [dependencies]
 anyhow = "1.0"
-axum = { version = "0.8", optional = true }
 console_error_panic_hook = "0.1.7"
 leptos = { version = "0.8", features = ["csr"] }
 leptos_meta = { version = "0.8" }
-leptos_axum = { version = "0.8", optional = true }
 leptos_router = { version = "0.8" }
-tokio = { version = "1.39", features = [
-    "rt-multi-thread",
-    "macros",
-], optional = true }
-tower = { version = "0.4", optional = true }
-tower-http = { version = "0.5", features = ["fs"], optional = true }
-wasm-bindgen = "0.2"
-thiserror = "1.0"
-tracing = { version = "0.1", optional = true }
-http = "1.1"
 chrono = { version = "0.4", features = ["js-sys", "wasm-bindgen"] }
 chrono-tz = "0.10"
 log = "0.4"
-leptos-use = { version = "0.16", features = [
-    "use_element_visibility",
-    "use_element_bounding",
-    "use_cookie",
-    "use_color_mode",
-    "use_debounce_fn",
-    "use_event_listener",
-    "use_interval",
-    "use_intl_number_format",
-    "use_locales",
-    "use_timestamp",
-    "storage",
-] }
+leptos-use = "0.16"
 leptos_icons = { version = "0.7" }
 icondata = { version = "0.6" }
 console_log = { version = "1" }
