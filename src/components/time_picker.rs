@@ -49,7 +49,8 @@ pub fn TimeInput(
                 dark:[color-scheme:dark] cursor-pointer
             "
             type="time"
-            name="time-picker"
+            name=format!("time_picker_{}", timezone.name().replace("/", "__"))
+            id=format!("time_picker_{}", timezone.name().replace("/", "__"))
             prop:value=input_time
             on:input:target=move |ev| {
                 let new_utc = update_current_time(ev.target().value(), current_time.get_untracked(), timezone);
@@ -81,7 +82,8 @@ pub fn DateInput(
                 dark:[color-scheme:dark] cursor-pointer
             "
             type="date"
-            name="date-picker"
+            name=format!("date_picker_{}", timezone.name().replace("/", "__"))
+            id=format!("date_picker_{}", timezone.name().replace("/", "__"))
             prop:value=input_date
             on:input:target=move |ev| {
                 let new_utc = update_current_date(ev.target().value(), current_time.get_untracked(), timezone);
