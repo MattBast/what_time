@@ -1,4 +1,4 @@
-use crate::timezone::{tz_display, tz_to_city, tz_to_country, tz_to_emoji};
+use crate::timezone::{tz_to_city, tz_to_country, tz_to_emoji};
 use crate::url_parse::{
     add_timezone_to_url_query, remove_timezone, remove_timezone_from_url_query,
     url_query_to_timezones,
@@ -102,7 +102,7 @@ pub fn TimezoneSelect() -> impl IntoView {
                                 // There is logic elsewhere in the app to listen to the
                                 // query and remove the timezone from the carousel.
                                 on:click=move |_| {
-                                    let current_timezones = remove_timezone_from_url_query(url_query.get_untracked(), tz.clone());
+                                    let current_timezones = remove_timezone_from_url_query(url_query.get_untracked(), tz);
                                     set_url_query.set(Some(current_timezones));
 
                                     // Empty the search term and hide the dropdown.
@@ -131,7 +131,7 @@ pub fn TimezoneSelect() -> impl IntoView {
                                 // There is logic elsewhere in the app to listen to the
                                 // query and update the carousel with the added timezone.
                                 on:click=move |_| {
-                                    let new_url = add_timezone_to_url_query(url_query.get_untracked(), tz.clone());
+                                    let new_url = add_timezone_to_url_query(url_query.get_untracked(), tz);
                                     set_url_query.set(Some(new_url));
 
                                     // Empty the search term and hide the dropdown.
@@ -218,7 +218,8 @@ fn get_tz_in_search_term(search_term: String, timezones_from_url: Vec<Tz>) -> Ve
     TZ_VARIANTS
         .iter()
         .filter(|tz| {
-            let (_emoji, city, country) = tz_display(tz);
+            let city = tz_to_city(tz);
+            let country = tz_to_country(tz);
 
             format!("{} {}", city.to_lowercase(), country.to_lowercase())
                 .contains(&search_term.to_lowercase())

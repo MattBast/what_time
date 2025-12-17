@@ -1,177 +1,6 @@
-use anyhow::{Context, Result};
 use chrono::prelude::*;
-use chrono::{DateTime, Duration};
+use chrono::DateTime;
 use chrono_tz::Tz;
-use std::cmp::Ordering;
-
-#[derive(Debug, Clone, Copy)]
-pub struct TimeIncrement {
-    pub timezone: Tz,
-    pub datetime: DateTime<Tz>,
-    pub now: bool,
-}
-
-impl TimeIncrement {
-    pub fn now(timezone: Tz) -> Self {
-        let datetime = Utc::now().with_timezone(&timezone);
-
-        Self {
-            datetime,
-            timezone,
-            now: true,
-        }
-    }
-
-    pub fn new(timezone: Tz, new_hour: u32) -> Result<Self> {
-        let datetime = Utc::now()
-            .with_timezone(&timezone)
-            .with_hour(new_hour)
-            .context("Number provided is not an hour")?;
-
-        Ok(Self {
-            datetime,
-            timezone,
-            now: false,
-        })
-    }
-
-    pub fn from_timestamp(timestamp: i64, timezone: Tz) -> Self {
-        if let Some(datetime) = DateTime::from_timestamp(timestamp, 0) {
-            Self {
-                datetime: datetime.with_timezone(&timezone),
-                timezone,
-                now: false,
-            }
-        } else {
-            Self::now(timezone)
-        }
-    }
-
-    pub fn get_hour(&self) -> u32 {
-        self.datetime.hour()
-    }
-
-    pub fn add(&mut self, duration: Duration) {
-        self.datetime += duration;
-    }
-
-    pub fn minus(&mut self, duration: Duration) {
-        self.datetime -= duration;
-    }
-
-    /// Print an emoji, city name and timezone code to inform the user
-    /// which timezone they are looking at.
-    pub fn display_header(&self) -> String {
-        let time = self.datetime;
-        format!(
-            "{} {} ({})",
-            tz_to_emoji(&self.timezone),
-            tz_to_city(&self.timezone),
-            time.format("%Z"),
-        )
-    }
-
-    /// Print the time rounded to the nearest increment. Most timezones
-    /// round to a whole hour but some like India and Nepal round to
-    /// half and quarter hours.
-    pub fn display_time_rounded(&self) -> String {
-        // Change the datetime back to the UTC timezone, remove the minutes
-        // and then add the timezone back on to add the timezone hour and
-        // minute increments.
-        let rounded_datetime = self
-            .datetime
-            .to_utc()
-            .with_minute(0)
-            .unwrap_or_default()
-            .with_timezone(&self.timezone);
-
-        rounded_datetime.format("%H:%M").to_string()
-    }
-
-    /// Print the time.
-    pub fn display_time(&self) -> String {
-        // Change the datetime back to the UTC timezone, remove the minutes
-        // and then add the timezone back on to add the timezone hour and
-        // minute increments.
-        let rounded_datetime = self.datetime.to_utc().with_timezone(&self.timezone);
-
-        rounded_datetime.format("%H:%M").to_string()
-    }
-
-    /// Print the day of the time displayed in the [display_time] method.
-    pub fn display_date(&self) -> String {
-        self.datetime.format("%e %B %Y").to_string()
-    }
-
-    /// Return the number of seconds since January 1, 1970 0:00:00 UTC (aka “UNIX timestamp”)
-    pub fn timestamp(&self) -> i64 {
-        self.datetime.to_utc().timestamp()
-    }
-
-    /// The date in the format required for the html date input
-    pub fn input_date(&self) -> String {
-        self.datetime.format("%Y-%m-%d").to_string()
-    }
-
-    /// The time in the format required for the html time input
-    /// rounded to the nearest hour.
-    pub fn input_time_rounded(&self) -> String {
-        self.datetime.format("%H:00").to_string()
-    }
-
-    /// The time in the format required for the html time input
-    pub fn input_time(&self) -> String {
-        self.datetime.format("%H:%M").to_string()
-    }
-}
-
-/// Allow for vectors of timezones to be sorted by their Offset i.e.
-/// the UTC+01:00 part of a timestamp.
-///
-/// If the offset cannot be parsed as a number, it will default to 0,
-/// aka, UTC.
-impl Ord for TimeIncrement {
-    fn cmp(&self, other: &Self) -> Ordering {
-        let self_offset = self
-            .datetime
-            .format("%z")
-            .to_string()
-            .parse::<i32>()
-            .unwrap_or_default();
-
-        let other_offset = other
-            .datetime
-            .format("%z")
-            .to_string()
-            .parse::<i32>()
-            .unwrap_or_default();
-
-        self_offset.cmp(&other_offset)
-    }
-}
-
-impl PartialOrd for TimeIncrement {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl PartialEq for TimeIncrement {
-    fn eq(&self, other: &Self) -> bool {
-        self.timezone == other.timezone
-    }
-}
-
-impl Eq for TimeIncrement {}
-
-/// Returns a tuple of the timezone displayable components as this: (emoji, city, country)
-pub fn tz_display(timezone: &Tz) -> (String, String, String) {
-    (
-        tz_to_emoji(timezone),
-        tz_to_city(timezone),
-        tz_to_country(timezone),
-    )
-}
 
 pub fn tz_to_city(timezone: &Tz) -> String {
     match timezone {
@@ -1982,27 +1811,54 @@ pub fn tz_to_emoji(timezone: &Tz) -> String {
     .to_string()
 }
 
+/// Get a timestamp with the UTC timezone. Convert it to the specified timezone.
+/// If `current_time` is None, default the time to now.
+pub fn utc_to_local_timezone(current_time: Option<i64>, tz: Tz) -> DateTime<Tz> {
+    match current_time {
+        Some(timestamp) => DateTime::from_timestamp(timestamp, 0)
+            .unwrap_or_default()
+            .with_timezone(&tz),
+        None => Utc::now().with_timezone(&tz),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_timezones_can_be_sorted() {
-        let mut timezones = vec![
-            TimeIncrement::now(Tz::Europe__Paris),
-            TimeIncrement::now(Tz::Europe__London),
-            TimeIncrement::now(Tz::America__Atikokan),
-        ];
-
-        timezones.sort();
+    fn test_parse_to_gmt() {
+        let gmt_time = utc_to_local_timezone(Some(1765920530), Tz::Europe__London);
 
         assert_eq!(
-            timezones,
-            vec![
-                TimeIncrement::now(Tz::America__Atikokan),
-                TimeIncrement::now(Tz::Europe__London),
-                TimeIncrement::now(Tz::Europe__Paris)
-            ]
+            gmt_time,
+            DateTime::parse_from_str("2025-12-16 21:28:50 +0000", "%Y-%m-%d %H:%M:%S %z")
+                .unwrap()
+                .with_timezone(&Tz::Europe__London)
+        );
+    }
+
+    #[test]
+    fn test_parse_to_cet() {
+        let gmt_time = utc_to_local_timezone(Some(1765920530), Tz::Europe__Paris);
+
+        assert_eq!(
+            gmt_time,
+            DateTime::parse_from_str("2025-12-16 22:28:50 +0100", "%Y-%m-%d %H:%M:%S %z")
+                .unwrap()
+                .with_timezone(&Tz::Europe__Paris)
+        );
+    }
+
+    #[test]
+    fn test_parse_to_ist() {
+        let gmt_time = utc_to_local_timezone(Some(1765920530), Tz::Asia__Calcutta);
+
+        assert_eq!(
+            gmt_time,
+            DateTime::parse_from_str("2025-12-17 02:58:50 +0530", "%Y-%m-%d %H:%M:%S %z")
+                .unwrap()
+                .with_timezone(&Tz::Asia__Calcutta)
         );
     }
 }

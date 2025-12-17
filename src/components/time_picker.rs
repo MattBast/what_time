@@ -1,4 +1,5 @@
 use crate::components::Button;
+use crate::timezone::utc_to_local_timezone;
 use crate::CURRENT_TIME;
 use chrono::offset::LocalResult::Single;
 use chrono::prelude::*;
@@ -145,56 +146,9 @@ fn get_time_diff(new_time: String, last_date: DateTime<Tz>) -> TimeDelta {
     TimeDelta::zero()
 }
 
-/// Get a timestamp with the UTC timezone. Convert it to the specified timezone.
-/// If `current_time` is None, default the time to now.
-fn utc_to_local_timezone(current_time: Option<i64>, tz: Tz) -> DateTime<Tz> {
-    match current_time {
-        Some(timestamp) => DateTime::from_timestamp(timestamp, 0)
-            .unwrap_or_default()
-            .with_timezone(&tz),
-        None => Utc::now().with_timezone(&tz),
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_parse_to_gmt() {
-        let gmt_time = utc_to_local_timezone(Some(1765920530), Tz::Europe__London);
-
-        assert_eq!(
-            gmt_time,
-            DateTime::parse_from_str("2025-12-16 21:28:50 +0000", "%Y-%m-%d %H:%M:%S %z")
-                .unwrap()
-                .with_timezone(&Tz::Europe__London)
-        );
-    }
-
-    #[test]
-    fn test_parse_to_cet() {
-        let gmt_time = utc_to_local_timezone(Some(1765920530), Tz::Europe__Paris);
-
-        assert_eq!(
-            gmt_time,
-            DateTime::parse_from_str("2025-12-16 22:28:50 +0100", "%Y-%m-%d %H:%M:%S %z")
-                .unwrap()
-                .with_timezone(&Tz::Europe__Paris)
-        );
-    }
-
-    #[test]
-    fn test_parse_to_ist() {
-        let gmt_time = utc_to_local_timezone(Some(1765920530), Tz::Asia__Calcutta);
-
-        assert_eq!(
-            gmt_time,
-            DateTime::parse_from_str("2025-12-17 02:58:50 +0530", "%Y-%m-%d %H:%M:%S %z")
-                .unwrap()
-                .with_timezone(&Tz::Asia__Calcutta)
-        );
-    }
 
     #[test]
     fn test_add_gmt_day() {

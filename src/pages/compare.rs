@@ -1,7 +1,8 @@
 use crate::components::{
     BackgroundBlur, DateInput, TimeInput, Timecard, TimecardDate, TimecardHeader, TimecardTime,
 };
-use crate::url_parse::url_query_to_time_increments;
+use crate::timezone::{tz_to_city, tz_to_emoji, utc_to_local_timezone};
+use crate::url_parse::url_query_to_timezones;
 use crate::{CURRENT_TIME, ZONE};
 use leptos::prelude::*;
 use leptos_router::hooks::query_signal;
@@ -19,9 +20,11 @@ pub fn Compare() -> impl IntoView {
         // Trigger these actions when the url "zone" query changes.
         let query = url_query.get().unwrap_or_default();
 
-        let mut timezones =
-            url_query_to_time_increments(query.clone(), current_time.get_untracked());
-        timezones.sort();
+        let timezones = url_query_to_timezones(query);
+        // ***
+        // Don't forget to re-implement the timezone sort function.
+        // ***
+        // timezones.sort();
 
         // Add the timezones from url to the carousel.
         set_timezones.set(timezones);
@@ -33,20 +36,29 @@ pub fn Compare() -> impl IntoView {
                 <div class="flex flex-wrap justify-center gap-2">
                     <For
                         each=move || get_timezones.get()
-                        key=|timezone| timezone.timezone
+                        key=|timezone| timezone.clone()
                         children=move|timezone| {
+
+                            let last_time = utc_to_local_timezone(current_time.get_untracked(), timezone);
+
+                            let display_header = format!(
+                                "{} {} ({})",
+                                tz_to_emoji(&timezone),
+                                tz_to_city(&timezone),
+                                last_time.format("%Z"),
+                            );
 
                             view! {
                                 <Timecard>
                                     <TimecardHeader>
-                                        {move || timezone.display_header()}
+                                        {display_header}
                                     </TimecardHeader>
 
                                     <TimecardTime>
                                         <TimeInput
                                             current_time
                                             set_current_time
-                                            timezone=timezone.timezone
+                                            timezone=timezone
                                         ></TimeInput>
                                     </TimecardTime>
 
@@ -54,7 +66,7 @@ pub fn Compare() -> impl IntoView {
                                         <DateInput
                                             current_time
                                             set_current_time
-                                            timezone=timezone.timezone
+                                            timezone=timezone
                                         ></DateInput>
                                     </TimecardDate>
 
