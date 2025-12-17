@@ -40,6 +40,19 @@ cargo install cargo-machete
 cargo install --locked cargo-outdated
 ```
 
+Use these commands to run the end to end tests. These tests use Playwright to open the website, click around and make sure the content renders okay.
+```bash
+trunk serve
+cd end2end
+npx playwright test --reporter=line --max-failures=1
+```
+As Playwright is required, you will likely need to install it first. Go to the `end2end` directory and install all the required packages.
+```bash
+cd end2end
+npm install
+npm init playwright@latest
+```
+
 ## UX rules
 
 ### Blocks of text
