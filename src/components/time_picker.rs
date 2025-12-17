@@ -1,7 +1,6 @@
 use crate::components::Button;
 use crate::timezone::TimeIncrement;
 use crate::CURRENT_TIME;
-use chrono::format::ParseResult;
 use chrono::offset::LocalResult::Single;
 use chrono::prelude::*;
 use chrono::{DateTime, TimeDelta};
@@ -93,33 +92,24 @@ pub fn DateInput(
     }
 }
 
-/// Get an event that contains a date in this format: "%Y-%m-%d".
+/// Get a date as string in this format: "%Y-%m-%d".
 /// Figure out the offset datetime with the timezone, convert it to
 /// UTC and return the UTC timestamp (formatted as a i64 number).
-fn update_current_date(ev: String, current_time: Option<i64>, timezone: Tz) -> i64 {
-    let last_date = utc_to_local_timezone(current_time, timezone);
+fn update_current_date(new_date: String, last_timestamp: Option<i64>, timezone: Tz) -> i64 {
+    let last_date = utc_to_local_timezone(last_timestamp, timezone);
 
-    let diff = get_date_diff(ev, last_date, timezone);
+    let diff = get_date_diff(new_date, last_date, timezone);
 
-    let utc = utc_to_local_timezone(current_time, Tz::UTC);
+    let utc = utc_to_local_timezone(last_timestamp, Tz::UTC);
     let new_utc = utc + diff;
 
     new_utc.timestamp()
 }
 
-fn update_current_time(ev: String, current_time: Option<i64>, timezone: Tz) -> i64 {
-    let last_date = utc_to_local_timezone(current_time, timezone);
-
-    let diff = get_time_diff(ev, last_date);
-
-    let utc = utc_to_local_timezone(current_time, Tz::UTC);
-    let new_utc = utc + diff;
-
-    new_utc.timestamp()
-}
-
-fn get_date_diff(ev: String, last_date: DateTime<Tz>, timezone: Tz) -> TimeDelta {
-    if let Ok(naive_date) = event_to_date(ev) {
+/// Return the time difference between `new_date` and `last_date`.
+/// It is assumed that `new_date` is at the same time as `last_date`.
+fn get_date_diff(new_date: String, last_date: DateTime<Tz>, timezone: Tz) -> TimeDelta {
+    if let Ok(naive_date) = NaiveDate::parse_from_str(&new_date, "%Y-%m-%d") {
         if let Single(new_date) = naive_date
             .and_time(last_date.time())
             .and_local_timezone(timezone)
@@ -131,8 +121,24 @@ fn get_date_diff(ev: String, last_date: DateTime<Tz>, timezone: Tz) -> TimeDelta
     TimeDelta::zero()
 }
 
-fn get_time_diff(ev: String, last_date: DateTime<Tz>) -> TimeDelta {
-    if let Ok(naive_time) = event_to_time(ev) {
+/// Get a time as string in this format: "%H:%M".
+/// Figure out the offset datetime with the timezone, convert it to
+/// UTC and return the UTC timestamp (formatted as a i64 number).
+fn update_current_time(new_date: String, last_timestamp: Option<i64>, timezone: Tz) -> i64 {
+    let last_date = utc_to_local_timezone(last_timestamp, timezone);
+
+    let diff = get_time_diff(new_date, last_date);
+
+    let utc = utc_to_local_timezone(last_timestamp, Tz::UTC);
+    let new_utc = utc + diff;
+
+    new_utc.timestamp()
+}
+
+/// Return the time difference between `new_time` and `last_date`.
+/// It is assumed that `new_time` is the time of the same day as `last_date`.
+fn get_time_diff(new_time: String, last_date: DateTime<Tz>) -> TimeDelta {
+    if let Ok(naive_time) = NaiveTime::parse_from_str(&new_time, "%H:%M") {
         if let Single(new_date) = last_date.with_time(naive_time) {
             return new_date - last_date;
         }
@@ -150,14 +156,6 @@ fn utc_to_local_timezone(current_time: Option<i64>, tz: Tz) -> DateTime<Tz> {
             .with_timezone(&tz),
         None => Utc::now().with_timezone(&tz),
     }
-}
-
-fn event_to_time(ev: String) -> ParseResult<NaiveTime> {
-    NaiveTime::parse_from_str(&ev, "%H:%M")
-}
-
-fn event_to_date(ev: String) -> ParseResult<NaiveDate> {
-    NaiveDate::parse_from_str(&ev, "%Y-%m-%d")
 }
 
 #[cfg(test)]
@@ -287,6 +285,75 @@ mod tests {
         assert_eq!(
             DateTime::from_timestamp(new_utc, 0).unwrap(),
             DateTime::parse_from_str("2025-12-31 22:28:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
+        );
+    }
+
+    #[test]
+    fn test_add_one_minute_to_utc_from_gmt() {
+        // The utc time is: 2025-12-17 10:45:00
+        let new_utc =
+            update_current_time("10:46".to_string(), Some(1765968316), Tz::Europe__London);
+
+        assert_eq!(
+            DateTime::from_timestamp(new_utc, 0).unwrap(),
+            DateTime::parse_from_str("2025-12-17 10:46:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
+        );
+    }
+
+    #[test]
+    fn test_add_one_minute_to_utc_from_cet() {
+        // The utc time is: 2025-12-17 10:45:00
+        let new_utc = update_current_time("10:46".to_string(), Some(1765968316), Tz::Europe__Paris);
+
+        assert_eq!(
+            DateTime::from_timestamp(new_utc, 0).unwrap(),
+            DateTime::parse_from_str("2025-12-17 09:46:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
+        );
+    }
+
+    #[test]
+    fn test_remove_one_minute_to_utc_from_gmt() {
+        // The utc time is: 2025-12-17 10:45:00
+        let new_utc =
+            update_current_time("10:44".to_string(), Some(1765968316), Tz::Europe__London);
+
+        assert_eq!(
+            DateTime::from_timestamp(new_utc, 0).unwrap(),
+            DateTime::parse_from_str("2025-12-17 10:44:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
+        );
+    }
+
+    #[test]
+    fn test_add_one_hour_to_utc_from_gmt() {
+        // The utc time is: 2025-12-17 10:45:00
+        let new_utc =
+            update_current_time("11:45".to_string(), Some(1765968316), Tz::Europe__London);
+
+        assert_eq!(
+            DateTime::from_timestamp(new_utc, 0).unwrap(),
+            DateTime::parse_from_str("2025-12-17 11:45:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
+        );
+    }
+
+    #[test]
+    fn test_add_one_hour_to_utc_from_cet() {
+        // The utc time is: 2025-12-17 10:45:00
+        let new_utc = update_current_time("11:45".to_string(), Some(1765968316), Tz::Europe__Paris);
+
+        assert_eq!(
+            DateTime::from_timestamp(new_utc, 0).unwrap(),
+            DateTime::parse_from_str("2025-12-17 10:45:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
+        );
+    }
+
+    #[test]
+    fn test_remove_one_hour_from_cet_to_move_utc_back_a_day() {
+        // The utc time is: 2025-12-18 00:15:00
+        let new_utc = update_current_time("00:15".to_string(), Some(1766016900), Tz::Europe__Paris);
+
+        assert_eq!(
+            DateTime::from_timestamp(new_utc, 0).unwrap(),
+            DateTime::parse_from_str("2025-12-17 23:15:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
         );
     }
 }
