@@ -34,6 +34,12 @@ cargo test
 cargo machete --with-metadata
 ```
 
+Not all these checks are native to Cargo. Install the tools with these commands:
+```bash
+cargo install cargo-machete
+cargo install --locked cargo-outdated
+```
+
 ## UX rules
 
 ### Blocks of text
