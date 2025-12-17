@@ -39,7 +39,7 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
-        <Title text="What Time"/>
+        <Title text="What Time - Compare timezones, fast"/>
         <Stylesheet id="leptos" href="/style/output.css"/>
         <Router>
             <main>
