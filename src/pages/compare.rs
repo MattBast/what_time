@@ -1,7 +1,7 @@
 use crate::components::{
     BackgroundBlur, DateInput, TimeInput, Timecard, TimecardDate, TimecardHeader, TimecardTime,
 };
-use crate::timezone::{tz_to_city, tz_to_emoji, utc_to_local_timezone};
+use crate::timezone::{sort_timezones, tz_to_city, tz_to_emoji, utc_to_local_timezone};
 use crate::url_parse::url_query_to_timezones;
 use crate::{CURRENT_TIME, ZONE};
 use leptos::prelude::*;
@@ -20,11 +20,12 @@ pub fn Compare() -> impl IntoView {
         // Trigger these actions when the url "zone" query changes.
         let query = url_query.get().unwrap_or_default();
 
-        let timezones = url_query_to_timezones(query);
+        let mut timezones = url_query_to_timezones(query);
         // ***
         // Don't forget to re-implement the timezone sort function.
         // ***
         // timezones.sort();
+        sort_timezones(&mut timezones);
 
         // Add the timezones from url to the carousel.
         set_timezones.set(timezones);

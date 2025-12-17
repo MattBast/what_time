@@ -1822,6 +1822,17 @@ pub fn utc_to_local_timezone(current_time: Option<i64>, tz: Tz) -> DateTime<Tz> 
     }
 }
 
+/// Sort a list of timezones with the westernmost timezones at the start of the list
+/// and the eastern most at the end.
+pub fn sort_timezones(timezones: &mut Vec<Tz>) {
+    let date = NaiveDate::from_ymd_opt(2025, 1, 1)
+        .unwrap()
+        .and_hms_opt(0, 0, 0)
+        .unwrap();
+
+    timezones.sort_by_key(|tz| tz.offset_from_utc_datetime(&date).fix().local_minus_utc());
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1859,6 +1870,17 @@ mod tests {
             DateTime::parse_from_str("2025-12-17 02:58:50 +0530", "%Y-%m-%d %H:%M:%S %z")
                 .unwrap()
                 .with_timezone(&Tz::Asia__Calcutta)
+        );
+    }
+
+    #[test]
+    fn test_sorting_timezones() {
+        let mut timezones = vec![Tz::Europe__Paris, Tz::Europe__London, Tz::America__Atikokan];
+        sort_timezones(&mut timezones);
+
+        assert_eq!(
+            timezones,
+            vec![Tz::America__Atikokan, Tz::Europe__London, Tz::Europe__Paris]
         );
     }
 }
