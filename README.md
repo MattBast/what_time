@@ -59,6 +59,11 @@ To inspect what each test is doing, open the Playwright UI:
 npx playwright test --ui
 ```
 
+And to generate a test by clicking in the UI, use this command:
+```bash
+npx playwright codegen playwright.dev
+```
+
 ## UX rules
 
 ### Blocks of text

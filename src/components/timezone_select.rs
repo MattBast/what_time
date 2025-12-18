@@ -68,6 +68,7 @@ pub fn TimezoneSelect() -> impl IntoView {
                 type="text"
                 placeholder="Search and add timezones..."
                 class="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 cursor-pointer"
+                id="timezone_select"
                 prop:value=search_term
                 // When the contents of the input is changed, update the `search_term`.
                 // This tells the component to update the list if timezones in the
@@ -83,7 +84,7 @@ pub fn TimezoneSelect() -> impl IntoView {
             />
 
             // Dropdown containing either all the timezones or a filtered subset of the timezones.
-            <div
+            <ul
                 class="absolute z-50 w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-600 rounded-md shadow-lg max-h-60 overflow-y-auto"
                 class:hidden=move || !show_dropdown.get()
             >
@@ -143,7 +144,7 @@ pub fn TimezoneSelect() -> impl IntoView {
                     }
                 />
 
-            </div>
+            </ul>
         </div>
 
         // Click outside to close dropdown
@@ -164,7 +165,7 @@ pub fn TimezoneSelectOption(
     selected: bool,
 ) -> impl IntoView {
     view! {
-        <div
+        <li
             class="group w-full text-left px-4 py-2 border-none cursor-pointer text-zinc-900 dark:text-zinc-100"
             class=(["bg-teal-100", "dark:bg-teal-700", "hover:bg-red-100", "dark:hover:bg-red-700"], selected)
             class=(["bg-transparent", "hover:bg-zinc-100", "dark:hover:bg-zinc-700"], !selected)
@@ -200,7 +201,7 @@ pub fn TimezoneSelectOption(
                     }.into_any()
                 }}
             </div>
-        </div>
+        </li>
     }
 }
 
