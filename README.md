@@ -46,11 +46,17 @@ trunk serve
 cd end2end
 npx playwright test --reporter=line --max-failures=1
 ```
+
 As Playwright is required, you will likely need to install it first. Go to the `end2end` directory and install all the required packages.
 ```bash
 cd end2end
 npm install
 npm init playwright@latest
+```
+
+To inspect what each test is doing, open the Playwright UI:
+```bash
+npx playwright test --ui
 ```
 
 ## UX rules
