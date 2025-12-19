@@ -46,7 +46,7 @@ pub fn TimeInput(
             class="
                 rounded-md text-zinc-900 dark:text-zinc-100 text-center
                 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500
-                dark:[color-scheme:dark] cursor-pointer
+                dark:[color-scheme:dark] cursor-pointer time-input-no-icon
             "
             type="time"
             name=format!("time_picker_{}", timezone.name().replace("/", "__"))
