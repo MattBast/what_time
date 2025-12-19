@@ -28,6 +28,10 @@ jobs:
         working-directory: ./end2end
         run: npx playwright install --with-deps
 
+      - name: Add WASM target
+        run: rustup target add wasm32-unknown-unknown
+      - name: Download and install tailwindcss binary
+        run: npm install -D tailwindcss
       - name: Download and install Trunk binary
         run: wget -qO- https://github.com/trunk-rs/trunk/releases/download/v0.18.4/trunk-x86_64-unknown-linux-gnu.tar.gz | tar -xzf-
       - name: Start the app
