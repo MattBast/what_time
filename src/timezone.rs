@@ -1824,13 +1824,14 @@ pub fn utc_to_local_timezone(current_time: Option<i64>, tz: Tz) -> DateTime<Tz> 
 
 /// Sort a list of timezones with the westernmost timezones at the start of the list
 /// and the eastern most at the end.
-pub fn sort_timezones(timezones: &mut Vec<Tz>) {
-    let date = NaiveDate::from_ymd_opt(2025, 1, 1)
-        .unwrap()
-        .and_hms_opt(0, 0, 0)
-        .unwrap();
+pub fn sort_timezones(timezones: &mut [Tz]) {
+    let naive_date_time = Utc::now().naive_utc();
 
-    timezones.sort_by_key(|tz| tz.offset_from_utc_datetime(&date).fix().local_minus_utc());
+    timezones.sort_by_key(|tz| {
+        tz.offset_from_utc_datetime(&naive_date_time)
+            .fix()
+            .local_minus_utc()
+    });
 }
 
 #[cfg(test)]

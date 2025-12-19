@@ -10,7 +10,7 @@ test("changing timezone time and date changes url", async ({ page }) => {
   await london_time_picker.fill("09:40");
   await london_date_picker.fill("2025-12-18");
 
-  expect(page.url()).toBe(
+  await expect(page).toHaveURL(
     "http://localhost:3000/?zone=Europe__London&current_time=1766050800",
   );
 });
