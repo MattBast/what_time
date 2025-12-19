@@ -64,6 +64,12 @@ And to generate a test by clicking in the UI, use this command:
 npx playwright codegen playwright.dev
 ```
 
+The app can be built and served from a Docker container with these commands:
+```bash
+docker build -t what-time .
+docker run --rm -it -p 3000:3000 --name first-run what-time
+```
+
 ## UX rules
 
 ### Blocks of text
