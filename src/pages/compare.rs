@@ -36,7 +36,7 @@ pub fn Compare() -> impl IntoView {
             <BackgroundBlur>
                 // The overscroll and touch-pan classes make scrolling on mobile smoother.
                 <div class="overflow-x-auto overscroll-x-contain touch-pan-x [-webkit-overflow-scrolling:touch] no-scrollbar snap-x snap-mandatory">
-                    <div class="flex gap-2 w-max px-4">
+                    <div class="flex gap-2 w-max mx-auto px-4">
                         <For
                             each=move || get_timezones.get()
                             key=|timezone| *timezone
