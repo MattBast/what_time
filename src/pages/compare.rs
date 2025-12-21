@@ -34,47 +34,50 @@ pub fn Compare() -> impl IntoView {
     view! {
         <div class="w-full">
             <BackgroundBlur>
-                <div class="flex flex-wrap justify-center gap-2">
-                    <For
-                        each=move || get_timezones.get()
-                        key=|timezone| *timezone
-                        children=move|timezone| {
+                // The overscroll and touch-pan classes make scrolling on mobile smoother.
+                <div class="overflow-x-auto overscroll-x-contain touch-pan-x [-webkit-overflow-scrolling:touch] no-scrollbar snap-x snap-mandatory">
+                    <div class="flex gap-2 w-max px-4">
+                        <For
+                            each=move || get_timezones.get()
+                            key=|timezone| *timezone
+                            children=move|timezone| {
 
-                            let last_time = utc_to_local_timezone(current_time.get_untracked(), timezone);
+                                let last_time = utc_to_local_timezone(current_time.get_untracked(), timezone);
 
-                            let display_header = format!(
-                                "{} {} ({})",
-                                tz_to_emoji(&timezone),
-                                tz_to_city(&timezone),
-                                last_time.format("%Z"),
-                            );
+                                let display_header = format!(
+                                    "{} {} ({})",
+                                    tz_to_emoji(&timezone),
+                                    tz_to_city(&timezone),
+                                    last_time.format("%Z"),
+                                );
 
-                            view! {
-                                <Timecard>
-                                    <TimecardHeader>
-                                        {display_header}
-                                    </TimecardHeader>
+                                view! {
+                                    <Timecard>
+                                        <TimecardHeader>
+                                            {display_header}
+                                        </TimecardHeader>
 
-                                    <TimecardTime>
-                                        <TimeInput
-                                            current_time
-                                            set_current_time
-                                            timezone=timezone
-                                        ></TimeInput>
-                                    </TimecardTime>
+                                        <TimecardTime>
+                                            <TimeInput
+                                                current_time
+                                                set_current_time
+                                                timezone=timezone
+                                            ></TimeInput>
+                                        </TimecardTime>
 
-                                    <TimecardDate>
-                                        <DateInput
-                                            current_time
-                                            set_current_time
-                                            timezone=timezone
-                                        ></DateInput>
-                                    </TimecardDate>
+                                        <TimecardDate>
+                                            <DateInput
+                                                current_time
+                                                set_current_time
+                                                timezone=timezone
+                                            ></DateInput>
+                                        </TimecardDate>
 
-                                </Timecard>
+                                    </Timecard>
+                                }
                             }
-                        }
-                    />
+                        />
+                    </div>
                 </div>
             </BackgroundBlur>
         </div>
