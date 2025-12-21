@@ -1,11 +1,15 @@
 <!doctype html>
 <html lang="en">
     <head>
-        <meta charset="utf-8" />
+        <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link data-trunk rel="rust" data-wasm-opt="z" />
+
         <link data-trunk rel="tailwind-css" href="input.css" />
-        <link rel="shortcut icon" type="image/ico" href="/favicon.ico" />
+
+        <!-- include support for `wasm-bindgen --weak-refs` - see: https://rustwasm.github.io/docs/wasm-bindgen/reference/weak-references.html -->
+        <link data-trunk rel="rust" data-wasm-opt="z" data-weak-refs />
+
+        <link rel="shortcut icon" type="image/ico" href="public/favicon.ico" />
     </head>
     <body class="bg-zinc-50 dark:bg-black"></body>
 </html>

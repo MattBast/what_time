@@ -40,12 +40,12 @@ pub fn App() -> impl IntoView {
 
     view! {
         <Title text="What Time - Compare timezones, fast"/>
-        <Stylesheet id="leptos" href="/style/output.css"/>
         <Router>
             <main>
                 <Routes fallback=|| "Page not found.">
                     <ParentRoute path=path!("") view=Wrapper>
                         <Route path=path!("/") view=Home/>
+                        <Route path=path!("/what_time") view=Home/> // <-- Needed for GitHub pages which uses the base path `/what_time`
                         <Route path=path!("/compare") view=Compare/>
                     </ParentRoute>
                 </Routes>
