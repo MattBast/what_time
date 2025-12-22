@@ -14,7 +14,7 @@ pub fn Introtext(children: Children) -> impl IntoView {
 #[component]
 pub fn IntroTitle(children: Children) -> impl IntoView {
     view! {
-        <h1 class="text-5xl font-bold tracking-tight text-zinc-800 leading-none sm:text-6xl dark:text-zinc-100">
+        <h1 class="text-5xl text-center font-bold tracking-tight text-zinc-800 leading-none sm:text-6xl dark:text-zinc-100">
             {children()}
         </h1>
     }
