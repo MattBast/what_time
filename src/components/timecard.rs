@@ -27,7 +27,7 @@ pub fn TimecardTime(children: Children) -> impl IntoView {
     view! {
         <h1 class="text-5xl sm:text-6xl w-fit font-semibold text-zinc-900 dark:text-zinc-100">
             {children()}
-        </h1>
+        </div>
     }
 }
 
@@ -36,6 +36,6 @@ pub fn TimecardDate(children: Children) -> impl IntoView {
     view! {
         <p class="text-xs my-2 w-fit text-zinc-600 dark:text-zinc-400">
             {children()}
-        </p>
+        </div>
     }
 }
