@@ -6,7 +6,7 @@ pub fn Timecard(children: Children) -> impl IntoView {
         <div
             class="rounded-2xl p-8 relative snap-center z-1 transition"
         >
-            <div class="p-6 flex-none text-center">
+            <div class="p-6 flex flex-col items-center">
                 {children()}
             </div>
         </div>
