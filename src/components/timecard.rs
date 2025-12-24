@@ -25,17 +25,17 @@ pub fn TimecardHeader(children: Children) -> impl IntoView {
 #[component]
 pub fn TimecardTime(children: Children) -> impl IntoView {
     view! {
-        <div class="text-5xl sm:text-6xl font-semibold text-zinc-900 dark:text-zinc-100">
+        <h1 class="text-5xl sm:text-6xl font-semibold text-zinc-900 dark:text-zinc-100">
             {children()}
-        </div>
+        </h1>
     }
 }
 
 #[component]
 pub fn TimecardDate(children: Children) -> impl IntoView {
     view! {
-        <div class="text-xs my-2 text-zinc-600 dark:text-zinc-400">
+        <p class="text-xs my-2 text-zinc-600 dark:text-zinc-400">
             {children()}
-        </div>
+        </p>
     }
 }
