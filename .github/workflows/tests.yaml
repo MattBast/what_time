@@ -5,17 +5,21 @@ on:
 
 jobs:
   test:
-    name: Test Rust code
+    name: Test App
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: trunk,wasm-bindgen
       - name: Machete
         uses: bnjbvr/cargo-machete@main # <-- For Cargo Machete
       - uses: actions/setup-node@v4 # <-- For the Playwright tests
         with:
           node-version: lts/*
 
+      # code checks and unit tests
       - name: Check
         run: cargo check --verbose --all-targets --all-features
       - name: Run clippy checks
@@ -27,12 +31,9 @@ jobs:
       - name: Run unit tests
         run: cargo test --verbose --all-targets
 
+      # setup wasm and install playwright dependencies
       - name: Add WASM target
         run: rustup target add wasm32-unknown-unknown
-
-      - name: Download and install Trunk binary
-        run: wget -qO- https://github.com/trunk-rs/trunk/releases/download/v0.18.4/trunk-x86_64-unknown-linux-gnu.tar.gz | tar -xzf-
-
       - name: Install playwright dependencies
         working-directory: ./end2end
         run: npm ci
