@@ -18,6 +18,11 @@ If that doesn't work, try this:
 export TRUNK_TOOLS_TAILWINDCSS="4.1.0"
 ```
 
+or if the styling looks like it hasn't loaded, install DaisyUI:
+```bash
+npm install -D daisyui
+```
+
 Sometimes port 3000 gets reserved after running leptos commands a gew times.
 So if the "Address already in use" error appears, try killing the process
 occupying the port. Start by find the process PID:

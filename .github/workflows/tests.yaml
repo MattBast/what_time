@@ -18,6 +18,8 @@ jobs:
       - uses: actions/setup-node@v4 # <-- For the Playwright tests
         with:
           node-version: lts/*
+      - name: Install DaisyUI
+        run: npm install -D daisyui # <-- Install Tailwindcss plugins
 
       # code checks and unit tests
       - name: Check
