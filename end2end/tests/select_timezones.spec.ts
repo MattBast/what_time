@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test("clicking timezones dropdown displays list of timezones", async ({
   page,
 }) => {
-  await page.goto("http://localhost:3000");
+  await page.goto("");
   await page.waitForLoadState("networkidle"); // Somtimes Firefox requires a delay
 
   await page.locator("input#timezone_select").click();
@@ -21,7 +21,7 @@ test("clicking timezones dropdown displays list of timezones", async ({
 test("selecting a timezone in the dropdown displays it in the url and on the page", async ({
   page,
 }) => {
-  await page.goto("http://localhost:3000/?current_time=1766076397");
+  await page.goto("/?current_time=1766076397");
 
   // Click on timezones input to reveal timezones and then click on first one.
   await page
@@ -41,15 +41,16 @@ test("selecting a timezone in the dropdown displays it in the url and on the pag
   );
 
   // Check that the url now contains the selected timezone
-  expect(page.url()).toBe(
-    "http://localhost:3000/?current_time=1766076397&zone=Africa__Abidjan",
+  const url = new URL(page.url());
+  expect(url.pathname + url.search).toBe(
+    "/?current_time=1766076397&zone=Africa__Abidjan",
   );
 });
 
 test("selecting two timezones in the dropdown displays them in the url and on the page", async ({
   page,
 }) => {
-  await page.goto("http://localhost:3000/?current_time=1766076397");
+  await page.goto("/?current_time=1766076397");
 
   // Click on timezones input to reveal timezones and then click on first and second one.
   await page
@@ -84,7 +85,8 @@ test("selecting two timezones in the dropdown displays them in the url and on th
   );
 
   // Check that the url now contains the selected timezone
-  expect(page.url()).toBe(
-    "http://localhost:3000/?current_time=1766076397&zone=Africa__Abidjan%2CAfrica__Accra",
+  const url = new URL(page.url());
+  expect(url.pathname + url.search).toBe(
+    "/?current_time=1766076397&zone=Africa__Abidjan%2CAfrica__Accra",
   );
 });
