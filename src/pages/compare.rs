@@ -19,10 +19,6 @@ pub fn Compare() -> impl IntoView {
         let query = url_query.get().unwrap_or_default();
 
         let mut timezones = url_query_to_timezones(query);
-        // ***
-        // Don't forget to re-implement the timezone sort function.
-        // ***
-        // timezones.sort();
         sort_timezones(&mut timezones);
 
         // Add the timezones from url to the carousel.
@@ -30,26 +26,26 @@ pub fn Compare() -> impl IntoView {
     });
 
     view! {
-        <div class="w-full">
-            <BackgroundBlur>
+        <BackgroundBlur>
+            <div class="w-full overflow-x-auto">
                 // The overscroll and touch-pan classes make scrolling on mobile smoother.
-                <div class="overflow-x-auto overscroll-x-contain touch-pan-x [-webkit-overflow-scrolling:touch] no-scrollbar snap-x snap-mandatory">
-                    <div class="flex gap-2 w-max mx-auto px-4">
-                        <For
-                            each=move || get_timezones.get()
-                            key=|timezone| *timezone
-                            children=move|timezone| {
+                <div class="carousel carousel-vertical sm:carousel-horizontal h-96 sm:h-auto">
+                    <For
+                        each=move || get_timezones.get()
+                        key=|timezone| *timezone
+                        children=move|timezone| {
 
-                                let last_time = utc_to_local_timezone(current_time.get_untracked(), timezone);
+                            let last_time = utc_to_local_timezone(current_time.get_untracked(), timezone);
 
-                                let display_header = format!(
-                                    "{} {} ({})",
-                                    tz_to_emoji(&timezone),
-                                    tz_to_city(&timezone),
-                                    last_time.format("%Z"),
-                                );
+                            let display_header = format!(
+                                "{} {} ({})",
+                                tz_to_emoji(&timezone),
+                                tz_to_city(&timezone),
+                                last_time.format("%Z"),
+                            );
 
-                                view! {
+                            view! {
+                                <div class="carousel-item">
                                     <Timecard>
 
                                         <fieldset class="fieldset p-6 flex flex-col items-center">
@@ -71,12 +67,12 @@ pub fn Compare() -> impl IntoView {
                                         </fieldset>
 
                                     </Timecard>
-                                }
+                                </div>
                             }
-                        />
-                    </div>
+                        }
+                    />
                 </div>
-            </BackgroundBlur>
-        </div>
+            </div>
+        </BackgroundBlur>
     }
 }
