@@ -10,7 +10,7 @@ use leptos::prelude::*;
 #[component]
 pub fn BackgroundBlur(children: Children) -> impl IntoView {
     view! {
-        <div class="bg-radial from-white dark:from-black from-20%">
+        <div class="bg-radial from-base-100 from-20%">
             {children()}
         </div>
     }

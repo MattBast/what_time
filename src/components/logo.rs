@@ -3,17 +3,13 @@ use leptos::prelude::*;
 /// The outline of a circle with a "glow" sitting behind it. This is provided
 /// as an SVG and inverts its colours when the browser is in dark mode.
 #[component]
-pub fn Logo(#[prop(optional)] small: bool) -> impl IntoView {
+pub fn Logo() -> impl IntoView {
     view! {
-        <div
-            class="transition-all duration-700 ease-in-out origin-center delay-800"
-            class=(["w-10", "h-10"], small)
-            class=(["w-24", "h-24"], !small)
-        >
+        <div class="w-10 h-10">
             <svg
                 // Set the stroke (outline) colour of the circles from here. Inverts the
                 // colours when the browser is in dark mode.
-                class="stroke-zinc-800 dark:stroke-zinc-100"
+                class="stroke-current"
                 xmlns="http://www.w3.org/2000/svg"
                 version="1.1"
                 xmlns:xlink="http://www.w3.org/1999/xlink"
