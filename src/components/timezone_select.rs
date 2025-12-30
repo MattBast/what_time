@@ -67,7 +67,7 @@ pub fn TimezoneSelect() -> impl IntoView {
             <input
                 type="text"
                 placeholder="Search and add timezones..."
-                class="w-full px-4 py-2 border rounded-md bg-base-100 text-base-content focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent cursor-pointer"
+                class="input w-full"
                 id="timezone_select"
                 prop:value=search_term
                 // When the contents of the input is changed, update the `search_term`.
@@ -79,7 +79,6 @@ pub fn TimezoneSelect() -> impl IntoView {
                     set_show_dropdown.set(true);
                 }
                 on:focus=move |_| set_show_dropdown.set(true)
-                // on:blur=move |_| set_show_dropdown.set(false)
                 on:click=move |_| set_show_dropdown.set(true)
             />
 
