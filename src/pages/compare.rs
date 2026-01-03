@@ -1,6 +1,4 @@
-use crate::components::{
-    BackgroundBlur, DateInput, TimeInput, Timecard, TimecardDate, TimecardHeader, TimecardTime,
-};
+use crate::components::{BackgroundBlur, DateInput, TimeInput, Timecard};
 use crate::timezone::{sort_timezones, tz_to_city, tz_to_emoji, utc_to_local_timezone};
 use crate::url_parse::url_query_to_timezones;
 use crate::{CURRENT_TIME, ZONE};
@@ -53,25 +51,24 @@ pub fn Compare() -> impl IntoView {
 
                                 view! {
                                     <Timecard>
-                                        <TimecardHeader>
-                                            {display_header}
-                                        </TimecardHeader>
 
-                                        <TimecardTime>
+                                        <fieldset class="fieldset p-6 flex flex-col items-center">
+
+                                            <label class="label text-2xl">{display_header}</label>
+
                                             <TimeInput
                                                 current_time
                                                 set_current_time
                                                 timezone=timezone
                                             ></TimeInput>
-                                        </TimecardTime>
 
-                                        <TimecardDate>
                                             <DateInput
                                                 current_time
                                                 set_current_time
                                                 timezone=timezone
                                             ></DateInput>
-                                        </TimecardDate>
+
+                                        </fieldset>
 
                                     </Timecard>
                                 }

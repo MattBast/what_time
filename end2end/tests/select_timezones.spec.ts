@@ -30,9 +30,7 @@ test("selecting a timezone in the dropdown displays it in the url and on the pag
   await page.getByText("🇨🇮 AbidjanCôte d'Ivoire").click();
 
   // Check that the timezone appeared on the page
-  await expect(
-    page.getByRole("heading", { name: "🇨🇮 Abidjan (GMT)" }),
-  ).toBeVisible();
+  await expect(page.getByText("🇨🇮 Abidjan (GMT)")).toBeVisible();
   await expect(page.locator("#time_picker_Africa__Abidjan")).toHaveValue(
     "16:46",
   );
@@ -66,9 +64,7 @@ test("selecting two timezones in the dropdown displays them in the url and on th
   await page.getByRole("listitem").filter({ hasText: "🇬🇭 AccraGhana" }).click();
 
   // Check that the timezones appeared on the page
-  await expect(
-    page.getByRole("heading", { name: "🇨🇮 Abidjan (GMT)" }),
-  ).toBeVisible();
+  await expect(page.getByText("🇨🇮 Abidjan (GMT)")).toBeVisible();
   await expect(page.locator("#time_picker_Africa__Abidjan")).toHaveValue(
     "16:46",
   );
@@ -76,9 +72,7 @@ test("selecting two timezones in the dropdown displays them in the url and on th
     "2025-12-18",
   );
 
-  await expect(
-    page.getByRole("heading", { name: "🇬🇭 Accra (GMT)" }),
-  ).toBeVisible();
+  await expect(page.getByText("🇬🇭 Accra (GMT)")).toBeVisible();
   await expect(page.locator("#time_picker_Africa__Accra")).toHaveValue("16:46");
   await expect(page.locator("#date_picker_Africa__Accra")).toHaveValue(
     "2025-12-18",

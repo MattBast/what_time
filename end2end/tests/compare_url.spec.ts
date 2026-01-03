@@ -15,12 +15,8 @@ test("compare page contains london and paris timezones when they're in the url",
   await page.goto("/?zone=Europe__London%2CEurope__Paris");
   await page.waitForLoadState("networkidle"); // Somtimes Firefox requires a delay
 
-  await expect(
-    page.getByRole("heading", { name: "🇬🇧 London (GMT)" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "🇫🇷 Paris (CET)" }),
-  ).toBeVisible();
+  await expect(page.getByText("🇬🇧 London (GMT)")).toBeVisible();
+  await expect(page.getByText("🇫🇷 Paris (CET)")).toBeVisible();
 });
 
 test("current time in url query is displayed on the page as a human readable time and date", async ({

@@ -1,28 +1,18 @@
 use leptos::prelude::*;
-use leptos_use::{use_color_mode, ColorMode, UseColorModeReturn};
 
 /// Allow the user to toggle between light and dark mode
 #[component]
 pub fn DarkModeToggle() -> impl IntoView {
-    let UseColorModeReturn {
-        mode, // Signal<ColorMode::dark | ColorMode::light>
-        set_mode,
-        ..
-    } = use_color_mode();
-
     view! {
-        <button
-            type="button"
+        <label
             aria-label="Switch to dark theme"
-            class="group cursor-pointer rounded-full bg-white/90 px-3 py-2 shadow-lg ring-1 shadow-zinc-800/5 ring-zinc-900/5 backdrop-blur-sm transition dark:bg-zinc-800/90 dark:ring-white/10 dark:hover:ring-white/20"
-            on:click=move |_| {
-                let new_mode = toggle_colour_mode(mode.get_untracked());
-                set_mode.set(new_mode);
-            }
+            class="swap swap-rotate btn rounded-full"
         >
+            // The input is hidden but controls the light-dark toggling
+            <input type="checkbox" class="theme-controller" value="dark" />
             <LightModeSvg/>
             <DarkModeSvg/>
-        </button>
+        </label>
     }
 }
 
@@ -36,16 +26,8 @@ fn LightModeSvg() -> impl IntoView {
             stroke-linecap="round"
             stroke-linejoin="round"
             aria-hidden="true"
-            // dark:hidden removes this icon when browser is in dark mode
-            class="
-                dark:hidden
-                h-6 w-6 fill-zinc-100 stroke-zinc-500 transition
-                group-hover:fill-zinc-200 group-hover:stroke-zinc-700
-                [@media(prefers-color-scheme:dark)]:fill-teal-50
-                [@media(prefers-color-scheme:dark)]:stroke-teal-500
-                [@media(prefers-color-scheme:dark)]:group-hover:fill-teal-50
-                [@media(prefers-color-scheme:dark)]:group-hover:stroke-teal-600
-            "
+            // swap-off keeps the icon hidden while in light mode
+            class="swap-off h-6 w-6 fill-base-300 stroke-current"
         >
             <path
                 d="M8 12.25A4.25 4.25 0 0 1 12.25 8v0a4.25 4.25 0 0 1 4.25 4.25v0a4.25 4.25 0 0 1-4.25 4.25v0A4.25 4.25 0 0 1 8 12.25v0Z"
@@ -67,15 +49,8 @@ fn DarkModeSvg() -> impl IntoView {
         <svg
             viewBox="0 0 24 24"
             aria-hidden="true"
-            // hidden removes this icon when browser is in light mode
-            // dark:block reveals it when in dark mode
-            class="
-                hidden dark:block
-                h-6 w-6 fill-zinc-700 stroke-zinc-500 transition
-                not-[@media_(prefers-color-scheme:dark)]:fill-teal-400/10
-                not-[@media_(prefers-color-scheme:dark)]:stroke-teal-500
-                [@media(prefers-color-scheme:dark)]:group-hover:stroke-zinc-400
-            "
+            // swap-on keeps the icon hidden while in dark mode
+            class="swap-on h-6 w-6 fill-current-content stroke-current"
         >
             <path
                 d="M17.25 16.22a6.937 6.937 0 0 1-9.47-9.47 7.451 7.451 0 1 0 9.47 9.47ZM12.75 7C17 7 17 2.75 17 2.75S17 7 21.25 7C17 7 17 11.25 17 11.25S17 7 12.75 7Z"
@@ -85,43 +60,5 @@ fn DarkModeSvg() -> impl IntoView {
             >
             </path>
         </svg>
-    }
-}
-
-/// Toggle the browser mode between light and dark. Default to Dark if there's an issue.
-fn toggle_colour_mode(mode: ColorMode) -> ColorMode {
-    match mode {
-        ColorMode::Dark => ColorMode::Light,
-        ColorMode::Light => ColorMode::Dark,
-        _ => ColorMode::Dark,
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_toggle_from_light_to_dark() {
-        let new_mode = toggle_colour_mode(ColorMode::Light);
-        assert_eq!(new_mode, ColorMode::Dark);
-    }
-
-    #[test]
-    fn test_toggle_from_dark_to_light() {
-        let new_mode = toggle_colour_mode(ColorMode::Dark);
-        assert_eq!(new_mode, ColorMode::Light);
-    }
-
-    #[test]
-    fn test_colour_mode_auto_defaults_to_dark() {
-        let new_mode = toggle_colour_mode(ColorMode::Auto);
-        assert_eq!(new_mode, ColorMode::Dark);
-    }
-
-    #[test]
-    fn test_colour_mode_custom_defaults_to_dark() {
-        let new_mode = toggle_colour_mode(ColorMode::Custom("Custom".to_string()));
-        assert_eq!(new_mode, ColorMode::Dark);
     }
 }

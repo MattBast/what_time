@@ -43,12 +43,7 @@ pub fn TimeInput(
 
     view! {
         <input
-            class="
-                w-fit max-w-full // <-- Make sure input does not grow to full screen width on Android Chrome
-                rounded-md text-zinc-900 dark:text-zinc-100 text-center
-                focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500
-                dark:[color-scheme:dark] cursor-pointer time-input-no-icon
-            "
+            class="input input-ghost input-xl text-5xl sm:text-6xl font-semibold w-fit max-w-full time-input-no-icon"
             type="time"
             name=format!("time_picker_{}", timezone.name().replace("/", "__"))
             id=format!("time_picker_{}", timezone.name().replace("/", "__"))
@@ -77,11 +72,7 @@ pub fn DateInput(
 
     view! {
         <input
-            class="
-                rounded-md text-zinc-900 dark:text-zinc-100 text-center
-                focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500
-                dark:[color-scheme:dark] cursor-pointer
-            "
+            class="input input-ghost input-sm max-w-full w-fit"
             type="date"
             name=format!("date_picker_{}", timezone.name().replace("/", "__"))
             id=format!("date_picker_{}", timezone.name().replace("/", "__"))

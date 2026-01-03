@@ -100,7 +100,7 @@ const config: PlaywrightTestConfig = {
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: "trunk build && trunk serve --dist dist --port 8080",
+    command: "trunk serve --port 8080",
     url: "http://localhost:8080",
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
