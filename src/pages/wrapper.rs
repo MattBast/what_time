@@ -8,7 +8,7 @@ pub fn Wrapper() -> impl IntoView {
         <div
             class=concat!(
                 // Layout
-                "font-sans flex flex-col justify-center min-h-screen ",
+                "flex flex-col justify-center min-h-screen ",
                 "px-4 sm:px-8 lg:px-12 ",
 
                 // Base background

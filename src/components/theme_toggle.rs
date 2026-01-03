@@ -1,64 +1,154 @@
+use capitalize::Capitalize;
 use leptos::prelude::*;
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
 
-/// Allow the user to toggle between light and dark mode
 #[component]
 pub fn DarkModeToggle() -> impl IntoView {
     view! {
-        <label
-            aria-label="Switch to dark theme"
-            class="swap swap-rotate btn rounded-full"
-        >
-            // The input is hidden but controls the light-dark toggling
-            <input type="checkbox" class="theme-controller" value="dark" />
-            <LightModeSvg/>
-            <DarkModeSvg/>
-        </label>
+        <div class="dropdown mb-72">
+          <div tabindex="0" role="button" class="btn">
+            "Theme"
+
+            <svg // <- Dropdown arrow
+              width="12px"
+              height="12px"
+              class="inline-block h-2 w-2 fill-current opacity-60"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 2048 2048">
+              <path d="M1799 349l242 241-1017 1017L7 590l242-241 775 775 775-775z"></path>
+            </svg>
+          </div>
+
+          <ul tabindex="-1" class="dropdown-content overflow-scroll max-h-80 bg-base-300 rounded-box z-1 w-52 p-2 shadow-2xl">
+
+            {
+                Theme::iter()
+                    .map(|theme| view! {
+                        <li>
+                          <input
+                            type="radio"
+                            name="theme-dropdown"
+                            class="theme-controller w-full btn btn-sm btn-block btn-ghost justify-start"
+                            aria-label={capitalize(&theme)}
+                            value={lowercase(&theme)} />
+                        </li>
+                    })
+                    .collect::<Vec<_>>()
+            }
+
+          </ul>
+        </div>
     }
 }
 
-/// A sun icon that only shows then the browser is in Light Mode
-#[component]
-fn LightModeSvg() -> impl IntoView {
-    view! {
-        <svg
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-            // swap-off keeps the icon hidden while in light mode
-            class="swap-off h-6 w-6 fill-base-300 stroke-current"
-        >
-            <path
-                d="M8 12.25A4.25 4.25 0 0 1 12.25 8v0a4.25 4.25 0 0 1 4.25 4.25v0a4.25 4.25 0 0 1-4.25 4.25v0A4.25 4.25 0 0 1 8 12.25v0Z"
-            >
-            </path>
-            <path
-                d="M12.25 3v1.5M21.5 12.25H20M18.791 18.791l-1.06-1.06M18.791 5.709l-1.06 1.06M12.25 20v1.5M4.5 12.25H3M6.77 6.77 5.709 5.709M6.77 17.73l-1.061 1.061"
-                fill="none"
-            >
-            </path>
-        </svg>
-    }
+#[derive(EnumIter, strum_macros::Display, Debug, PartialEq)]
+enum Theme {
+    Default,
+    Light,
+    Dark,
+    Cupcake,
+    Bumblebee,
+    Emerald,
+    Corporate,
+    Synthwave,
+    Retro,
+    Cyberpunk,
+    Valentine,
+    Halloween,
+    Garden,
+    Forest,
+    Aqua,
+    Lofi,
+    Pastel,
+    Fantasy,
+    Wireframe,
+    Black,
+    Luxury,
+    Dracula,
+    Cmyk,
+    Autumn,
+    Business,
+    Acid,
+    Lemonade,
+    Night,
+    Coffee,
+    Winter,
+    Dim,
+    Nord,
+    Sunset,
+    Caramellatte,
+    Abyss,
+    Silk,
 }
 
-/// A moon icon that only shows then the browser is in Dark Mode
-#[component]
-fn DarkModeSvg() -> impl IntoView {
-    view! {
-        <svg
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            // swap-on keeps the icon hidden while in dark mode
-            class="swap-on h-6 w-6 fill-current-content stroke-current"
-        >
-            <path
-                d="M17.25 16.22a6.937 6.937 0 0 1-9.47-9.47 7.451 7.451 0 1 0 9.47 9.47ZM12.75 7C17 7 17 2.75 17 2.75S17 7 21.25 7C17 7 17 11.25 17 11.25S17 7 12.75 7Z"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-            >
-            </path>
-        </svg>
+fn capitalize(theme: &Theme) -> String {
+    theme.to_string().capitalize_first_only()
+}
+
+fn lowercase(theme: &Theme) -> String {
+    theme.to_string().to_lowercase()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_theme_can_be_capitalized() {
+        assert_eq!(capitalize(&Theme::Default), "Default");
+        assert_eq!(capitalize(&Theme::Light), "Light");
+        assert_eq!(capitalize(&Theme::Dark), "Dark");
+    }
+
+    #[test]
+    fn test_theme_can_be_lowercased() {
+        assert_eq!(lowercase(&Theme::Default), "default");
+        assert_eq!(lowercase(&Theme::Light), "light");
+        assert_eq!(lowercase(&Theme::Dark), "dark");
+    }
+
+    #[test]
+    fn test_can_get_list_of_valid_themes() {
+        let themes = vec![
+            Theme::Default,
+            Theme::Light,
+            Theme::Dark,
+            Theme::Cupcake,
+            Theme::Bumblebee,
+            Theme::Emerald,
+            Theme::Corporate,
+            Theme::Synthwave,
+            Theme::Retro,
+            Theme::Cyberpunk,
+            Theme::Valentine,
+            Theme::Halloween,
+            Theme::Garden,
+            Theme::Forest,
+            Theme::Aqua,
+            Theme::Lofi,
+            Theme::Pastel,
+            Theme::Fantasy,
+            Theme::Wireframe,
+            Theme::Black,
+            Theme::Luxury,
+            Theme::Dracula,
+            Theme::Cmyk,
+            Theme::Autumn,
+            Theme::Business,
+            Theme::Acid,
+            Theme::Lemonade,
+            Theme::Night,
+            Theme::Coffee,
+            Theme::Winter,
+            Theme::Dim,
+            Theme::Nord,
+            Theme::Sunset,
+            Theme::Caramellatte,
+            Theme::Abyss,
+            Theme::Silk,
+        ];
+
+        assert_eq!(Theme::iter().collect::<Vec<Theme>>(), themes);
     }
 }
