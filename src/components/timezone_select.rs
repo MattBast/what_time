@@ -84,7 +84,7 @@ pub fn TimezoneSelect() -> impl IntoView {
 
             // Dropdown containing either all the timezones or a filtered subset of the timezones.
             <ul
-                class="absolute z-50 w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-600 rounded-md shadow-lg max-h-60 overflow-y-auto"
+                class="absolute z-50 w-full mt-1 bg-base-100 rounded-md shadow-lg max-h-60 overflow-y-auto"
                 class:hidden=move || !show_dropdown.get()
             >
                 <For
@@ -165,9 +165,9 @@ pub fn TimezoneSelectOption(
 ) -> impl IntoView {
     view! {
         <li
-            class="group w-full text-left px-4 py-2 border-none cursor-pointer text-zinc-900 dark:text-zinc-100"
-            class=(["bg-teal-100", "dark:bg-teal-700", "hover:bg-red-100", "dark:hover:bg-red-700"], selected)
-            class=(["bg-transparent", "hover:bg-zinc-100", "dark:hover:bg-zinc-700"], !selected)
+            class="group w-full text-left px-4 py-2 border-none cursor-pointer text-base-content"
+            class=(["bg-success", "hover:bg-error"], selected)
+            class=(["bg-transparent", "hover:bg-success"], !selected)
         >
             <div class="flex justify-between items-center">
                 <div>
@@ -179,10 +179,7 @@ pub fn TimezoneSelectOption(
                 {if selected {
                     view! {
                         <span
-                            class="
-                                text-2xl font-bold text-teal-500 dark:text-teal-400
-                                group-hover:text-red-500 group-hover:dark:text-red-400
-                            "
+                            class="text-2xl font-bold text-success-content group-hover:text-error-content"
                         >
                             <span class="group-hover:hidden">
                                 <Icon icon=icondata::BiCheckRegular />
@@ -194,7 +191,7 @@ pub fn TimezoneSelectOption(
                     }.into_any()
                 } else {
                     view! {
-                        <span class="text-sm text-zinc-500 dark:text-zinc-400">
+                        <span class="text-sm text-base-content">
                             {tz_country}
                         </span>
                     }.into_any()
