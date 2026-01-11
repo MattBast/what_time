@@ -7,7 +7,7 @@ use strum_macros::EnumIter;
 pub fn DarkModeToggle() -> impl IntoView {
     view! {
         <div class="dropdown mb-72">
-          <div tabindex="0" role="button" class="btn">
+          <div tabindex="0" role="button" class="btn btn-outline bg-base-100">
             "Theme"
 
             <svg // <- Dropdown arrow
