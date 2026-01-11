@@ -1,13 +1,28 @@
 use capitalize::Capitalize;
+use codee::string::JsonSerdeCodec;
 use leptos::prelude::*;
+use leptos_use::storage::use_local_storage;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
 #[component]
-pub fn DarkModeToggle() -> impl IntoView {
+pub fn ThemeToggle() -> impl IntoView {
+    // Look for theme in local storage. Use "default" if not found.
+    let (theme, set_theme, _) = use_local_storage::<String, JsonSerdeCodec>("default");
+
+    // Listen to local storage changing and update the page'stheme when it does.
+    Effect::new(move |_| {
+        let theme = theme.get();
+        if let Some(document) = window().document() {
+            if let Some(html) = document.document_element() {
+                let _ = html.set_attribute("data-theme", &theme);
+            }
+        }
+    });
+
     view! {
         <div class="dropdown mb-72">
-          <div tabindex="0" role="button" class="btn">
+          <div tabindex="0" role="button" class="btn btn-outline bg-base-100">
             "Theme"
 
             <svg // <- Dropdown arrow
@@ -23,18 +38,31 @@ pub fn DarkModeToggle() -> impl IntoView {
           <ul tabindex="-1" class="dropdown-content overflow-scroll max-h-80 bg-base-300 rounded-box z-1 w-52 p-2 shadow-2xl">
 
             {
-                Theme::iter()
-                    .map(|theme| view! {
+                Theme::iter().map(|t| {
+                    let value = lowercase(&t);
+                    let value_two = lowercase(&t);
+                    let label = capitalize(&t);
+
+                    view! {
                         <li>
-                          <input
+                            <input
                             type="radio"
                             name="theme-dropdown"
-                            class="theme-controller w-full btn btn-sm btn-block btn-ghost justify-start"
-                            aria-label={capitalize(&theme)}
-                            value={lowercase(&theme)} />
+                            class="w-full btn btn-sm btn-block btn-ghost justify-start"
+                            aria-label={label}
+                            value={value.clone()}
+
+                            // Decide if this theme is selected by listening to local storage.
+                            checked=move || theme.get() == value.clone()
+
+                            // Update local storage with new theme when clicked
+                            on:change=move |_| {
+                                set_theme.set(value_two.clone());
+                            }
+                            />
                         </li>
-                    })
-                    .collect::<Vec<_>>()
+                    }
+                }).collect::<Vec<_>>()
             }
 
           </ul>
@@ -42,8 +70,9 @@ pub fn DarkModeToggle() -> impl IntoView {
     }
 }
 
-#[derive(EnumIter, strum_macros::Display, Debug, PartialEq)]
+#[derive(EnumIter, strum_macros::Display, Debug, PartialEq, Clone, Default)]
 enum Theme {
+    #[default]
     Default,
     Light,
     Dark,

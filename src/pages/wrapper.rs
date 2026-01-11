@@ -1,4 +1,4 @@
-use crate::components::{DarkModeToggle, Logo};
+use crate::components::{Logo, ThemeToggle};
 use leptos::prelude::*;
 use leptos_router::components::Outlet;
 
@@ -41,7 +41,7 @@ fn Header() -> impl IntoView {
                             </div>
 
                             <div class="flex justify-end md:flex-1">
-                                <DarkModeToggle/>
+                                <ThemeToggle/>
                             </div>
 
                         </div>
