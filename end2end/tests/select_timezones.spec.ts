@@ -1,5 +1,21 @@
 import { test, expect } from "@playwright/test";
 
+test("select shows on larger screens", async ({ page, isMobile }) => {
+  test.skip(isMobile);
+  await page.goto("");
+  await page.waitForLoadState("networkidle"); // Somtimes Firefox requires a delay
+
+  await expect(page.locator("input#timezone_select")).toBeVisible();
+});
+
+test("select does not show on mobiles", async ({ page, isMobile }) => {
+  test.skip(!isMobile);
+  await page.goto("");
+  await page.waitForLoadState("networkidle"); // Somtimes Firefox requires a delay
+
+  await expect(page.locator("input#timezone_select")).toBeHidden();
+});
+
 test("clicking timezones dropdown displays list of timezones", async ({
   page,
 }) => {

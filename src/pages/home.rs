@@ -28,11 +28,13 @@ pub fn Home() -> impl IntoView {
         </Show>
 
         <BackgroundBlur>
-            <div class="py-8">
+            <div class="py-8 hidden sm:block">
                 // A select element that allows the user to add timezones to the carousel
                 <TimezoneSelect/>
             </div>
         </BackgroundBlur>
+
+        <FloatingButton/>
 
     }
 }
@@ -50,5 +52,26 @@ fn WelcomeText() -> impl IntoView {
                 </ul>
             </IntroSubtitle>
         </Introtext>
+    }
+}
+
+#[component]
+fn FloatingButton() -> impl IntoView {
+    view! {
+        <div id="floating_button" class="fab block sm:hidden">
+          <button class="btn btn-lg btn-circle btn-primary">
+              <svg
+                aria-label="New"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="currentColor"
+                class="size-6"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+          </button>
+        </div>
     }
 }
