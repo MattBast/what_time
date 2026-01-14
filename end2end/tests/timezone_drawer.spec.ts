@@ -18,3 +18,15 @@ test("floating button shows on mobiles", async ({ page, isMobile }) => {
 
   await expect(page.locator("div#floating_button")).toBeVisible();
 });
+
+test("clicking the floating button shows the timezone drawer", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(!isMobile);
+  await page.goto("");
+  await page.waitForLoadState("networkidle"); // Somtimes Firefox requires a delay
+
+  await page.locator("div#floating_button").click();
+  await expect(page.locator("ul#drawer_timezones")).toBeInViewport();
+});
