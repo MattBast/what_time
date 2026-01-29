@@ -27,9 +27,9 @@ pub fn Compare() -> impl IntoView {
 
     view! {
         <BackgroundBlur>
-            <div class="w-full overflow-x-auto">
+            <div class="flex justify-center w-full overflow-x-auto">
                 // The overscroll and touch-pan classes make scrolling on mobile smoother.
-                <div class="carousel carousel-vertical sm:carousel-horizontal h-96 sm:h-auto">
+                <div class="carousel carousel-vertical sm:carousel-horizontal h-fit max-h-144 sm:h-auto">
                     <For
                         each=move || get_timezones.get()
                         key=|timezone| *timezone
