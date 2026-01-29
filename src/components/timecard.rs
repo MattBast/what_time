@@ -4,7 +4,7 @@ use leptos::prelude::*;
 pub fn Timecard(children: Children) -> impl IntoView {
     view! {
         <div
-            class="rounded-2xl relative snap-center z-1 transition"
+            class="w-full sm:w-auto rounded-2xl relative snap-center z-1 transition"
         >
             {children()}
         </div>
