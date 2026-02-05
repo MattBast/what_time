@@ -45,12 +45,12 @@ pub fn Home() -> impl IntoView {
 }
 
 #[component]
-fn WelcomeText() -> impl IntoView {
+pub fn WelcomeText() -> impl IntoView {
     view! {
         <Introtext>
             <IntroTitle>"Compare timezones, fast"</IntroTitle>
             <IntroSubtitle>
-                <ul class="list-disc">
+                <ul id="sub-headings" class="list-disc">
                     <InlineLi>"🙂 Pick your timezone."</InlineLi>
                     <InlineLi>"😀 Compare with another."</InlineLi>
                     <InlineLi>"😁 Keep adding more."</InlineLi>

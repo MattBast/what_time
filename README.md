@@ -37,13 +37,17 @@ cargo check
 cargo clippy -- -D warnings
 cargo test
 cargo machete --with-metadata
+wasm-pack test --firefox --headless
 ```
 
 Not all these checks are native to Cargo. Install the tools with these commands:
 ```bash
 cargo install cargo-machete
 cargo install --locked cargo-outdated
+cargo install wasm-pack
 ```
+
+For more information about wasm-pack, see [here](https://wasm-bindgen.github.io/wasm-bindgen/wasm-bindgen-test/index.html).
 
 Use these commands to run the end to end tests. These tests use Playwright to open the website, click around and make sure the content renders okay.
 ```bash
