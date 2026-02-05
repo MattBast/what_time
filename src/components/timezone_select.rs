@@ -208,7 +208,7 @@ fn get_tz_in_search_term(search_term: String, timezones_from_url: Vec<Tz>) -> Ve
 
 /// Observe a url and update the timezones present in the dropdown. This function
 /// is designed to be used in a Leptos `Effect` like this:
-/// ```
+/// ```ignore
 /// Effect::new(move ||{
 ///     add_timezones_to_selected_from_url(&url_query, &set_tz_variants, &set_selected_tz_variants)
 /// });
@@ -229,7 +229,7 @@ pub fn add_timezones_to_selected_from_url(
 }
 
 /// Listen for the `search_term` to be changed
-/// ```
+/// ```ignore
 /// Effect::new(move ||{
 ///     filter_timezones_when_search_term_changes(&search_term, &url_query, &set_tz_variants)
 /// });

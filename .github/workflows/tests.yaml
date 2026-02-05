@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: taiki-e/install-action@v2
         with:
-          tool: trunk,wasm-bindgen
+          tool: trunk,wasm-bindgen,wasm-pack
       - name: Machete
         uses: bnjbvr/cargo-machete@main # <-- For Cargo Machete
       - uses: actions/setup-node@v4 # <-- For the Playwright tests
@@ -32,6 +32,9 @@ jobs:
         run: cargo machete
       - name: Run unit tests
         run: cargo test --verbose --all-targets
+
+      # wasm-bindgen component tests
+      - run: wasm-pack test --headless --firefox
 
       # setup wasm and install playwright dependencies
       - name: Add WASM target
