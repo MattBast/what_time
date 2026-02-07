@@ -1,21 +1,16 @@
 use crate::components::Button;
 use crate::timezone::utc_to_local_timezone;
-use crate::CURRENT_TIME;
 use chrono::offset::LocalResult::Single;
 use chrono::prelude::*;
 use chrono::{DateTime, TimeDelta};
 use chrono_tz::Tz;
 use leptos::prelude::*;
-use leptos_router::hooks::query_signal;
 
 #[component]
-pub fn TimePicker() -> impl IntoView {
-    // Watch the url query to decide whether to show the carousel or not.
-    let (_current_time, set_current_time) = query_signal::<i64>(CURRENT_TIME);
-
+pub fn TimePicker(set_time_query: SignalSetter<Option<i64>>) -> impl IntoView {
     view! {
         <div class="flex w-full gap-5 justify-end content-end">
-            <Button on:click=move |_| set_current_time.set(now_timestamp())>
+            <Button on:click=move |_| set_time_query.set(now_timestamp())>
                 "Now"
             </Button>
         </div>
@@ -28,16 +23,16 @@ fn now_timestamp() -> Option<i64> {
 
 #[component]
 pub fn TimeInput(
-    current_time: Memo<Option<i64>>,
-    set_current_time: SignalSetter<Option<i64>>,
+    time_query: Memo<Option<i64>>,
+    set_time_query: SignalSetter<Option<i64>>,
     timezone: Tz,
 ) -> impl IntoView {
-    let last_time = utc_to_local_timezone(current_time.get_untracked(), timezone);
+    let last_time = utc_to_local_timezone(time_query.get_untracked(), timezone);
     let (input_time, set_input_time) = signal(last_time.format("%H:%M").to_string());
 
     // Listen for the `current_time` url query to change and when it does, re-render the time in the inputs.
     Effect::new(move || {
-        let now = utc_to_local_timezone(current_time.get(), timezone);
+        let now = utc_to_local_timezone(time_query.get(), timezone);
         set_input_time.set(now.format("%H:%M").to_string());
     });
 
@@ -49,8 +44,8 @@ pub fn TimeInput(
             id=format!("time_picker_{}", timezone.name().replace("/", "__"))
             prop:value=input_time
             on:input:target=move |ev| {
-                let new_utc = update_current_time(ev.target().value(), current_time.get_untracked(), timezone);
-                set_current_time.set(Some(new_utc))
+                let new_utc = update_current_time(ev.target().value(), time_query.get_untracked(), timezone);
+                set_time_query.set(Some(new_utc))
             }
         />
     }
@@ -58,15 +53,15 @@ pub fn TimeInput(
 
 #[component]
 pub fn DateInput(
-    current_time: Memo<Option<i64>>,
-    set_current_time: SignalSetter<Option<i64>>,
+    time_query: Memo<Option<i64>>,
+    set_time_query: SignalSetter<Option<i64>>,
     timezone: Tz,
 ) -> impl IntoView {
     let (input_date, set_input_date) = signal(String::new());
 
     // Listen for the `current_time` url query to change and when it does, re-render the time in the inputs.
     Effect::new(move || {
-        let now = utc_to_local_timezone(current_time.get(), timezone);
+        let now = utc_to_local_timezone(time_query.get(), timezone);
         set_input_date.set(now.format("%Y-%m-%d").to_string());
     });
 
@@ -78,8 +73,8 @@ pub fn DateInput(
             id=format!("date_picker_{}", timezone.name().replace("/", "__"))
             prop:value=input_date
             on:input:target=move |ev| {
-                let new_utc = update_current_date(ev.target().value(), current_time.get_untracked(), timezone);
-                set_current_time.set(Some(new_utc))
+                let new_utc = update_current_date(ev.target().value(), time_query.get_untracked(), timezone);
+                set_time_query.set(Some(new_utc))
             }
         />
     }
