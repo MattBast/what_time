@@ -21,7 +21,7 @@ pub fn ThemeToggle() -> impl IntoView {
     });
 
     view! {
-        <div class="dropdown dropdown-end mb-72">
+        <div id="themes-button" class="dropdown dropdown-end mb-72">
           <div tabindex="0" role="button" class="btn btn-outline bg-base-100">
             "Theme"
 
@@ -35,7 +35,7 @@ pub fn ThemeToggle() -> impl IntoView {
             </svg>
           </div>
 
-          <ul tabindex="-1" class="dropdown-content overflow-scroll max-h-80 bg-base-300 rounded-box z-1000 w-52 p-2 shadow-2xl">
+          <ul id="themes-list" tabindex="-1" class="dropdown-content overflow-scroll max-h-80 bg-base-300 rounded-box z-1000 w-52 p-2 shadow-2xl">
 
             {
                 Theme::iter().map(|t| {

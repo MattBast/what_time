@@ -1,22 +1,20 @@
 use crate::components::{BackgroundBlur, DateInput, TimeInput, Timecard};
 use crate::timezone::{sort_timezones, tz_to_city, tz_to_emoji, utc_to_local_timezone};
 use crate::url_parse::url_query_to_timezones;
-use crate::{CURRENT_TIME, ZONE};
 use leptos::prelude::*;
-use leptos_router::hooks::query_signal;
 
 #[component]
-pub fn Compare() -> impl IntoView {
-    // Watch the url to decide which timezones to include and what times to compare.
-    let (url_query, _set_url_query) = query_signal::<String>(ZONE);
-    let (current_time, set_current_time) = query_signal::<i64>(CURRENT_TIME);
-
+pub fn Compare(
+    timezones_query: Memo<Option<String>>,
+    time_query: Memo<Option<i64>>,
+    set_time_query: SignalSetter<Option<i64>>,
+) -> impl IntoView {
     let (get_timezones, set_timezones) = signal(Vec::new());
 
     // Listen for the `zone` url query to change and when it does, re-render the timezones.
     Effect::new(move || {
         // Trigger these actions when the url "zone" query changes.
-        let query = url_query.get().unwrap_or_default();
+        let query = timezones_query.get().unwrap_or_default();
 
         let mut timezones = url_query_to_timezones(query);
         sort_timezones(&mut timezones);
@@ -35,7 +33,7 @@ pub fn Compare() -> impl IntoView {
                         key=|timezone| *timezone
                         children=move|timezone| {
 
-                            let last_time = utc_to_local_timezone(current_time.get_untracked(), timezone);
+                            let last_time = utc_to_local_timezone(time_query.get_untracked(), timezone);
 
                             let display_header = format!(
                                 "{} {} ({})",
@@ -53,14 +51,14 @@ pub fn Compare() -> impl IntoView {
                                             <label class="label text-2xl">{display_header}</label>
 
                                             <TimeInput
-                                                current_time
-                                                set_current_time
+                                                time_query
+                                                set_time_query
                                                 timezone=timezone
                                             ></TimeInput>
 
                                             <DateInput
-                                                current_time
-                                                set_current_time
+                                                time_query
+                                                set_time_query
                                                 timezone=timezone
                                             ></DateInput>
 

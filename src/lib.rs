@@ -32,7 +32,6 @@ pub fn App() -> impl IntoView {
                     <ParentRoute path=path!("") view=Wrapper>
                         <Route path=path!("/") view=Home/>
                         <Route path=path!("/what_time") view=Home/> // <-- Needed for GitHub pages which uses the base path `/what_time`
-                        <Route path=path!("/compare") view=Compare/>
                     </ParentRoute>
                 </Routes>
             </main>

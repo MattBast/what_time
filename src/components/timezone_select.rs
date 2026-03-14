@@ -3,17 +3,15 @@ use crate::url_parse::{
     add_timezone_to_url_query, remove_timezone, remove_timezone_from_url_query,
     url_query_to_timezones,
 };
-use crate::ZONE;
 use chrono_tz::{Tz, TZ_VARIANTS};
 use leptos::prelude::*;
 use leptos_icons::Icon;
-use leptos_router::hooks::query_signal;
 
 #[component]
-pub fn TimezoneSelect() -> impl IntoView {
-    // Watch the url.
-    let (url_query, set_url_query) = query_signal::<String>(ZONE);
-
+pub fn TimezoneSelect(
+    timezones_query: Memo<Option<String>>,
+    set_timezones_query: SignalSetter<Option<String>>,
+) -> impl IntoView {
     // Get a list of all the available timezones to present in the dropdown.
     let (tz_variants, set_tz_variants) = ArcRwSignal::new(TZ_VARIANTS.to_vec()).split();
 
@@ -31,7 +29,7 @@ pub fn TimezoneSelect() -> impl IntoView {
         let set_tz_variants = set_tz_variants.clone();
         move || {
             add_timezones_to_selected_from_url(
-                &url_query,
+                &timezones_query,
                 &set_tz_variants,
                 &set_selected_tz_variants,
             )
@@ -42,7 +40,11 @@ pub fn TimezoneSelect() -> impl IntoView {
     Effect::new({
         let set_tz_variants = set_tz_variants.clone();
         move || {
-            filter_timezones_when_search_term_changes(&search_term, &url_query, &set_tz_variants)
+            filter_timezones_when_search_term_changes(
+                &search_term,
+                &timezones_query,
+                &set_tz_variants,
+            )
         }
     });
 
@@ -85,8 +87,8 @@ pub fn TimezoneSelect() -> impl IntoView {
                                 // There is logic elsewhere in the app to listen to the
                                 // query and remove the timezone from the carousel.
                                 on:click=move |_| {
-                                    let current_timezones = remove_timezone_from_url_query(url_query.get_untracked(), tz);
-                                    set_url_query.set(Some(current_timezones));
+                                    let current_timezones = remove_timezone_from_url_query(timezones_query.get_untracked(), tz);
+                                    set_timezones_query.set(Some(current_timezones));
 
                                     // Empty the search term and hide the dropdown.
                                     set_search_term.set(String::new());
@@ -112,8 +114,8 @@ pub fn TimezoneSelect() -> impl IntoView {
                                 // There is logic elsewhere in the app to listen to the
                                 // query and update the carousel with the added timezone.
                                 on:click=move |_| {
-                                    let new_url = add_timezone_to_url_query(url_query.get_untracked(), tz);
-                                    set_url_query.set(Some(new_url));
+                                    let new_url = add_timezone_to_url_query(timezones_query.get_untracked(), tz);
+                                    set_timezones_query.set(Some(new_url));
 
                                     // Empty the search term and hide the dropdown.
                                     set_search_term.set(String::new());

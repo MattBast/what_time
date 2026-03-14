@@ -1,8 +1,6 @@
-// #![allow(dead_code)]
-
 use leptos::{prelude::*, task::tick};
 use wasm_bindgen_test::*;
-use what_time::pages::WelcomeText;
+use what_time::pages::HomeContent;
 use what_time::App;
 
 wasm_bindgen_test_configure!(run_in_browser);
@@ -19,7 +17,14 @@ async fn homepage_has_default_title() {
 
 #[wasm_bindgen_test]
 fn homepage_has_main_heading() {
-    mount_to_body(WelcomeText);
+    mount_to_body(|| {
+        view! { <HomeContent
+            timezones_query=Memo::new(move |_| None)
+            set_timezones_query=SignalSetter::default()
+            time_query=Memo::new(move |_| None)
+            set_time_query=SignalSetter::default()
+        /> }
+    });
 
     let document = document();
     let h1 = document.query_selector("#main-heading").unwrap().unwrap();
@@ -33,7 +38,14 @@ fn homepage_has_main_heading() {
 
 #[wasm_bindgen_test]
 fn homepage_has_sub_heading() {
-    mount_to_body(WelcomeText);
+    mount_to_body(|| {
+        view! { <HomeContent
+            timezones_query=Memo::new(move |_| None)
+            set_timezones_query=SignalSetter::default()
+            time_query=Memo::new(move |_| None)
+            set_time_query=SignalSetter::default()
+        /> }
+    });
 
     let document = document();
     let ul = document.query_selector("#sub-headings").unwrap().unwrap();
