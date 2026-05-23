@@ -603,6 +603,7 @@ pub fn tz_to_city(timezone: &Tz) -> String {
         Tz::Zulu => "Zulu",
     }
     .to_string()
+    .replace('_', " ")
 }
 
 pub fn tz_to_country(timezone: &Tz) -> String {
@@ -1883,5 +1884,50 @@ mod tests {
             timezones,
             vec![Tz::America__Atikokan, Tz::Europe__London, Tz::Europe__Paris]
         );
+    }
+
+    #[test]
+    fn test_los_angeles_city_uses_spaces_not_underscores() {
+        assert_eq!(tz_to_city(&Tz::America__Los_Angeles), "Los Angeles");
+    }
+
+    #[test]
+    fn test_sao_paulo_city_uses_spaces_not_underscores() {
+        assert_eq!(tz_to_city(&Tz::America__Sao_Paulo), "Sao Paulo");
+    }
+
+    #[test]
+    fn test_tel_aviv_city_uses_spaces_not_underscores() {
+        assert_eq!(tz_to_city(&Tz::Asia__Tel_Aviv), "Tel Aviv");
+    }
+
+    #[test]
+    fn test_dar_es_salaam_city_keeps_existing_spaces() {
+        assert_eq!(tz_to_city(&Tz::Africa__Dar_es_Salaam), "Dar es Salaam");
+    }
+
+    #[test]
+    fn test_london_city_is_unchanged() {
+        assert_eq!(tz_to_city(&Tz::Europe__London), "London");
+    }
+
+    #[test]
+    fn test_city_names_for_common_timezones_never_contain_underscores() {
+        let timezones = [
+            Tz::America__Los_Angeles,
+            Tz::America__Sao_Paulo,
+            Tz::America__Bahia_Banderas,
+            Tz::Asia__Tel_Aviv,
+            Tz::Europe__San_Marino,
+            Tz::Atlantic__St_Helena,
+        ];
+
+        for tz in timezones {
+            let city = tz_to_city(&tz);
+            assert!(
+                !city.contains('_'),
+                "city name for {tz:?} must not contain underscores: {city:?}"
+            );
+        }
     }
 }
