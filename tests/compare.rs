@@ -27,12 +27,17 @@ async fn timezone_in_url_added_to_page() {
 
     tick().await;
 
-    assert_eq!(get_timezones(test_wrapper), vec!["🇬🇧 London (GMT)"]);
+    let actual = get_timezones(test_wrapper);
+    assert!(
+        actual == vec!["🇬🇧 London (GMT)"] || actual == vec!["🇬🇧 London (BST)"],
+        "Expected timezone to be either London (GMT) or London (BST), got: {:?}",
+        actual
+    );
 }
 
 #[wasm_bindgen_test]
 async fn timezones_in_url_added_to_page() {
-    let timezones_query = Memo::new(move |_| Some("Europe__London,Europe__Paris".to_string()));
+    let timezones_query = Memo::new(move |_| Some("Asia__Calcutta,Asia__Shanghai".to_string()));
 
     let document = document();
     let test_wrapper = document.create_element("section").unwrap();
@@ -53,7 +58,7 @@ async fn timezones_in_url_added_to_page() {
 
     assert_eq!(
         get_timezones(test_wrapper),
-        vec!["🇬🇧 London (GMT)", "🇫🇷 Paris (CET)"]
+        vec!["🇮🇳 Calcutta (IST)", "🇨🇳 Shanghai (CST)"]
     );
 }
 
