@@ -13,10 +13,6 @@ use leptos_router::path;
 
 /// Defines the name of the "zone" url parameter
 pub const ZONE: &str = "zone";
-/// Defines the name of the "future_increments" url parameter
-pub const FUTURE_INCREMENTS: &str = "future_increments";
-/// Defines the name of the "past_increments" url parameter
-pub const PAST_INCREMENTS: &str = "past_increments";
 /// Defines the name of the "current_time" url parameter
 pub const CURRENT_TIME: &str = "current_time";
 
