@@ -138,4 +138,22 @@ mod tests {
             "2025-12-17"
         );
     }
+
+    #[test]
+    fn test_abidjan_card_is_built_correctly() {
+        let timestamp = Some(1766076397);
+
+        assert_eq!(
+            compare_card_header(timestamp, Tz::Africa__Abidjan),
+            "🇨🇮 Abidjan (GMT)"
+        );
+        assert_eq!(
+            compare_time_input_value(timestamp, Tz::Africa__Abidjan),
+            "16:46"
+        );
+        assert_eq!(
+            compare_date_input_value(timestamp, Tz::Africa__Abidjan),
+            "2025-12-18"
+        );
+    }
 }

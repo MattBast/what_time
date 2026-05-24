@@ -266,6 +266,25 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_dropdown_sample_cities_have_no_underscores() {
+        let sample = [
+            Tz::Africa__Abidjan,
+            Tz::Africa__Accra,
+            Tz::Africa__Addis_Ababa,
+            Tz::Europe__London,
+            Tz::Europe__Paris,
+        ];
+
+        for tz in sample {
+            let city = tz_to_city(&tz);
+            assert!(
+                !city.contains('_'),
+                "city label for {tz:?} must not contain underscores: {city:?}"
+            );
+        }
+    }
+
+    #[test]
     fn test_get_all_timezones_when_url_query_is_empty() {
         let timezones = get_tz_not_in_url_query(Vec::new());
         assert_eq!(timezones, TZ_VARIANTS);
