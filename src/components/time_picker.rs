@@ -297,4 +297,34 @@ mod tests {
             DateTime::parse_from_str("2025-12-17 23:15:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
         );
     }
+
+    #[test]
+    fn test_london_time_then_date_updates_to_expected_utc() {
+        let anchor = Some(1765987708);
+        let after_time = update_current_time("09:40".to_string(), anchor, Tz::Europe__London);
+        let timestamp = update_current_date(
+            "2025-12-18".to_string(),
+            Some(after_time),
+            Tz::Europe__London,
+        );
+
+        assert_eq!(timestamp, 1766050800);
+    }
+
+    #[test]
+    fn test_london_evening_shows_as_paris_morning_next_day() {
+        use crate::timezone::utc_to_local_timezone;
+
+        let anchor = Some(1765987708);
+        let after_time = update_current_time("23:40".to_string(), anchor, Tz::Europe__London);
+        let timestamp = update_current_date(
+            "2025-12-18".to_string(),
+            Some(after_time),
+            Tz::Europe__London,
+        );
+
+        let paris = utc_to_local_timezone(Some(timestamp), Tz::Europe__Paris);
+        assert_eq!(paris.format("%H:%M").to_string(), "00:40");
+        assert_eq!(paris.format("%Y-%m-%d").to_string(), "2025-12-19");
+    }
 }

@@ -143,6 +143,12 @@ mod tests {
     }
 
     #[test]
+    fn test_add_second_timezone_builds_comma_separated_zone_query() {
+        let zone = add_timezone_to_url_query(Some("Africa__Abidjan".into()), Tz::Africa__Accra);
+        assert_eq!(zone, "Africa__Abidjan,Africa__Accra");
+    }
+
+    #[test]
     fn test_variants_filtered_by_url_query() {
         let mut all_timezones = TZ_VARIANTS.clone().to_vec();
 

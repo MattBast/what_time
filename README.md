@@ -49,7 +49,7 @@ cargo install wasm-pack
 
 For more information about wasm-pack, see [here](https://wasm-bindgen.github.io/wasm-bindgen/wasm-bindgen-test/index.html).
 
-Use these commands to run the end to end tests. These tests use Playwright to open the website, click around and make sure the content renders okay.
+Use these commands to run the Playwright smoke tests (responsive layout, one URL flow, theme attribute). Logic-heavy behaviour is covered by `cargo test`.
 ```bash
 trunk serve
 cd end2end

@@ -138,6 +138,11 @@ mod tests {
     }
 
     #[test]
+    fn test_valentine_theme_serializes_for_data_theme_attribute() {
+        assert_eq!(lowercase(&Theme::Valentine), "valentine");
+    }
+
+    #[test]
     fn test_can_get_list_of_valid_themes() {
         let themes = vec![
             Theme::Default,
