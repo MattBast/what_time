@@ -302,6 +302,7 @@ mod tests {
     fn test_london_time_then_date_updates_to_expected_utc() {
         let anchor = Some(1765987708);
         let after_time = update_current_time("09:40".to_string(), anchor, Tz::Europe__London);
+
         let timestamp = update_current_date(
             "2025-12-18".to_string(),
             Some(after_time),
@@ -317,6 +318,7 @@ mod tests {
 
         let anchor = Some(1765987708);
         let after_time = update_current_time("23:40".to_string(), anchor, Tz::Europe__London);
+
         let timestamp = update_current_date(
             "2025-12-18".to_string(),
             Some(after_time),
