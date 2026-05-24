@@ -1813,12 +1813,12 @@ pub fn tz_to_emoji(timezone: &Tz) -> String {
 }
 
 /// Get a timestamp with the UTC timezone. Convert it to the specified timezone.
-/// If `current_time` is None, default the time to now.
+/// If `current_time` is None or not a valid Unix timestamp, default the time to now.
 pub fn utc_to_local_timezone(current_time: Option<i64>, tz: Tz) -> DateTime<Tz> {
     match current_time {
         Some(timestamp) => DateTime::from_timestamp(timestamp, 0)
-            .unwrap_or_default()
-            .with_timezone(&tz),
+            .map(|dt| dt.with_timezone(&tz))
+            .unwrap_or_else(|| Utc::now().with_timezone(&tz)),
         None => Utc::now().with_timezone(&tz),
     }
 }
@@ -1873,6 +1873,17 @@ mod tests {
                 .unwrap()
                 .with_timezone(&Tz::Asia__Calcutta)
         );
+    }
+
+    #[test]
+    fn test_invalid_timestamp_defaults_to_now() {
+        let from_invalid = utc_to_local_timezone(Some(i64::MAX), Tz::UTC);
+        let from_none = utc_to_local_timezone(None, Tz::UTC);
+
+        let epoch = DateTime::from_timestamp(0, 0).expect("epoch should be valid");
+        assert!(from_invalid > epoch);
+        assert!(from_none > epoch);
+        assert!((from_invalid - from_none).num_seconds().abs() < 2);
     }
 
     #[test]
