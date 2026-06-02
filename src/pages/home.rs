@@ -43,8 +43,12 @@ pub fn HomeContent(
                 <div class="flex flex-wrap justify-center gap-3 py-8">
                     // Open drawer to add a new timezone.
                     <AddTimezoneButton/>
-                    // Set the current time to the current time in the user's timezone.
-                    <NowButton set_time_query/>
+
+                    {move || should_show_compare(timezones_query.get()).then(|| view! {
+                        // Set the current time to the current time in the user's timezone.
+                        <NowButton set_time_query/>
+                    })}
+
                 </div>
             </BackgroundBlur>
         </TimezoneDrawer>
