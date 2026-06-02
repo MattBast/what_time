@@ -30,7 +30,6 @@ pub fn TimeInput(
     let last_time = utc_to_local_timezone(time_query.get_untracked(), timezone);
     let (input_time, set_input_time) = signal(last_time.format("%H:%M").to_string());
 
-    // Listen for the `current_time` url query to change and when it does, re-render the time in the inputs.
     Effect::new(move || {
         let now = utc_to_local_timezone(time_query.get(), timezone);
         set_input_time.set(now.format("%H:%M").to_string());
