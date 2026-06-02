@@ -45,7 +45,7 @@ pub fn TimezoneDrawerContent(
     });
 
     view! {
-        <div class="menu bg-base-200 min-h-full w-80 block sm:hidden">
+        <div class="menu bg-base-200 min-h-full w-80">
             // A search input where the user can type and search for a timezone.
             <input
                 type="text"

@@ -1,6 +1,6 @@
 use crate::components::{
-    BackgroundBlur, InlineLi, IntroSubtitle, IntroTitle, Introtext, TimePicker,
-    TimezoneDrawerContent, TimezoneSelect,
+    AddTimezoneButton, BackgroundBlur, InlineLi, IntroSubtitle, IntroTitle, Introtext, NowButton,
+    TimezoneDrawerContent, DRAWER_SWITCH_ID,
 };
 use crate::pages::Compare;
 use crate::url_parse::url_query_to_timezones;
@@ -27,7 +27,7 @@ pub fn HomeContent(
     view! {
         <TimezoneDrawer timezones_query set_timezones_query>
             <Show
-                when=move || !url_query_to_timezones(timezones_query.get().unwrap_or_default()).is_empty()
+                when=move || should_show_compare(timezones_query.get())
                 fallback=|| view! {
                     <BackgroundBlur>
                         <div class="pt-24">
@@ -36,20 +36,17 @@ pub fn HomeContent(
                     </BackgroundBlur>
                 }
             >
-                <TimePicker set_time_query/>
                 <Compare timezones_query time_query set_time_query/>
             </Show>
 
-            // Select component for tablets and desktops
             <BackgroundBlur>
-                <div class="py-8 hidden sm:block">
-                    // A select element that allows the user to add timezones to the carousel
-                    <TimezoneSelect timezones_query set_timezones_query/>
+                <div class="flex flex-wrap justify-center gap-3 py-8">
+                    // Open drawer to add a new timezone.
+                    <AddTimezoneButton/>
+                    // Set the current time to the current time in the user's timezone.
+                    <NowButton set_time_query/>
                 </div>
             </BackgroundBlur>
-
-            // Drawer for mobiles
-            <FloatingButton/>
         </TimezoneDrawer>
 
     }
@@ -71,30 +68,8 @@ pub fn WelcomeText() -> impl IntoView {
     }
 }
 
-#[component]
-fn FloatingButton() -> impl IntoView {
-    view! {
-        <div id="floating_button" class="fab block sm:hidden">
-          <label for="drawer-switch" class="drawer-button btn btn-lg btn-circle btn-neutral">
-              <svg
-                aria-label="Add Timezone"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                class="size-6"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-          </label>
-        </div>
-    }
-}
-
-/// This component depends on a label within its `children` having the class
-/// `drawer-button` and the `for` attribute containing "drawer". This class and for
-/// attribute makes that button the button that opens this drawer.
+/// Wraps page content and the timezone drawer. A control with class `drawer-button` and
+/// `for` pointing at the drawer checkbox opens the drawer.
 #[component]
 fn TimezoneDrawer(
     timezones_query: Memo<Option<String>>,
@@ -103,16 +78,48 @@ fn TimezoneDrawer(
 ) -> impl IntoView {
     view! {
         <div class="drawer drawer-end">
-          <input id="drawer-switch" type="checkbox" class="drawer-toggle" />
+          <input id=DRAWER_SWITCH_ID type="checkbox" class="drawer-toggle" />
           <div class="drawer-content">
               {children()}
           </div>
           <div class="drawer-side">
-
-            <label for="drawer-switch" aria-label="close sidebar" class="drawer-overlay"></label>
+            <label for=DRAWER_SWITCH_ID aria-label="close sidebar" class="drawer-overlay"></label>
             <TimezoneDrawerContent timezones_query set_timezones_query/>
-
           </div>
         </div>
+    }
+}
+
+/// Whether the compare view should render instead of the welcome screen.
+pub(crate) fn should_show_compare(timezones_query: Option<String>) -> bool {
+    !url_query_to_timezones(timezones_query.unwrap_or_default()).is_empty()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_should_show_compare_when_zone_query_is_empty() {
+        assert!(!should_show_compare(None));
+        assert!(!should_show_compare(Some(String::new())));
+    }
+
+    #[test]
+    fn test_should_show_compare_when_zone_query_has_timezone() {
+        assert!(should_show_compare(Some("Europe__London".into())));
+        assert!(should_show_compare(Some(
+            "Europe__London,Europe__Paris".into()
+        )));
+    }
+
+    #[test]
+    fn test_should_show_compare_when_zone_query_only_has_invalid_segments() {
+        assert!(!should_show_compare(Some("Not_A_Zone,Also_Invalid".into())));
+    }
+
+    #[test]
+    fn test_should_show_compare_when_zone_query_has_valid_and_invalid_segments() {
+        assert!(should_show_compare(Some("Bad_Zone,Europe__Dublin".into())));
     }
 }

@@ -1,31 +1,26 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("smoke", () => {
-  test("desktop shows timezone search", async ({ page, isMobile }) => {
-    test.skip(isMobile);
+  test("add timezone button is visible", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("input#timezone_select")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Add Timezone" })).toBeVisible();
   });
 
-  test("mobile shows add-timezone control", async ({ page, isMobile }) => {
-    test.skip(!isMobile);
+  test("drawer opens from add timezone button", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("div#floating_button")).toBeVisible();
-  });
-
-  test("mobile drawer opens", async ({ page, isMobile }) => {
-    test.skip(!isMobile);
-    await page.goto("/");
-    await page.locator("#floating_button label").click();
+    await page.getByRole("button", { name: "Add Timezone" }).click();
     await expect(page.locator("ul#drawer_timezones")).toBeVisible();
+    await expect(
+      page.getByRole("textbox", { name: "Search and add timezones..." }),
+    ).toBeVisible();
   });
 
-  test("selecting a timezone updates the URL", async ({ page, isMobile }) => {
-    test.skip(isMobile);
+  test("selecting a timezone updates the URL", async ({ page }) => {
     await page.goto("/?current_time=1766076397");
+    await page.getByRole("button", { name: "Add Timezone" }).click();
     await page
       .getByRole("textbox", { name: "Search and add timezones..." })
-      .click();
+      .fill("Abidjan");
     await page.getByText("Abidjan").first().click();
     await expect(page).toHaveURL(
       /current_time=1766076397&zone=Africa__Abidjan/,
