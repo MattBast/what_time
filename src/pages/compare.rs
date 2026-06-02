@@ -28,11 +28,13 @@ pub fn Compare(
                         key=|timezone| *timezone
                         children=move |timezone| {
                             view! {
+
                                 <TimezoneCard
                                     timezone
                                     time_query
                                     set_time_query
                                 />
+
                             }
                         }
                     />
