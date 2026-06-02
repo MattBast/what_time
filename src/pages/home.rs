@@ -1,6 +1,6 @@
 use crate::components::{
-    AddTimezoneButton, BackgroundBlur, InlineLi, IntroSubtitle, IntroTitle, Introtext,
-    TimePicker, TimezoneDrawerContent, DRAWER_SWITCH_ID,
+    AddTimezoneButton, BackgroundBlur, InlineLi, IntroSubtitle, IntroTitle, Introtext, NowButton,
+    TimezoneDrawerContent, DRAWER_SWITCH_ID,
 };
 use crate::pages::Compare;
 use crate::url_parse::url_query_to_timezones;
@@ -27,7 +27,7 @@ pub fn HomeContent(
     view! {
         <TimezoneDrawer timezones_query set_timezones_query>
             <Show
-                when=move || !url_query_to_timezones(timezones_query.get().unwrap_or_default()).is_empty()
+                when=move || should_show_compare(timezones_query.get())
                 fallback=|| view! {
                     <BackgroundBlur>
                         <div class="pt-24">
@@ -36,13 +36,15 @@ pub fn HomeContent(
                     </BackgroundBlur>
                 }
             >
-                <TimePicker set_time_query/>
                 <Compare timezones_query time_query set_time_query/>
             </Show>
 
             <BackgroundBlur>
-                <div class="flex justify-center py-8">
+                <div class="flex flex-wrap justify-center gap-3 py-8">
+                    // Open drawer to add a new timezone.
                     <AddTimezoneButton/>
+                    // Set the current time to the current time in the user's timezone.
+                    <NowButton set_time_query/>
                 </div>
             </BackgroundBlur>
         </TimezoneDrawer>
@@ -85,5 +87,39 @@ fn TimezoneDrawer(
             <TimezoneDrawerContent timezones_query set_timezones_query/>
           </div>
         </div>
+    }
+}
+
+/// Whether the compare view should render instead of the welcome screen.
+pub(crate) fn should_show_compare(timezones_query: Option<String>) -> bool {
+    !url_query_to_timezones(timezones_query.unwrap_or_default()).is_empty()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_should_show_compare_when_zone_query_is_empty() {
+        assert!(!should_show_compare(None));
+        assert!(!should_show_compare(Some(String::new())));
+    }
+
+    #[test]
+    fn test_should_show_compare_when_zone_query_has_timezone() {
+        assert!(should_show_compare(Some("Europe__London".into())));
+        assert!(should_show_compare(Some(
+            "Europe__London,Europe__Paris".into()
+        )));
+    }
+
+    #[test]
+    fn test_should_show_compare_when_zone_query_only_has_invalid_segments() {
+        assert!(!should_show_compare(Some("Not_A_Zone,Also_Invalid".into())));
+    }
+
+    #[test]
+    fn test_should_show_compare_when_zone_query_has_valid_and_invalid_segments() {
+        assert!(should_show_compare(Some("Bad_Zone,Europe__Dublin".into())));
     }
 }

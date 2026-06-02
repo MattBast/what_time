@@ -1,25 +1,9 @@
-use crate::components::Button;
 use crate::timezone::utc_to_local_timezone;
 use chrono::offset::LocalResult::Single;
 use chrono::prelude::*;
 use chrono::{DateTime, TimeDelta};
 use chrono_tz::Tz;
 use leptos::prelude::*;
-
-#[component]
-pub fn TimePicker(set_time_query: SignalSetter<Option<i64>>) -> impl IntoView {
-    view! {
-        <div class="flex w-full gap-5 justify-end content-end">
-            <Button on:click=move |_| set_time_query.set(now_timestamp())>
-                "Now"
-            </Button>
-        </div>
-    }
-}
-
-fn now_timestamp() -> Option<i64> {
-    Some(Utc::now().timestamp())
-}
 
 #[component]
 pub fn TimeInput(
