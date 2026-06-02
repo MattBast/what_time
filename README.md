@@ -23,6 +23,11 @@ or if the styling looks like it hasn't loaded, install DaisyUI:
 npm install -D daisyui
 ```
 
+To quickly update all the npm packages, use this command:
+```bash
+npx npm-check-updates -u
+```
+
 Sometimes port 3000 gets reserved after running leptos commands a gew times.
 So if the "Address already in use" error appears, try killing the process
 occupying the port. Start by find the process PID:

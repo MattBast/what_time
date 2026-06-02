@@ -7,6 +7,7 @@ jobs:
   test:
     name: Test App
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v4
@@ -41,7 +42,9 @@ jobs:
         run: npm ci
       - name: Install Playwright Browsers
         working-directory: ./end2end
-        run: npx playwright install --with-deps
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: npx playwright install chromium --with-deps
 
       - name: Run Playwright tests
         working-directory: ./end2end
