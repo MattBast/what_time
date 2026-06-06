@@ -1,8 +1,13 @@
 use crate::components::{BackgroundBlur, TimezoneCard};
 use crate::timezone::sort_timezones;
-use crate::url_parse::url_query_to_timezones;
+use crate::url_parse::{city_pair_url_query, url_query_to_timezones};
+use crate::{CURRENT_TIME, ZONE};
 use chrono_tz::Tz;
 use leptos::prelude::*;
+use leptos_meta::Title;
+use leptos_router::hooks::{query_signal, use_params_map};
+
+const EXTRA_CITIES: &str = "cities";
 
 #[component]
 pub fn Compare(
@@ -42,11 +47,84 @@ pub fn Compare(
     }
 }
 
+#[component]
+pub fn CompareCityPair() -> impl IntoView {
+    let params = use_params_map();
+    let (extra_cities_query, _) = query_signal::<String>(EXTRA_CITIES);
+    let (zone_query, set_zone_query) = query_signal::<String>(ZONE);
+    let (time_query, set_time_query) = query_signal::<i64>(CURRENT_TIME);
+
+    let route_timezones_query = Memo::new(move |_| {
+        params.with(|params| {
+            city_pair_url_query(
+                params.get("city1"),
+                params.get("city2"),
+                extra_cities_query.get(),
+            )
+        })
+    });
+
+    let timezones_query = Memo::new(move |_| {
+        let query = [
+            route_timezones_query.get(),
+            zone_query.get().unwrap_or_default(),
+        ]
+        .into_iter()
+        .filter(|query| !query.is_empty())
+        .collect::<Vec<_>>()
+        .join(",");
+
+        (!query.is_empty()).then_some(query)
+    });
+
+    let page_title = Memo::new(move |_| {
+        params.with(|params| {
+            let city1 = params.get("city1").unwrap_or_default();
+            let city2 = params.get("city2").unwrap_or_default();
+            city_pair_page_title(&city1, &city2)
+        })
+    });
+
+    view! {
+        <Title text=move || page_title.get()/>
+        <crate::pages::HomeContent
+            timezones_query
+            set_timezones_query=set_zone_query
+            time_query
+            set_time_query
+        />
+    }
+}
+
 /// Parse the `zone` URL query and return timezones sorted west to east.
 pub(crate) fn sorted_timezones_from_query(query: String) -> Vec<Tz> {
     let mut timezones = url_query_to_timezones(query);
+    timezones.dedup();
     sort_timezones(&mut timezones);
+    timezones.dedup();
     timezones
+}
+
+fn city_pair_page_title(city1: &str, city2: &str) -> String {
+    format!(
+        "{} Time vs {} Time | What Time",
+        city_slug_to_title(city1),
+        city_slug_to_title(city2)
+    )
+}
+
+fn city_slug_to_title(slug: &str) -> String {
+    slug.split(['-', '_'])
+        .filter(|word| !word.is_empty())
+        .map(|word| {
+            let mut chars = word.chars();
+            match chars.next() {
+                Some(first) => format!("{}{}", first.to_uppercase(), chars.as_str()),
+                None => String::new(),
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 #[cfg(test)]
@@ -112,6 +190,22 @@ mod tests {
         assert!(
             timezones.last() == Some(&Tz::Asia__Tokyo),
             "easternmost zone should be last"
+        );
+    }
+
+    #[test]
+    fn test_sorted_timezones_from_query_removes_duplicates() {
+        let timezones =
+            sorted_timezones_from_query("Europe__London,Europe__Paris,Europe__London".to_string());
+
+        assert_eq!(timezones, vec![Tz::Europe__London, Tz::Europe__Paris]);
+    }
+
+    #[test]
+    fn test_city_pair_page_title_from_slugs() {
+        assert_eq!(
+            city_pair_page_title("london", "new-york"),
+            "London Time vs New York Time | What Time"
         );
     }
 

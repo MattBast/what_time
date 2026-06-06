@@ -14,6 +14,90 @@ pub fn url_query_to_timezones(query: String) -> Vec<Tz> {
     zones
 }
 
+pub fn city_slug_to_timezone(slug: &str) -> Option<Tz> {
+    match normalize_city_slug(slug).as_str() {
+        "london" => Some(Tz::Europe__London),
+        "paris" => Some(Tz::Europe__Paris),
+        "new-york" => Some(Tz::America__New_York),
+        "tokyo" => Some(Tz::Asia__Tokyo),
+        "sydney" => Some(Tz::Australia__Sydney),
+        "san-francisco" => Some(Tz::America__Los_Angeles), // <-- Needs update later to display San Francisco on the card title
+        "los-angeles" => Some(Tz::America__Los_Angeles),
+        "chicago" => Some(Tz::America__Chicago),
+        "toronto" => Some(Tz::America__Toronto),
+        "vancouver" => Some(Tz::America__Vancouver),
+        "mexico-city" => Some(Tz::America__Mexico_City),
+        "sao-paulo" => Some(Tz::America__Sao_Paulo),
+        "utc" => Some(Tz::UTC),
+        "dublin" => Some(Tz::Europe__Dublin),
+        "berlin" => Some(Tz::Europe__Berlin),
+        "amsterdam" => Some(Tz::Europe__Amsterdam),
+        "madrid" => Some(Tz::Europe__Madrid),
+        "rome" => Some(Tz::Europe__Rome),
+        "zurich" => Some(Tz::Europe__Zurich),
+        "dubai" => Some(Tz::Asia__Dubai),
+        "singapore" => Some(Tz::Asia__Singapore),
+        "hong-kong" => Some(Tz::Asia__Hong_Kong),
+        "shanghai" => Some(Tz::Asia__Shanghai),
+        "seoul" => Some(Tz::Asia__Seoul),
+        "mumbai" => Some(Tz::Asia__Kolkata),
+        "delhi" => Some(Tz::Asia__Kolkata),
+        "kolkata" => Some(Tz::Asia__Kolkata),
+        "bangkok" => Some(Tz::Asia__Bangkok),
+        "jakarta" => Some(Tz::Asia__Jakarta),
+        "auckland" => Some(Tz::Pacific__Auckland),
+        "melbourne" => Some(Tz::Australia__Melbourne),
+        "brisbane" => Some(Tz::Australia__Brisbane),
+        "perth" => Some(Tz::Australia__Perth),
+        "cairo" => Some(Tz::Africa__Cairo),
+        "johannesburg" => Some(Tz::Africa__Johannesburg),
+        "lagos" => Some(Tz::Africa__Lagos),
+        _ => None,
+    }
+}
+
+pub fn city_slugs_to_url_query(slugs: &[String]) -> String {
+    let mut timezones = Vec::new();
+
+    for slug in slugs {
+        if let Some(timezone) = city_slug_to_timezone(slug) {
+            if !timezones.contains(&timezone) {
+                timezones.push(timezone);
+            }
+        }
+    }
+
+    tz_vec_to_url_query(timezones)
+}
+
+pub fn city_pair_url_query(
+    city1: Option<String>,
+    city2: Option<String>,
+    extra: Option<String>,
+) -> String {
+    let mut slugs = Vec::new();
+
+    if let Some(city) = city1 {
+        slugs.push(city);
+    }
+
+    if let Some(city) = city2 {
+        slugs.push(city);
+    }
+
+    if let Some(extra) = extra {
+        slugs.extend(
+            extra
+                .split(',')
+                .map(str::trim)
+                .filter(|slug| !slug.is_empty())
+                .map(ToOwned::to_owned),
+        );
+    }
+
+    city_slugs_to_url_query(&slugs)
+}
+
 /// Get all the timezones from the "zone" query of the url and remove them from
 /// the list of timezones that fill the timezone select element.
 pub fn remove_timezone(query: String, variants: &mut Vec<Tz>) {
@@ -36,6 +120,15 @@ pub fn tz_vec_to_url_query(timezones: Vec<Tz>) -> String {
         .map(|tz| tz.to_string().replace("/", "__"))
         .collect::<Vec<String>>()
         .join(",")
+}
+
+fn normalize_city_slug(slug: &str) -> String {
+    slug.trim()
+        .to_lowercase()
+        .replace('_', "-")
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join("-")
 }
 
 /// Take the `current_time` query and add a new timezone to it.
@@ -161,5 +254,52 @@ mod tests {
         assert!(!all_timezones.contains(&Tz::Europe__London));
         assert!(!all_timezones.contains(&Tz::Europe__Paris));
         assert!(!all_timezones.contains(&Tz::Europe__Dublin));
+    }
+
+    #[test]
+    fn test_city_slug_to_timezone_supports_core_seo_pairs() {
+        assert_eq!(city_slug_to_timezone("london"), Some(Tz::Europe__London));
+        assert_eq!(city_slug_to_timezone("paris"), Some(Tz::Europe__Paris));
+        assert_eq!(
+            city_slug_to_timezone("new-york"),
+            Some(Tz::America__New_York)
+        );
+        assert_eq!(city_slug_to_timezone("tokyo"), Some(Tz::Asia__Tokyo));
+        assert_eq!(city_slug_to_timezone("sydney"), Some(Tz::Australia__Sydney));
+        assert_eq!(
+            city_slug_to_timezone("san-francisco"),
+            Some(Tz::America__Los_Angeles)
+        );
+    }
+
+    #[test]
+    fn test_city_pair_url_query_builds_zone_query_from_slugs() {
+        let query = city_pair_url_query(Some("london".into()), Some("paris".into()), None);
+        assert_eq!(query, "Europe__London,Europe__Paris");
+    }
+
+    #[test]
+    fn test_city_pair_url_query_includes_extra_city_slugs() {
+        let query = city_pair_url_query(
+            Some("london".into()),
+            Some("new-york".into()),
+            Some("paris,tokyo,sydney".into()),
+        );
+
+        assert_eq!(
+            query,
+            "Europe__London,America__New_York,Europe__Paris,Asia__Tokyo,Australia__Sydney"
+        );
+    }
+
+    #[test]
+    fn test_city_pair_url_query_ignores_unknown_slugs_and_duplicates() {
+        let query = city_pair_url_query(
+            Some("london".into()),
+            Some("not-a-city".into()),
+            Some("london,paris".into()),
+        );
+
+        assert_eq!(query, "Europe__London,Europe__Paris");
     }
 }
