@@ -11,7 +11,7 @@ test.describe("smoke", () => {
     await page.getByRole("button", { name: "Add Timezone" }).click();
     await expect(page.locator("ul#drawer_timezones")).toBeVisible();
     await expect(
-      page.getByRole("textbox", { name: "Search and add timezones..." }),
+      page.getByRole("textbox", { name: "Search and add cities..." }),
     ).toBeVisible();
   });
 
@@ -19,11 +19,11 @@ test.describe("smoke", () => {
     await page.goto("/?current_time=1766076397");
     await page.getByRole("button", { name: "Add Timezone" }).click();
     await page
-      .getByRole("textbox", { name: "Search and add timezones..." })
+      .getByRole("textbox", { name: "Search and add cities..." })
       .fill("Abidjan");
     await page.getByText("Abidjan").first().click();
     await expect(page).toHaveURL(
-      /current_time=1766076397&zone=Africa__Abidjan/,
+      /current_time=1766076397&zone=abidjan/,
     );
   });
 
