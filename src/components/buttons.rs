@@ -82,10 +82,10 @@ pub fn AddTimezoneButton() -> impl IntoView {
         <DrawerButton
             drawer_for=add_timezone_drawer_target().to_string()
             id="add_timezone_button"
-            aria_label="Add Timezone"
+            aria_label="Add City"
         >
             <Icon icon=BiPlusRegular />
-            "Add Timezone"
+            "Add City"
         </DrawerButton>
     }
 }
