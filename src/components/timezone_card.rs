@@ -1,36 +1,35 @@
 use crate::components::{DateInput, TimeInput};
-use crate::timezone::{tz_to_city, tz_to_emoji, utc_to_local_timezone};
+use crate::timezone::{utc_to_local_timezone, City};
 use chrono_tz::Tz;
 use leptos::prelude::*;
+use std::str::FromStr;
 
 #[component]
 pub fn TimezoneCard(
-    timezone: Tz,
+    city: City,
     time_query: Memo<Option<i64>>,
     set_time_query: SignalSetter<Option<i64>>,
 ) -> impl IntoView {
-    let header = move || timezone_card_header(time_query.get(), timezone);
+    let city_clone = city.clone();
+    let header = move || timezone_card_header(time_query.get(), &city_clone);
+    let tz = Tz::from_str(&city.timezone).unwrap_or(Tz::UTC);
 
     view! {
         <div class="card bg-base-100 border border-base-300 shadow-sm w-full sm:w-auto min-w-[14rem]">
             <div class="card-body items-center gap-4 p-6">
                 <h2 class="card-title">{header}</h2>
-                <TimeInput time_query set_time_query timezone />
-                <DateInput time_query set_time_query timezone />
+                <TimeInput time_query set_time_query timezone=tz />
+                <DateInput time_query set_time_query timezone=tz />
             </div>
         </div>
     }
 }
 
 /// City line shown at the top of each card (emoji, city, zone abbreviation).
-pub(crate) fn timezone_card_header(time_query: Option<i64>, timezone: Tz) -> String {
-    let local_time = utc_to_local_timezone(time_query, timezone);
-    format!(
-        "{} {} ({})",
-        tz_to_emoji(&timezone),
-        tz_to_city(&timezone),
-        local_time.format("%Z"),
-    )
+pub(crate) fn timezone_card_header(time_query: Option<i64>, city: &City) -> String {
+    let tz = Tz::from_str(&city.timezone).unwrap_or(Tz::UTC);
+    let local_time = utc_to_local_timezone(time_query, tz);
+    format!("{} {} ({})", city.emoji, city.name, local_time.format("%Z"),)
 }
 
 /// Local time string bound to the card's time input (`HH:MM`).
@@ -52,32 +51,37 @@ pub(crate) fn timezone_card_local_date(time_query: Option<i64>, timezone: Tz) ->
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::url_parse::find_city_by_slug;
 
     /// Fixed UTC instant used across several card tests (2025-12-17 16:08:28 UTC).
     const SAMPLE_TIMESTAMP: i64 = 1765987708;
 
     #[test]
     fn test_timezone_card_header_uses_city_emoji_and_zone_in_winter() {
-        let header = timezone_card_header(Some(1765920530), Tz::Europe__London);
+        let city = find_city_by_slug("london").unwrap();
+        let header = timezone_card_header(Some(1765920530), city);
         assert_eq!(header, "🇬🇧 London (GMT)");
     }
 
     #[test]
     fn test_timezone_card_header_uses_bst_when_london_is_in_dst() {
         // 2025-06-15 14:00:00 UTC -> 15:00 BST
-        let header = timezone_card_header(Some(1749996000), Tz::Europe__London);
+        let city = find_city_by_slug("london").unwrap();
+        let header = timezone_card_header(Some(1749996000), city);
         assert_eq!(header, "🇬🇧 London (BST)");
     }
 
     #[test]
     fn test_timezone_card_header_for_paris_shows_cet() {
-        let header = timezone_card_header(Some(SAMPLE_TIMESTAMP), Tz::Europe__Paris);
+        let city = find_city_by_slug("paris").unwrap();
+        let header = timezone_card_header(Some(SAMPLE_TIMESTAMP), city);
         assert_eq!(header, "🇫🇷 Paris (CET)");
     }
 
     #[test]
     fn test_timezone_card_header_city_name_has_no_underscores() {
-        let header = timezone_card_header(Some(SAMPLE_TIMESTAMP), Tz::America__Los_Angeles);
+        let city = find_city_by_slug("los-angeles").unwrap();
+        let header = timezone_card_header(Some(SAMPLE_TIMESTAMP), city);
         assert_eq!(header, "🇺🇸 Los Angeles (PST)");
         assert!(!header.contains('_'));
     }
@@ -109,11 +113,9 @@ mod tests {
     #[test]
     fn test_timezone_card_abidjan_values() {
         let timestamp = Some(1766076397);
+        let city = find_city_by_slug("abidjan").unwrap();
 
-        assert_eq!(
-            timezone_card_header(timestamp, Tz::Africa__Abidjan),
-            "🇨🇮 Abidjan (GMT)"
-        );
+        assert_eq!(timezone_card_header(timestamp, city), "🇨🇮 Abidjan (GMT)");
         assert_eq!(
             timezone_card_local_time(timestamp, Tz::Africa__Abidjan),
             "16:46"

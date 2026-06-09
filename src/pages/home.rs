@@ -3,7 +3,7 @@ use crate::components::{
     TimezoneDrawerContent, DRAWER_SWITCH_ID,
 };
 use crate::pages::Compare;
-use crate::url_parse::url_query_to_timezones;
+use crate::url_parse::url_query_to_cities;
 use crate::{CURRENT_TIME, ZONE};
 use leptos::prelude::*;
 use leptos_router::hooks::query_signal;
@@ -11,10 +11,10 @@ use leptos_router::hooks::query_signal;
 #[component]
 pub fn Home() -> impl IntoView {
     // Watch the url queries
-    let (timezones_query, set_timezones_query) = query_signal::<String>(ZONE);
+    let (cities_query, set_cities_query) = query_signal::<String>(ZONE);
     let (time_query, set_time_query) = query_signal::<i64>(CURRENT_TIME);
 
-    view! { <HomeContent timezones_query set_timezones_query time_query set_time_query/> }
+    view! { <HomeContent timezones_query=cities_query set_timezones_query=set_cities_query time_query set_time_query/> }
 }
 
 #[component]
@@ -36,12 +36,12 @@ pub fn HomeContent(
                     </BackgroundBlur>
                 }
             >
-                <Compare timezones_query time_query set_time_query/>
+                <Compare cities_query=timezones_query time_query set_time_query/>
             </Show>
 
             <BackgroundBlur>
                 <div class="flex flex-wrap justify-center gap-3 py-8">
-                    // Open drawer to add a new timezone.
+                    // Open drawer to add a new city.
                     <AddTimezoneButton/>
 
                     {move || should_show_compare(timezones_query.get()).then(|| view! {
@@ -52,7 +52,6 @@ pub fn HomeContent(
                 </div>
             </BackgroundBlur>
         </TimezoneDrawer>
-
     }
 }
 
@@ -63,7 +62,7 @@ pub fn WelcomeText() -> impl IntoView {
             <IntroTitle>"Compare timezones, fast"</IntroTitle>
             <IntroSubtitle>
                 <ul id="sub-headings" class="list-disc">
-                    <InlineLi>"🙂 Pick your timezone."</InlineLi>
+                    <InlineLi>"🙂 Pick your city."</InlineLi>
                     <InlineLi>"😀 Compare with another."</InlineLi>
                     <InlineLi>"😁 Keep adding more."</InlineLi>
                 </ul>
@@ -95,8 +94,8 @@ fn TimezoneDrawer(
 }
 
 /// Whether the compare view should render instead of the welcome screen.
-pub(crate) fn should_show_compare(timezones_query: Option<String>) -> bool {
-    !url_query_to_timezones(timezones_query.unwrap_or_default()).is_empty()
+pub(crate) fn should_show_compare(cities_query: Option<String>) -> bool {
+    !url_query_to_cities(cities_query.unwrap_or_default()).is_empty()
 }
 
 #[cfg(test)]
@@ -106,24 +105,23 @@ mod tests {
     #[test]
     fn test_should_show_compare_when_zone_query_is_empty() {
         assert!(!should_show_compare(None));
-        assert!(!should_show_compare(Some(String::new())));
+        assert!(!should_show_compare(String::new().into()));
     }
 
     #[test]
-    fn test_should_show_compare_when_zone_query_has_timezone() {
+    fn test_should_show_compare_when_zone_query_has_city() {
+        assert!(should_show_compare(Some("london".into())));
         assert!(should_show_compare(Some("Europe__London".into())));
-        assert!(should_show_compare(Some(
-            "Europe__London,Europe__Paris".into()
-        )));
+        assert!(should_show_compare(Some("london,paris".into())));
     }
 
     #[test]
     fn test_should_show_compare_when_zone_query_only_has_invalid_segments() {
-        assert!(!should_show_compare(Some("Not_A_Zone,Also_Invalid".into())));
+        assert!(!should_show_compare(Some("Not_A_City,Also_Invalid".into())));
     }
 
     #[test]
     fn test_should_show_compare_when_zone_query_has_valid_and_invalid_segments() {
-        assert!(should_show_compare(Some("Bad_Zone,Europe__Dublin".into())));
+        assert!(should_show_compare(Some("Bad_City,london".into())));
     }
 }
