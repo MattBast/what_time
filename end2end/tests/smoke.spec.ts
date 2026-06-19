@@ -10,9 +10,9 @@ test.describe("smoke", () => {
     await page.goto("/");
     await page.getByRole("button", { name: "Add City" }).click();
     await expect(page.locator("ul#drawer_timezones")).toBeVisible();
-    await expect(
-      page.getByRole("textbox", { name: "Search and add cities..." }),
-    ).toBeVisible();
+    const searchInput = page.getByRole("textbox", { name: "Search and add cities..." });
+    await expect(searchInput).toBeVisible();
+    await expect(searchInput).toBeFocused();
   });
 
   test("selecting a timezone updates the URL", async ({ page }) => {

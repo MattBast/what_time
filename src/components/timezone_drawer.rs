@@ -9,6 +9,7 @@ use leptos::prelude::*;
 pub fn TimezoneDrawerContent(
     timezones_query: Memo<Option<String>>,
     set_timezones_query: SignalSetter<Option<String>>,
+    search_input_ref: NodeRef<leptos::html::Input>,
 ) -> impl IntoView {
     // Get a list of all the available cities to present in the dropdown.
     let (city_variants, set_city_variants) = ArcRwSignal::new(CITIES.clone()).split();
@@ -47,6 +48,7 @@ pub fn TimezoneDrawerContent(
         <div class="menu bg-base-200 min-h-full w-80">
             // A search input where the user can type and search for a city.
             <input
+                node_ref=search_input_ref
                 type="text"
                 placeholder="Search and add cities..."
                 class="input w-full mb-2"

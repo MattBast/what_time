@@ -79,15 +79,35 @@ fn TimezoneDrawer(
     set_timezones_query: SignalSetter<Option<String>>,
     children: Children,
 ) -> impl IntoView {
+    // Used to focus the search input after the drawer opens.
+    let search_input_ref = NodeRef::<leptos::html::Input>::new();
+
     view! {
         <div class="drawer drawer-end">
-          <input id=DRAWER_SWITCH_ID type="checkbox" class="drawer-toggle" />
+          <input
+            id=DRAWER_SWITCH_ID
+            type="checkbox"
+            class="drawer-toggle"
+            on:change=move |ev| {
+                if event_target_checked(&ev) {
+                    set_timeout(move || {
+                        if let Some(input) = search_input_ref.get() {
+                            let _ = input.focus();
+                        }
+                    }, std::time::Duration::from_millis(150));
+                }
+            }
+          />
           <div class="drawer-content">
               {children()}
           </div>
           <div class="drawer-side">
             <label for=DRAWER_SWITCH_ID aria-label="close sidebar" class="drawer-overlay"></label>
-            <TimezoneDrawerContent timezones_query set_timezones_query/>
+            <TimezoneDrawerContent
+                timezones_query
+                set_timezones_query
+                search_input_ref
+            />
           </div>
         </div>
     }
