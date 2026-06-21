@@ -31,7 +31,7 @@ pub fn Wrapper() -> impl IntoView {
 #[component]
 fn Header() -> impl IntoView {
     view! {
-        <div class="fixed top-5 left-0 right-0">
+        <div class="fixed top-5 left-0 right-0 z-50">
             <div class="mx-auto w-full max-w-7xl">
                 <div class="relative px-4 sm:px-8">
                         <div class="relative flex gap-4">

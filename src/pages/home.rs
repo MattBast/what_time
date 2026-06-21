@@ -101,7 +101,7 @@ fn TimezoneDrawer(
           <div class="drawer-content">
               {children()}
           </div>
-          <div class="drawer-side">
+          <div class="drawer-side z-[100]">
             <label for=DRAWER_SWITCH_ID aria-label="close sidebar" class="drawer-overlay"></label>
             <TimezoneDrawerContent
                 timezones_query
