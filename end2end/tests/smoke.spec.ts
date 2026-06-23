@@ -22,7 +22,7 @@ test.describe("smoke", () => {
       .getByRole("textbox", { name: "Search and add cities..." })
       .fill("Abidjan");
     await page.getByText("Abidjan").first().click();
-    await expect(page).toHaveURL(/current_time=1766076397&zone=abidjan/);
+    await expect(page).toHaveURL("http://localhost:8080/compare/abidjan?current_time=1766076397");
   });
 
   test("theme selection sets data-theme on html", async ({ page }) => {
