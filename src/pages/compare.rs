@@ -1,6 +1,6 @@
 use crate::components::{BackgroundBlur, TimezoneCard};
 use crate::timezone::{sort_cities, City};
-use crate::url_parse::{city_pair_slugs, find_city_by_slug, url_query_to_cities};
+use crate::url_parse::{find_city_by_slug, route_cities_slugs, url_query_to_cities};
 use crate::{CURRENT_TIME, ZONE};
 use leptos::prelude::*;
 use leptos_meta::Title;
@@ -55,13 +55,7 @@ pub fn CompareCityPair() -> impl IntoView {
     let (time_query, set_time_query) = query_signal::<i64>(CURRENT_TIME);
 
     let route_cities_query = Memo::new(move |_| {
-        params.with(|params| {
-            city_pair_slugs(
-                params.get("city1"),
-                params.get("city2"),
-                extra_cities_query.get(),
-            )
-        })
+        params.with(|params| route_cities_slugs(params.get("cities"), extra_cities_query.get()))
     });
 
     let cities_query = Memo::new(move |_| {
@@ -80,9 +74,9 @@ pub fn CompareCityPair() -> impl IntoView {
 
     let page_title = Memo::new(move |_| {
         params.with(|params| {
-            let city1 = params.get("city1").unwrap_or_default();
-            let city2 = params.get("city2").unwrap_or_default();
-            city_pair_page_title(&city1, &city2)
+            let cities_param = params.get("cities").unwrap_or_default();
+            let slugs: Vec<&str> = cities_param.split('/').filter(|s| !s.is_empty()).collect();
+            route_cities_page_title(&slugs)
         })
     });
 
@@ -104,12 +98,16 @@ pub(crate) fn sorted_cities_from_query(query: String) -> Vec<City> {
     cities
 }
 
-fn city_pair_page_title(city1: &str, city2: &str) -> String {
-    format!(
-        "{} Time vs {} Time | What Time",
-        city_slug_to_title(city1),
-        city_slug_to_title(city2)
-    )
+fn route_cities_page_title(slugs: &[&str]) -> String {
+    if slugs.is_empty() {
+        "What Time".to_string()
+    } else {
+        let titles: Vec<String> = slugs
+            .iter()
+            .map(|slug| format!("{} Time", city_slug_to_title(slug)))
+            .collect();
+        format!("{} | What Time", titles.join(" vs "))
+    }
 }
 
 fn city_slug_to_title(slug: &str) -> String {
@@ -178,10 +176,18 @@ mod tests {
     }
 
     #[test]
-    fn test_city_pair_page_title_from_slugs() {
+    fn test_route_cities_page_title_from_slugs() {
         assert_eq!(
-            city_pair_page_title("london", "new-york"),
+            route_cities_page_title(&["london"]),
+            "London Time | What Time"
+        );
+        assert_eq!(
+            route_cities_page_title(&["london", "new-york"]),
             "London Time vs New York City Time | What Time"
+        );
+        assert_eq!(
+            route_cities_page_title(&["london", "new-york", "paris"]),
+            "London Time vs New York City Time vs Paris Time | What Time"
         );
     }
 

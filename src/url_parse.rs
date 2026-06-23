@@ -71,31 +71,13 @@ pub fn city_slugs_to_url_query(slugs: &[String]) -> String {
     tz_vec_to_url_query(timezones)
 }
 
-pub fn city_pair_url_query(
-    city1: Option<String>,
-    city2: Option<String>,
-    extra: Option<String>,
-) -> String {
-    let mut slugs = Vec::new();
-
-    if let Some(city) = city1 {
-        slugs.push(city);
-    }
-
-    if let Some(city) = city2 {
-        slugs.push(city);
-    }
-
-    if let Some(extra) = extra {
-        slugs.extend(
-            extra
-                .split(',')
-                .map(str::trim)
-                .filter(|slug| !slug.is_empty())
-                .map(ToOwned::to_owned),
-        );
-    }
-
+pub fn route_cities_url_query(cities_param: Option<String>, extra: Option<String>) -> String {
+    let slugs_str = route_cities_slugs(cities_param, extra);
+    let slugs: Vec<String> = slugs_str
+        .split(',')
+        .filter(|s| !s.is_empty())
+        .map(String::from)
+        .collect();
     city_slugs_to_url_query(&slugs)
 }
 
@@ -221,17 +203,15 @@ pub fn remove_city_from_url_query(url_query: Option<String>, city_slug: &str) ->
     slugs.join(",")
 }
 
-pub fn city_pair_slugs(
-    city1: Option<String>,
-    city2: Option<String>,
-    extra: Option<String>,
-) -> String {
+pub fn route_cities_slugs(cities_param: Option<String>, extra: Option<String>) -> String {
     let mut slugs = Vec::new();
-    if let Some(c1) = city1 {
-        slugs.push(c1);
-    }
-    if let Some(c2) = city2 {
-        slugs.push(c2);
+    if let Some(param) = cities_param {
+        for segment in param.split('/') {
+            let segment = segment.trim();
+            if !segment.is_empty() {
+                slugs.push(segment.to_string());
+            }
+        }
     }
     if let Some(ext) = extra {
         for slug in ext.split(',') {
@@ -370,16 +350,15 @@ mod tests {
     }
 
     #[test]
-    fn test_city_pair_url_query_builds_zone_query_from_slugs() {
-        let query = city_pair_url_query(Some("london".into()), Some("paris".into()), None);
+    fn test_route_cities_url_query_builds_zone_query_from_slugs() {
+        let query = route_cities_url_query(Some("london/paris".into()), None);
         assert_eq!(query, "Europe__London,Europe__Paris");
     }
 
     #[test]
-    fn test_city_pair_url_query_includes_extra_city_slugs() {
-        let query = city_pair_url_query(
-            Some("london".into()),
-            Some("new-york".into()),
+    fn test_route_cities_url_query_includes_extra_city_slugs() {
+        let query = route_cities_url_query(
+            Some("london/new-york".into()),
             Some("paris,tokyo,sydney".into()),
         );
 
@@ -390,10 +369,9 @@ mod tests {
     }
 
     #[test]
-    fn test_city_pair_url_query_ignores_unknown_slugs_and_duplicates() {
-        let query = city_pair_url_query(
-            Some("london".into()),
-            Some("not-a-city".into()),
+    fn test_route_cities_url_query_ignores_unknown_slugs_and_duplicates() {
+        let query = route_cities_url_query(
+            Some("london/not-a-city".into()),
             Some("london,paris".into()),
         );
 
@@ -437,10 +415,9 @@ mod tests {
     }
 
     #[test]
-    fn test_city_pair_slugs() {
-        let q = city_pair_slugs(
-            Some("london".to_string()),
-            Some("paris".to_string()),
+    fn test_route_cities_slugs() {
+        let q = route_cities_slugs(
+            Some("london/paris".to_string()),
             Some("new-york,tokyo".to_string()),
         );
         assert_eq!(q, "london,paris,new-york,tokyo");
