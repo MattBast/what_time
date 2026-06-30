@@ -74,7 +74,7 @@ pub fn WelcomeText() -> impl IntoView {
 /// Wraps page content and the timezone drawer. A control with class `drawer-button` and
 /// `for` pointing at the drawer checkbox opens the drawer.
 #[component]
-fn TimezoneDrawer(
+pub fn TimezoneDrawer(
     timezones_query: Memo<Option<String>>,
     set_timezones_query: SignalSetter<Option<String>>,
     children: Children,

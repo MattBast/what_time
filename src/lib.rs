@@ -58,6 +58,10 @@ pub fn App() -> impl IntoView {
                         <Route path=path!("/what_time") view=Home/> // <-- Needed for GitHub pages which uses the base path `/what_time`
                         <Route path=path!("/compare/*cities") view=CompareCityPair/>
                         <Route path=path!("/what_time/compare/*cities") view=CompareCityPair/>
+                        <Route path=path!("/overlap/*cities") view=OverlapCityPair/>
+                        <Route path=path!("/what_time/overlap/*cities") view=OverlapCityPair/>
+                        <Route path=path!("/overlap") view=OverlapHome/>
+                        <Route path=path!("/what_time/overlap") view=OverlapHome/>
                     </ParentRoute>
                 </Routes>
             </main>

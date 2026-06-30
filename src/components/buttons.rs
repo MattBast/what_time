@@ -113,3 +113,82 @@ mod tests {
         assert_eq!(add_timezone_drawer_target(), "drawer-switch");
     }
 }
+
+use crate::timezone::City;
+
+#[component]
+pub fn ViewToggle(
+    is_compare: bool,
+    cities: Memo<Vec<City>>,
+    time_query: Memo<Option<i64>>,
+    cities_query: Memo<Option<String>>,
+) -> impl IntoView {
+    let query_string = move || {
+        let mut parts = Vec::new();
+        if let Some(t) = time_query.get() {
+            parts.push(format!("current_time={t}"));
+        }
+        if let Some(z) = cities_query.get() {
+            parts.push(format!("zone={z}"));
+        }
+        if parts.is_empty() {
+            String::new()
+        } else {
+            format!("?{}", parts.join("&"))
+        }
+    };
+
+    let compare_href = move || {
+        let slugs: Vec<String> = cities.get().iter().map(|c| c.slug.clone()).collect();
+        if slugs.is_empty() {
+            format!("/{}", query_string())
+        } else {
+            format!("/compare/{}{}", slugs.join("/"), query_string())
+        }
+    };
+
+    let overlap_href = move || {
+        let slugs: Vec<String> = cities.get().iter().map(|c| c.slug.clone()).collect();
+        if slugs.is_empty() {
+            format!("/overlap{}", query_string())
+        } else {
+            format!("/overlap/{}{}", slugs.join("/"), query_string())
+        }
+    };
+
+    view! {
+        <div class="flex justify-center w-full mb-6">
+            <div class="bg-base-200/60 backdrop-blur-md p-1 rounded-xl flex gap-1 border border-base-300">
+                <a
+                    href=compare_href
+                    class=move || {
+                        let active = is_compare;
+                        let base = "px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 select-none";
+                        if active {
+                            format!("{base} bg-neutral text-neutral-content shadow-sm")
+                        } else {
+                            format!("{base} text-base-content/70 hover:text-base-content hover:bg-base-300/50")
+                        }
+                    }
+                >
+                    "Compare"
+                </a>
+                <a
+                    href=overlap_href
+                    class=move || {
+                        let active = !is_compare;
+                        let base = "px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 select-none";
+                        if active {
+                            format!("{base} bg-neutral text-neutral-content shadow-sm")
+                        } else {
+                            format!("{base} text-base-content/70 hover:text-base-content hover:bg-base-300/50")
+                        }
+                    }
+                >
+                    "Overlap"
+                </a>
+            </div>
+        </div>
+    }
+}
+

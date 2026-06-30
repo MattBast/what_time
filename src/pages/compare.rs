@@ -23,10 +23,18 @@ pub fn Compare(
         set_cities.set(sorted_cities_from_query(query));
     });
 
+    let cities_memo = Memo::new(move |_| get_cities.get());
+
     view! {
         <BackgroundBlur>
-            <div class="flex justify-center w-full overflow-x-auto px-2 pt-4">
-                <div class="flex flex-wrap justify-center gap-4">
+            <div class="flex flex-col items-center w-full px-2 pt-4">
+                <crate::components::ViewToggle
+                    is_compare=true
+                    cities=cities_memo
+                    time_query=time_query
+                    cities_query=cities_query
+                />
+                <div class="flex flex-wrap justify-center gap-4 w-full">
                     <For
                         each=move || get_cities.get()
                         key=|city| city.slug.clone()
