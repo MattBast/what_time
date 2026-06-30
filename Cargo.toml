@@ -2,7 +2,7 @@
 name = "what_time"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.84"
+rust-version = "1.96"
 
 [dependencies]
 console_error_panic_hook = "0.1.7"
