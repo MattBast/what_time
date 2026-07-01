@@ -21,7 +21,7 @@ pub fn TimeInput(
 
     view! {
         <input
-            class="input input-ghost input-xl text-5xl sm:text-6xl font-semibold w-fit max-w-full time-input-no-icon"
+            class="input input-xl font-semibold"
             type="time"
             name=format!("time_picker_{}", timezone.name().replace("/", "__"))
             id=format!("time_picker_{}", timezone.name().replace("/", "__"))
@@ -50,7 +50,7 @@ pub fn DateInput(
 
     view! {
         <input
-            class="input input-ghost input-sm max-w-full w-fit"
+            class="input input-sm max-w-full w-fit"
             type="date"
             name=format!("date_picker_{}", timezone.name().replace("/", "__"))
             id=format!("date_picker_{}", timezone.name().replace("/", "__"))

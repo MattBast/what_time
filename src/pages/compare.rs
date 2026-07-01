@@ -33,11 +33,13 @@ pub fn Compare(
                         children=move |city| {
                             let c = city.clone();
                             view! {
+
                                 <TimezoneCard
                                     city=c
                                     time_query
                                     set_time_query
                                 />
+
                             }
                         }
                     />
