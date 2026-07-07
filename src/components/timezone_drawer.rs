@@ -6,11 +6,36 @@ use crate::CURRENT_TIME;
 use leptos::prelude::*;
 use leptos_router::hooks::{use_navigate, use_query_map};
 
+/// Which page family the drawer should navigate within when cities are added or removed.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum DrawerRouteMode {
+    #[default]
+    Compare,
+    Overlap,
+}
+
+impl DrawerRouteMode {
+    fn empty_path(self) -> &'static str {
+        match self {
+            Self::Compare => "/",
+            Self::Overlap => "/overlap",
+        }
+    }
+
+    fn route_prefix(self) -> &'static str {
+        match self {
+            Self::Compare => "compare",
+            Self::Overlap => "overlap",
+        }
+    }
+}
+
 #[component]
 pub fn TimezoneDrawerContent(
     timezones_query: Memo<Option<String>>,
     set_timezones_query: SignalSetter<Option<String>>,
     search_input_ref: NodeRef<leptos::html::Input>,
+    #[prop(default = DrawerRouteMode::Compare)] route_mode: DrawerRouteMode,
 ) -> impl IntoView {
     // `set_timezones_query` is kept as a prop for API compatibility but navigation
     // is now handled by route-based URLs instead of query-string mutations.
@@ -95,6 +120,7 @@ pub fn TimezoneDrawerContent(
                                                 &selected_cities.get_untracked(),
                                                 &city.slug,
                                                 current_time,
+                                                route_mode,
                                             );
                                             navigate(&route, Default::default());
                                             set_search_term.set(String::new());
@@ -135,6 +161,7 @@ pub fn TimezoneDrawerContent(
                                                 &selected_cities.get_untracked(),
                                                 &city.slug,
                                                 current_time,
+                                                route_mode,
                                             );
                                             navigate(&route, Default::default());
                                             set_search_term.set(String::new());
@@ -150,13 +177,13 @@ pub fn TimezoneDrawerContent(
     }
 }
 
-/// Build a `/compare/…` route path from an ordered list of city slugs.
-/// Returns `"/"` when the slice is empty so callers can navigate back to the home page.
-pub(crate) fn route_path_for_slugs(slugs: &[String]) -> String {
+/// Build a route path from an ordered list of city slugs for the given page mode.
+/// Returns the mode's empty path when the slice is empty.
+pub(crate) fn route_path_for_slugs(slugs: &[String], mode: DrawerRouteMode) -> String {
     if slugs.is_empty() {
-        "/".to_string()
+        mode.empty_path().to_string()
     } else {
-        format!("/compare/{}", slugs.join("/"))
+        format!("/{}/{}", mode.route_prefix(), slugs.join("/"))
     }
 }
 
@@ -174,10 +201,11 @@ pub(crate) fn add_city_to_route(
     selected: &[City],
     new_slug: &str,
     current_time: Option<String>,
+    mode: DrawerRouteMode,
 ) -> String {
     let mut slugs: Vec<String> = selected.iter().map(|c| c.slug.clone()).collect();
     slugs.push(new_slug.to_string());
-    route_path_with_time(&route_path_for_slugs(&slugs), current_time)
+    route_path_with_time(&route_path_for_slugs(&slugs, mode), current_time)
 }
 
 /// Build the route obtained by removing `slug_to_remove` from the currently-selected cities,
@@ -187,15 +215,16 @@ pub(crate) fn remove_city_from_route(
     selected: &[City],
     slug_to_remove: &str,
     current_time: Option<String>,
+    mode: DrawerRouteMode,
 ) -> String {
     let slugs: Vec<String> = selected
         .iter()
         .filter(|c| c.slug != slug_to_remove)
         .map(|c| c.slug.clone())
         .collect();
-    let path = route_path_for_slugs(&slugs);
-    // Don't forward current_time when navigating all the way back to the home page.
-    if path == "/" {
+    let path = route_path_for_slugs(&slugs, mode);
+    // Don't forward current_time when navigating back to the mode's empty page.
+    if path == mode.empty_path() {
         path
     } else {
         route_path_with_time(&path, current_time)
@@ -222,15 +251,20 @@ mod tests {
 
     #[test]
     fn test_route_path_for_no_slugs_returns_home() {
-        assert_eq!(route_path_for_slugs(&[]), "/");
+        assert_eq!(route_path_for_slugs(&[], DrawerRouteMode::Compare), "/");
+        assert_eq!(route_path_for_slugs(&[], DrawerRouteMode::Overlap), "/overlap");
     }
 
     #[test]
     fn test_route_path_for_one_slug() {
         let slug = london().slug;
         assert_eq!(
-            route_path_for_slugs(&[slug.clone()]),
+            route_path_for_slugs(&[slug.clone()], DrawerRouteMode::Compare),
             format!("/compare/{slug}")
+        );
+        assert_eq!(
+            route_path_for_slugs(&[slug.clone()], DrawerRouteMode::Overlap),
+            format!("/overlap/{slug}")
         );
     }
 
@@ -239,8 +273,12 @@ mod tests {
         let (l, p, t) = (london().slug, paris().slug, tokyo().slug);
         let slugs = vec![l.clone(), p.clone(), t.clone()];
         assert_eq!(
-            route_path_for_slugs(&slugs),
+            route_path_for_slugs(&slugs, DrawerRouteMode::Compare),
             format!("/compare/{l}/{p}/{t}")
+        );
+        assert_eq!(
+            route_path_for_slugs(&slugs, DrawerRouteMode::Overlap),
+            format!("/overlap/{l}/{p}/{t}")
         );
     }
 
@@ -276,8 +314,12 @@ mod tests {
     fn test_add_city_to_route_from_empty_selection() {
         let slug = london().slug;
         assert_eq!(
-            add_city_to_route(&[], &slug, None),
+            add_city_to_route(&[], &slug, None, DrawerRouteMode::Compare),
             format!("/compare/{slug}")
+        );
+        assert_eq!(
+            add_city_to_route(&[], &slug, None, DrawerRouteMode::Overlap),
+            format!("/overlap/{slug}")
         );
     }
 
@@ -285,8 +327,12 @@ mod tests {
     fn test_add_city_to_route_appends_after_existing_city() {
         let (london, paris) = (london(), paris());
         assert_eq!(
-            add_city_to_route(&[london.clone()], &paris.slug, None),
+            add_city_to_route(&[london.clone()], &paris.slug, None, DrawerRouteMode::Compare),
             format!("/compare/{}/{}", london.slug, paris.slug)
+        );
+        assert_eq!(
+            add_city_to_route(&[london.clone()], &paris.slug, None, DrawerRouteMode::Overlap),
+            format!("/overlap/{}/{}", london.slug, paris.slug)
         );
     }
 
@@ -294,8 +340,22 @@ mod tests {
     fn test_add_city_to_route_preserves_current_time() {
         let (london, paris) = (london(), paris());
         assert_eq!(
-            add_city_to_route(&[london.clone()], &paris.slug, Some("99999".to_string())),
+            add_city_to_route(
+                &[london.clone()],
+                &paris.slug,
+                Some("99999".to_string()),
+                DrawerRouteMode::Compare,
+            ),
             format!("/compare/{}/{}", london.slug, paris.slug) + "?current_time=99999"
+        );
+        assert_eq!(
+            add_city_to_route(
+                &[london.clone()],
+                &paris.slug,
+                Some("99999".to_string()),
+                DrawerRouteMode::Overlap,
+            ),
+            format!("/overlap/{}/{}", london.slug, paris.slug) + "?current_time=99999"
         );
     }
 
@@ -303,7 +363,12 @@ mod tests {
     fn test_add_city_to_route_preserves_order() {
         let (london, paris, tokyo) = (london(), paris(), tokyo());
         assert_eq!(
-            add_city_to_route(&[london.clone(), paris.clone()], &tokyo.slug, None),
+            add_city_to_route(
+                &[london.clone(), paris.clone()],
+                &tokyo.slug,
+                None,
+                DrawerRouteMode::Compare,
+            ),
             format!("/compare/{}/{}/{}", london.slug, paris.slug, tokyo.slug)
         );
     }
@@ -314,8 +379,22 @@ mod tests {
     fn test_remove_last_city_returns_home_without_time() {
         let london = london();
         assert_eq!(
-            remove_city_from_route(&[london.clone()], &london.slug, Some("12345".to_string())),
+            remove_city_from_route(
+                &[london.clone()],
+                &london.slug,
+                Some("12345".to_string()),
+                DrawerRouteMode::Compare,
+            ),
             "/"
+        );
+        assert_eq!(
+            remove_city_from_route(
+                &[london.clone()],
+                &london.slug,
+                Some("12345".to_string()),
+                DrawerRouteMode::Overlap,
+            ),
+            "/overlap"
         );
     }
 
@@ -323,8 +402,22 @@ mod tests {
     fn test_remove_city_leaves_remaining_cities() {
         let (london, paris) = (london(), paris());
         assert_eq!(
-            remove_city_from_route(&[london.clone(), paris.clone()], &paris.slug, None),
+            remove_city_from_route(
+                &[london.clone(), paris.clone()],
+                &paris.slug,
+                None,
+                DrawerRouteMode::Compare,
+            ),
             format!("/compare/{}", london.slug)
+        );
+        assert_eq!(
+            remove_city_from_route(
+                &[london.clone(), paris.clone()],
+                &paris.slug,
+                None,
+                DrawerRouteMode::Overlap,
+            ),
+            format!("/overlap/{}", london.slug)
         );
     }
 
@@ -336,8 +429,18 @@ mod tests {
                 &[london.clone(), paris.clone()],
                 &paris.slug,
                 Some("99999".to_string()),
+                DrawerRouteMode::Compare,
             ),
             format!("/compare/{}", london.slug) + "?current_time=99999"
+        );
+        assert_eq!(
+            remove_city_from_route(
+                &[london.clone(), paris.clone()],
+                &paris.slug,
+                Some("99999".to_string()),
+                DrawerRouteMode::Overlap,
+            ),
+            format!("/overlap/{}", london.slug) + "?current_time=99999"
         );
     }
 
@@ -349,6 +452,7 @@ mod tests {
                 &[london.clone(), paris.clone(), tokyo.clone()],
                 &london.slug,
                 None,
+                DrawerRouteMode::Compare,
             ),
             format!("/compare/{}/{}", paris.slug, tokyo.slug)
         );
@@ -358,7 +462,12 @@ mod tests {
     fn test_remove_city_not_in_selection_is_unchanged() {
         let (london, tokyo) = (london(), tokyo());
         assert_eq!(
-            remove_city_from_route(&[london.clone()], &tokyo.slug, None),
+            remove_city_from_route(
+                &[london.clone()],
+                &tokyo.slug,
+                None,
+                DrawerRouteMode::Compare,
+            ),
             format!("/compare/{}", london.slug)
         );
     }

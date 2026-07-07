@@ -1,6 +1,6 @@
 use crate::components::{
     AddTimezoneButton, BackgroundBlur, InlineLi, IntroSubtitle, IntroTitle, Introtext, NowButton,
-    TimezoneDrawerContent, DRAWER_SWITCH_ID,
+    TimezoneDrawerContent, DRAWER_SWITCH_ID, DrawerRouteMode,
 };
 use crate::pages::Compare;
 use crate::url_parse::url_query_to_cities;
@@ -77,6 +77,7 @@ pub fn WelcomeText() -> impl IntoView {
 pub fn TimezoneDrawer(
     timezones_query: Memo<Option<String>>,
     set_timezones_query: SignalSetter<Option<String>>,
+    #[prop(default = DrawerRouteMode::Compare)] route_mode: DrawerRouteMode,
     children: Children,
 ) -> impl IntoView {
     // Used to focus the search input after the drawer opens.
@@ -107,6 +108,7 @@ pub fn TimezoneDrawer(
                 timezones_query
                 set_timezones_query
                 search_input_ref
+                route_mode
             />
           </div>
         </div>

@@ -1,4 +1,7 @@
-use crate::components::{AddTimezoneButton, BackgroundBlur, IntroSubtitle, IntroTitle, Introtext, NowButton, ViewToggle};
+use crate::components::{
+    AddTimezoneButton, BackgroundBlur, IntroSubtitle, IntroTitle, Introtext, NowButton, ViewToggle,
+    DrawerRouteMode,
+};
 use crate::pages::TimezoneDrawer;
 use crate::timezone::{sort_cities, utc_to_local_timezone};
 use crate::url_parse::{find_city_by_slug, route_cities_slugs, url_query_to_cities};
@@ -185,9 +188,7 @@ pub fn Overlap(
                                                             <div
                                                                 class=move || {
                                                                     let base = "flex flex-col items-center flex-1 min-w-[32px] relative z-10 py-1 rounded-lg cursor-pointer transition-all duration-200 tooltip tooltip-top";
-                                                                    if is_selected {
-                                                                        format!("{base} bg-neutral/10 border border-neutral/20 shadow-inner scale-110")
-                                                                    } else if is_overlap_hour {
+                                                                    if is_overlap_hour {
                                                                         format!("{base} bg-success/10 hover:bg-success/20 border border-success/15")
                                                                     } else {
                                                                         format!("{base} hover:bg-base-300/40")
@@ -201,9 +202,7 @@ pub fn Overlap(
                                                                 // Hour text label
                                                                 <span class=move || {
                                                                     let base = "text-[10px] font-bold select-none transition-colors";
-                                                                    if is_selected {
-                                                                        format!("{base} text-neutral-content bg-neutral px-1.5 py-0.5 rounded-md text-[9px]")
-                                                                    } else if is_overlap_hour {
+                                                                    if is_overlap_hour {
                                                                         format!("{base} text-success-content")
                                                                     } else if is_work {
                                                                         format!("{base} text-info-content")
@@ -217,9 +216,7 @@ pub fn Overlap(
                                                                 // Dot marker
                                                                 <div class=move || {
                                                                     let base = "w-3.5 h-3.5 rounded-full border-2 border-base-100 transition-all duration-200 mt-1 shadow-sm";
-                                                                    if is_selected {
-                                                                        format!("{base} bg-neutral scale-125 ring-2 ring-neutral/30")
-                                                                    } else if is_overlap_hour {
+                                                                    if is_overlap_hour {
                                                                         format!("{base} bg-success scale-110 shadow-[0_0_8px_var(--color-success)]")
                                                                     } else if is_work {
                                                                         format!("{base} bg-info")
@@ -229,14 +226,7 @@ pub fn Overlap(
                                                                 }></div>
 
                                                                 // Weekday label
-                                                                <span class=move || {
-                                                                    let base = "text-[8px] opacity-60 mt-1 select-none font-medium";
-                                                                    if is_selected {
-                                                                        format!("{base} font-bold opacity-100")
-                                                                    } else {
-                                                                        base.to_string()
-                                                                    }
-                                                                }>
+                                                                <span class="text-[8px] opacity-60 mt-1 select-none font-medium">
                                                                     {weekday_label}
                                                                 </span>
                                                             </div>
@@ -264,7 +254,7 @@ pub fn OverlapContent(
     set_time_query: SignalSetter<Option<i64>>,
 ) -> impl IntoView {
     view! {
-        <TimezoneDrawer timezones_query set_timezones_query>
+        <TimezoneDrawer timezones_query set_timezones_query route_mode=DrawerRouteMode::Overlap>
             <Show
                 when=move || crate::pages::should_show_compare(timezones_query.get())
                 fallback=|| view! {
@@ -340,14 +330,219 @@ pub fn OverlapCityPair() -> impl IntoView {
         })
     });
 
+    let (get_cities, set_cities) = signal(Vec::new());
+
+    // Listen for the `zone` url query to change and when it does, re-render the cities.
+    Effect::new(move || {
+        let query = cities_query.get().unwrap_or_default();
+        let mut cities = url_query_to_cities(query);
+        sort_cities(&mut cities);
+        set_cities.set(cities);
+    });
+
+    let cities_memo = Memo::new(move |_| get_cities.get());
+
+    // Compute the overlaps for the 25 hours (0..=24) of the timeline
+    let overlaps = Memo::new(move |_| {
+        let cities = get_cities.get();
+        if cities.is_empty() {
+            return vec![false; 25];
+        }
+
+        let first_city = &cities[0];
+        let first_city_tz = Tz::from_str(&first_city.timezone).unwrap_or(Tz::UTC);
+        let base_dt = utc_to_local_timezone(time_query.get(), first_city_tz);
+
+        let start_of_day = match base_dt.date_naive().and_hms_opt(0, 0, 0) {
+            Some(naive_time) => match first_city_tz.from_local_datetime(&naive_time) {
+                chrono::LocalResult::Single(dt) => dt,
+                chrono::LocalResult::Ambiguous(dt1, _) => dt1,
+                chrono::LocalResult::None => base_dt,
+            },
+            None => base_dt,
+        };
+        let start_of_day_utc = start_of_day.with_timezone(&Utc);
+
+        (0..=24)
+            .map(|i| {
+                let hour_utc = start_of_day_utc + chrono::Duration::hours(i);
+                cities.iter().all(|city| {
+                    let tz = Tz::from_str(&city.timezone).unwrap_or(Tz::UTC);
+                    let local_dt = hour_utc.with_timezone(&tz);
+                    let hr = local_dt.hour();
+                    let wk = local_dt.weekday();
+
+                    let is_working_hour = hr >= 9 && hr < 17;
+                    let is_working_day = wk != Weekday::Sat && wk != Weekday::Sun;
+
+                    is_working_hour && is_working_day
+                })
+            })
+            .collect::<Vec<bool>>()
+    });
+
+    // Compute the index of the hour currently selected
+    let selected_index = Memo::new(move |_| {
+        let cities = get_cities.get();
+        if cities.is_empty() {
+            return None;
+        }
+        let first_city = &cities[0];
+        let first_city_tz = Tz::from_str(&first_city.timezone).unwrap_or(Tz::UTC);
+        let base_dt = utc_to_local_timezone(time_query.get(), first_city_tz);
+
+        Some(base_dt.hour() as usize)
+    });
+
+    // Compute the start of day UTC reference timestamp
+    let start_of_day_utc_ref = Memo::new(move |_| {
+        let cities = get_cities.get();
+        if cities.is_empty() {
+            return Utc::now();
+        }
+        let first_city = &cities[0];
+        let first_city_tz = Tz::from_str(&first_city.timezone).unwrap_or(Tz::UTC);
+        let base_dt = utc_to_local_timezone(time_query.get(), first_city_tz);
+
+        let start_of_day = match base_dt.date_naive().and_hms_opt(0, 0, 0) {
+            Some(naive_time) => match first_city_tz.from_local_datetime(&naive_time) {
+                chrono::LocalResult::Single(dt) => dt,
+                chrono::LocalResult::Ambiguous(dt1, _) => dt1,
+                chrono::LocalResult::None => base_dt,
+            },
+            None => base_dt,
+        };
+        start_of_day.with_timezone(&Utc)
+    });
+
     view! {
         <Title text=move || format!("Overlap: {}", page_title.get())/>
-        <OverlapContent
-            timezones_query=cities_query
-            set_timezones_query=set_zone_query
-            time_query
-            set_time_query
-        />
+        <TimezoneDrawer timezones_query=cities_query set_timezones_query=set_zone_query route_mode=DrawerRouteMode::Overlap>
+            <BackgroundBlur>
+                <div class="flex flex-col items-center w-full px-2 pt-4">
+                    <ViewToggle
+                        is_compare=false
+                        cities=cities_memo
+                        time_query=time_query
+                        cities_query=cities_query
+                    />
+
+                    <Show
+                        when=move || !get_cities.get().is_empty()
+                        fallback=|| view! {
+                            <div class="text-center py-12 opacity-60">
+                                "Please select at least one city/timezone to compare."
+                            </div>
+                        }
+                    >
+                        <div class="w-full max-w-3xl mx-auto border border-base-300 rounded-3xl bg-base-100/50 backdrop-blur-md p-6 shadow-xl overflow-hidden mb-6">
+                            <div class="text-center mb-6">
+                                <h2 class="text-lg font-bold tracking-tight">"Timezone Overlap Timeline"</h2>
+                                <p class="text-xs opacity-60 mt-1 flex flex-col gap-1 items-center justify-center">
+                                    <span>"Highlighting overlapping working hours (9:00 AM - 5:00 PM local time)"</span>
+                                    <span class="flex items-center gap-1.5 mt-1">
+                                        <span class="badge badge-success badge-xs"></span>
+                                        "Overlap Hour"
+                                    </span>
+                                </p>
+                            </div>
+
+                            <div class="overflow-x-auto w-full no-scrollbar">
+                                <ul class="timeline timeline-vertical mx-auto w-fit" style="grid-template-columns: 0px auto 1fr;">
+                                    <For
+                                        each=move || 0..=24
+                                        key=|&i| i
+                                        children=move |i| {
+                                            let hour_utc = start_of_day_utc_ref.get() + chrono::Duration::hours(i as i64);
+
+                                            let is_overlap_hour = overlaps.get()[i];
+
+                                            view! {
+                                                <li>
+                                                    {move || {
+                                                        if i > 0 {
+                                                            let is_overlap_prev = overlaps.get()[i - 1] && overlaps.get()[i];
+                                                            let class = if is_overlap_prev { "bg-success" } else { "" };
+                                                            Some(view! { <hr class=class /> })
+                                                        } else {
+                                                            None
+                                                        }
+                                                    }}
+
+
+                                                    {move || {
+                                                        if is_overlap_hour {
+                                                            view! {
+                                                                <div
+                                                                    class="timeline-middle bg-success w-4.5 h-4.5 rounded-full border-2 border-base-100 shadow-sm z-10 cursor-pointer"
+                                                                    on:click=move |_| {
+                                                                        set_time_query.set(Some(hour_utc.timestamp()));
+                                                                    }
+                                                                ></div>
+                                                            }.into_any()
+                                                        } else {
+                                                            view! {
+                                                                <div
+                                                                    class="timeline-middle w-4 h-4 rounded-full bg-base-300 border-2 border-base-100 hover:bg-neutral hover:scale-110 transition-all duration-200 cursor-pointer"
+                                                                    on:click=move |_| {
+                                                                        set_time_query.set(Some(hour_utc.timestamp()));
+                                                                    }
+                                                                ></div>
+                                                            }.into_any()
+                                                        }
+                                                    }}
+
+                                                    <div class="timeline-end bg-base-200/20 hover:bg-base-200/50 transition-colors p-3 rounded-2xl border border-base-200/40 flex flex-col gap-2 min-w-[280px] ml-2 my-1">
+                                                        {move || {
+                                                            let cities_clone = get_cities.get();
+                                                            cities_clone.into_iter().map(|city| {
+                                                                let city_tz = Tz::from_str(&city.timezone).unwrap_or(Tz::UTC);
+                                                                let local_dt = hour_utc.with_timezone(&city_tz);
+                                                                let time_str = local_dt.format("%I:%M %p").to_string();
+                                                                let day_str = local_dt.format("%a").to_string();
+
+                                                                view! {
+                                                                    <div class="flex items-center justify-between text-xs py-0.5">
+                                                                        <div class="flex items-center gap-1.5 font-medium flex-1 min-w-0 pr-2">
+                                                                            <span class="shrink-0">{city.emoji.clone()}</span>
+                                                                            <span class="opacity-80 truncate">{city.name.clone()}</span>
+                                                                        </div>
+                                                                        <div class="flex items-center gap-2 font-mono shrink-0">
+                                                                            <span class="opacity-70">{time_str}</span>
+                                                                            <span class="text-[10px] opacity-45">{day_str}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                            }).collect_view()
+                                                        }}
+                                                    </div>
+
+                                                    {move || {
+                                                        if i < 24 {
+                                                            let is_overlap_next = overlaps.get()[i] && overlaps.get()[i + 1];
+                                                            let class = if is_overlap_next { "bg-success" } else { "" };
+                                                            Some(view! { <hr class=class /> })
+                                                        } else {
+                                                            None
+                                                        }
+                                                    }}
+                                                </li>
+                                            }
+                                        }
+                                    />
+                                </ul>
+                            </div>
+                        </div>
+                    </Show>
+                </div>
+            </BackgroundBlur>
+            <BackgroundBlur>
+                <div class="flex flex-wrap justify-center gap-3 py-8">
+                    <AddTimezoneButton/>
+                    <NowButton set_time_query/>
+                </div>
+            </BackgroundBlur>
+        </TimezoneDrawer>
     }
 }
 
