@@ -2,7 +2,7 @@ use crate::components::{
     AddTimezoneButton, BackgroundBlur, InlineLi, IntroSubtitle, IntroTitle, Introtext, NowButton,
     TimezoneDrawerContent, DRAWER_SWITCH_ID,
 };
-use crate::pages::Compare;
+use crate::pages::{Compare, Hours};
 use crate::url_parse::url_query_to_cities;
 use crate::{CURRENT_TIME, ZONE};
 use leptos::prelude::*;
@@ -26,19 +26,6 @@ pub fn HomeContent(
 ) -> impl IntoView {
     view! {
         <TimezoneDrawer timezones_query set_timezones_query>
-            <Show
-                when=move || should_show_compare(timezones_query.get())
-                fallback=|| view! {
-                    <BackgroundBlur>
-                        <div class="pt-24">
-                            <WelcomeText/>
-                        </div>
-                    </BackgroundBlur>
-                }
-            >
-                <Compare cities_query=timezones_query time_query set_time_query/>
-            </Show>
-
             <BackgroundBlur>
                 <div class="flex flex-wrap justify-center gap-3 py-8">
                     // Open drawer to add a new city.
@@ -51,6 +38,20 @@ pub fn HomeContent(
 
                 </div>
             </BackgroundBlur>
+
+            <Show
+                when=move || should_show_compare(timezones_query.get())
+                fallback=|| view! {
+                    <BackgroundBlur>
+                        <div class="pt-24">
+                            <WelcomeText/>
+                        </div>
+                    </BackgroundBlur>
+                }
+            >
+                <Compare cities_query=timezones_query time_query set_time_query/>
+                <Hours cities_query=timezones_query/>
+            </Show>
         </TimezoneDrawer>
     }
 }
