@@ -1,4 +1,5 @@
 use crate::components::{Logo, ThemeToggle};
+use leptos::html::div;
 use leptos::prelude::*;
 use leptos_router::components::Outlet;
 
@@ -30,23 +31,13 @@ pub fn Wrapper() -> impl IntoView {
 
 #[component]
 fn Header() -> impl IntoView {
-    view! {
-        <div class="fixed top-5 left-0 right-0 z-50">
-            <div class="mx-auto w-full max-w-7xl">
-                <div class="relative px-4 sm:px-8">
-                        <div class="relative flex gap-4">
-
-                            <div class="flex flex-1">
-                                <Logo/>
-                            </div>
-
-                            <div class="flex justify-end md:flex-1">
-                                <ThemeToggle/>
-                            </div>
-
-                        </div>
-                </div>
-            </div>
-        </div>
-    }
+    div()
+        .attr("class", "fixed top-5 left-0 right-0 z-50")
+        .child(
+            div().attr("class", "mx-auto max-w-7xl px-4 sm:px-8").child(
+                div()
+                    .attr("class", "flex items-center justify-between")
+                    .child((Logo(), ThemeToggle())),
+            ),
+        )
 }

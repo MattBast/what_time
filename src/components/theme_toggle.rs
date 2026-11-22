@@ -21,7 +21,7 @@ pub fn ThemeToggle() -> impl IntoView {
     });
 
     view! {
-        <div id="themes-button" class="dropdown dropdown-end mb-72">
+        <div id="themes-button" class="dropdown dropdown-end">
           <div tabindex="0" role="button" class="btn btn-outline bg-base-100">
             "Theme"
 
