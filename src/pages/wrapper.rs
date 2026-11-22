@@ -1,4 +1,4 @@
-use crate::components::{theme_toggle, Logo};
+use crate::components::{logo, theme_toggle};
 use leptos::html::div;
 use leptos::prelude::*;
 use leptos_router::components::Outlet;
@@ -37,7 +37,7 @@ fn Header() -> impl IntoView {
             div().attr("class", "mx-auto max-w-7xl px-4 sm:px-8").child(
                 div()
                     .attr("class", "flex items-center justify-between")
-                    .child((Logo(), theme_toggle())),
+                    .child((logo(), theme_toggle())),
             ),
         )
 }

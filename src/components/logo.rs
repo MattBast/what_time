@@ -1,46 +1,84 @@
+use leptos::html::div;
 use leptos::prelude::*;
+use leptos::svg::{circle, defs, feGaussianBlur, filter, g, svg};
 
 /// The outline of a circle with a "glow" sitting behind it. This is provided
 /// as an SVG and inverts its colours when the browser is in dark mode.
-#[component]
-pub fn Logo() -> impl IntoView {
-    view! {
-        <div class="w-10 h-10">
-            <svg
-                // Set the stroke (outline) colour of the circles from here. Inverts the
-                // colours when the browser is in dark mode.
-                class="stroke-current"
-                xmlns="http://www.w3.org/2000/svg"
-                version="1.1"
-                xmlns:xlink="http://www.w3.org/1999/xlink"
-                xmlns:svgjs="http://svgjs.dev/svgjs"
-                viewBox="200 100 600 600"
-                opacity="1"
-            >
-                <defs>
-                    <filter id="nnneon-filter" x="-100%" y="-100%" width="400%" height="400%" filterUnits="objectBoundingBox" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                        <feGaussianBlur stdDeviation="17 8" x="0%" y="0%" width="100%" height="100%" in="SourceGraphic" edgeMode="none" result="blur">
-                        </feGaussianBlur>
-                    </filter>
-                    <filter id="nnneon-filter2" x="-100%" y="-100%" width="400%" height="400%" filterUnits="objectBoundingBox" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                        <feGaussianBlur stdDeviation="10 17" x="0%" y="0%" width="100%" height="100%" in="SourceGraphic" edgeMode="none" result="blur">
-                        </feGaussianBlur>
-                    </filter>
-                </defs>
-                <g
-                    stroke-width="16"
-                    fill="none"
-                >
-                    <circle r="150" cx="400" cy="400" filter="url(#nnneon-filter)">
-                    </circle>
-                    <circle r="150" cx="412" cy="400" filter="url(#nnneon-filter2)" opacity="0.25">
-                    </circle>
-                    <circle r="150" cx="388" cy="400" filter="url(#nnneon-filter2)" opacity="0.25">
-                    </circle>
-                    <circle r="150" cx="400" cy="400">
-                    </circle>
-                </g>
-            </svg>
-        </div>
-    }
+pub fn logo() -> impl IntoView {
+    div().attr("class", "w-10 h-10").child(
+        svg()
+            .attr("class", "stroke-current")
+            .attr("xmlns", "http://www.w3.org/2000/svg")
+            .attr("viewBox", "200 100 600 600")
+            .attr("opacity", "1")
+            .child(
+                defs().child((
+                    filter()
+                        .attr("id", "nnneon-filter")
+                        .attr("x", "-100%")
+                        .attr("y", "-100%")
+                        .attr("width", "400%")
+                        .attr("height", "400%")
+                        .attr("filterUnits", "objectBoundingBox")
+                        .attr("primitiveUnits", "userSpaceOnUse")
+                        .attr("color-interpolation-filters", "sRGB")
+                        .child(
+                            feGaussianBlur()
+                                .attr("stdDeviation", "17 8")
+                                .attr("x", "0%")
+                                .attr("y", "0%")
+                                .attr("width", "100%")
+                                .attr("height", "100%")
+                                .attr("in", "SourceGraphic")
+                                .attr("edgeMode", "none")
+                                .attr("result", "blur"),
+                        ),
+                    filter()
+                        .attr("id", "nnneon-filter2")
+                        .attr("x", "-100%")
+                        .attr("y", "-100%")
+                        .attr("width", "400%")
+                        .attr("height", "400%")
+                        .attr("filterUnits", "objectBoundingBox")
+                        .attr("primitiveUnits", "userSpaceOnUse")
+                        .attr("color-interpolation-filters", "sRGB")
+                        .child(
+                            feGaussianBlur()
+                                .attr("stdDeviation", "10 17")
+                                .attr("x", "0%")
+                                .attr("y", "0%")
+                                .attr("width", "100%")
+                                .attr("height", "100%")
+                                .attr("in", "SourceGraphic")
+                                .attr("edgeMode", "none")
+                                .attr("result", "blur"),
+                        ),
+                )),
+            )
+            .child(
+                g().attr("stroke-width", "16").attr("fill", "none").child((
+                    circle()
+                        .attr("r", "150")
+                        .attr("cx", "400")
+                        .attr("cy", "400")
+                        .attr("filter", "url(#nnneon-filter)"),
+                    circle()
+                        .attr("r", "150")
+                        .attr("cx", "412")
+                        .attr("cy", "400")
+                        .attr("filter", "url(#nnneon-filter2)")
+                        .attr("opacity", "0.25"),
+                    circle()
+                        .attr("r", "150")
+                        .attr("cx", "388")
+                        .attr("cy", "400")
+                        .attr("filter", "url(#nnneon-filter2)")
+                        .attr("opacity", "0.25"),
+                    circle()
+                        .attr("r", "150")
+                        .attr("cx", "400")
+                        .attr("cy", "400"),
+                )),
+            ),
+    )
 }
