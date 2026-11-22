@@ -1,12 +1,14 @@
 use capitalize::Capitalize;
 use codee::string::JsonSerdeCodec;
+use leptos::html::{div, input, li, ul};
 use leptos::prelude::*;
+use leptos::svg::{path, svg};
+use leptos::tachys::html::event::change;
 use leptos_use::storage::use_local_storage;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
-#[component]
-pub fn ThemeToggle() -> impl IntoView {
+pub fn theme_toggle() -> impl IntoView {
     // Look for theme in local storage. Use "default" if not found.
     let (theme, set_theme, _) = use_local_storage::<String, JsonSerdeCodec>("default");
 
@@ -20,54 +22,50 @@ pub fn ThemeToggle() -> impl IntoView {
         }
     });
 
-    view! {
-        <div id="themes-button" class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-outline bg-base-100">
-            "Theme"
+    div()
+        .attr("id", "themes-button")
+        .attr("class", "dropdown dropdown-end")
+        .child((
+            div()
+                .attr("tabindex", "0")
+                .attr("role", "button")
+                .attr("class", "btn btn-outline bg-base-100")
+                .child((
+                    "Theme",
+                    svg() // <- Dropdown arrow
+                        .attr("width", "12px")
+                        .attr("height", "12px")
+                        .attr("class", "inline-block h-2 w-2 fill-current opacity-60")
+                        .attr("xmlns", "http://www.w3.org/2000/svg")
+                        .attr("viewBox", "0 0 2048 2048")
+                        .child(path().attr(
+                            "d",
+                            "M1799 349l242 241-1017 1017L7 590l242-241 775 775 775-775z",
+                        )),
+                )),
+            ul()
+                .attr("id", "themes-list")
+                .attr("tabindex", "-1")
+                .attr("class", "dropdown-content overflow-scroll max-h-80 bg-base-300 rounded-box z-1000 w-52 p-2 shadow-2xl")
+                .child({
+                    Theme::iter().map(|t| {
+                        let value = lowercase(&t);
+                        let value_two = lowercase(&t);
+                        let label = capitalize(&t);
 
-            <svg // <- Dropdown arrow
-              width="12px"
-              height="12px"
-              class="inline-block h-2 w-2 fill-current opacity-60"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 2048 2048">
-              <path d="M1799 349l242 241-1017 1017L7 590l242-241 775 775 775-775z"></path>
-            </svg>
-          </div>
-
-          <ul id="themes-list" tabindex="-1" class="dropdown-content overflow-scroll max-h-80 bg-base-300 rounded-box z-1000 w-52 p-2 shadow-2xl">
-
-            {
-                Theme::iter().map(|t| {
-                    let value = lowercase(&t);
-                    let value_two = lowercase(&t);
-                    let label = capitalize(&t);
-
-                    view! {
-                        <li>
-                            <input
-                            type="radio"
-                            name="theme-dropdown"
-                            class="w-full btn btn-sm btn-block btn-ghost justify-start"
-                            aria-label={label}
-                            value={value.clone()}
-
-                            // Decide if this theme is selected by listening to local storage.
-                            checked=move || theme.get() == value.clone()
-
-                            // Update local storage with new theme when clicked
-                            on:change=move |_| {
-                                set_theme.set(value_two.clone());
-                            }
-                            />
-                        </li>
-                    }
-                }).collect::<Vec<_>>()
-            }
-
-          </ul>
-        </div>
-    }
+                        li().child(
+                            input()
+                                .attr("type", "radio")
+                                .attr("name", "theme-dropdown")
+                                .attr("class", "w-full btn btn-sm btn-block btn-ghost justify-start")
+                                .attr("aria-label", label)
+                                .attr("value", value.clone())
+                                .attr("checked", move || theme.get() == value.clone()) // <- Decide if this theme is selected by listening to local storage.
+                                .on(change, move |_| {set_theme.set(value_two.clone());})
+                        )
+                        }).collect:: <Vec<_> >()
+                })
+        ))
 }
 
 #[derive(EnumIter, strum_macros::Display, Debug, PartialEq, Clone, Default)]
