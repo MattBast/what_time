@@ -1,5 +1,22 @@
 # What Time
 
+## Re-entry guide
+
+Start with these files after time away from the project:
+
+| If you want to change... | Read this first |
+| --- | --- |
+| Routes, document metadata, or the application shell | `src/lib.rs` |
+| The comparison page, route/query handling, or browser titles | `src/pages/compare.rs`, then `src/components/timezone_card.rs` |
+| Adding/removing cities and URL construction | `src/components/timezone_drawer.rs` |
+| City data, slugs, timezone conversion, and ordering | `src/timezone.rs` and `src/url_parse.rs` |
+| Shared visual building blocks | `src/components/` |
+
+### Mental model
+
+The URL is the source of truth: city slugs become `City` values, and the page renders
+one time card per city. The drawer changes the URL; reactive signals update the page.
+
 Run this command to open the website in dev mode and listen for changes in the codebase. The page will reload whenever a change is detected:
 ```bash
 trunk serve --open

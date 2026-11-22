@@ -13,8 +13,13 @@ use leptos_router::path;
 
 /// Defines the name of the "zone" url parameter
 pub const ZONE: &str = "zone";
+
 /// Defines the name of the "current_time" url parameter
 pub const CURRENT_TIME: &str = "current_time";
+
+/// Defines the name of the "hours" url parameter which defines
+/// how many hours are presented on the page.
+pub const HOURS: &str = "hours";
 
 /// Document title shown in the browser tab and search results.
 const APP_TITLE: &str = "What Time - Compare timezones, fast";

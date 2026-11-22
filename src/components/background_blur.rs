@@ -1,3 +1,4 @@
+use leptos::html::div;
 use leptos::prelude::*;
 
 /// Add a solid colour blur behind an element.
@@ -9,9 +10,7 @@ use leptos::prelude::*;
 /// ```
 #[component]
 pub fn BackgroundBlur(children: Children) -> impl IntoView {
-    view! {
-        <div class="bg-radial from-base-100 from-20%">
-            {children()}
-        </div>
-    }
+    div()
+        .attr("class", "bg-radial from-base-100 from-20%")
+        .child(children())
 }

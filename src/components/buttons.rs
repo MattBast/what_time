@@ -1,16 +1,10 @@
-use chrono::Utc;
-use icondata::{BiPlusRegular, BiTimeRegular};
+use icondata::{BiPlusRegular, ChCross, ChPlus};
 use leptos::prelude::*;
 use leptos_icons::Icon;
 
 pub const DRAWER_SWITCH_ID: &str = "drawer-switch";
 
 const BTN_CLASS: &str = "btn btn-neutral";
-
-/// Value written to the `current_time` URL query when the user clicks "Now".
-pub(crate) fn current_time_query_value() -> Option<i64> {
-    Some(Utc::now().timestamp())
-}
 
 /// Drawer checkbox id targeted by `AddTimezoneButton` (must match `TimezoneDrawer` in home).
 pub(crate) fn add_timezone_drawer_target() -> &'static str {
@@ -63,20 +57,6 @@ pub fn DrawerButton(
 }
 
 #[component]
-pub fn NowButton(set_time_query: SignalSetter<Option<i64>>) -> impl IntoView {
-    view! {
-        <Button
-            id="now_button"
-            aria_label="Set time to now"
-            on_click=Box::new(move || set_time_query.set(current_time_query_value()))
-        >
-            <Icon icon=BiTimeRegular />
-            "Now"
-        </Button>
-    }
-}
-
-#[component]
 pub fn AddTimezoneButton() -> impl IntoView {
     view! {
         <DrawerButton
@@ -90,22 +70,34 @@ pub fn AddTimezoneButton() -> impl IntoView {
     }
 }
 
+#[component]
+pub fn AddTimezoneButtonFab() -> impl IntoView {
+    let (fab_toggle, set_fab_toggle) = signal(true);
+
+    view! {
+        <div class="fab">
+            <label
+                for="drawer-switch"
+                id="add_timezone_button"
+                aria-label="Add City"
+                class="btn btn-xl btn-circle btn-neutral drawer-button"
+                role="button"
+                on:click=move |_| {set_fab_toggle.set(!fab_toggle.get_untracked())}
+            >
+                {move || if fab_toggle.get() {
+                    view! {<Icon icon=ChPlus />}
+                } else {
+                    view!{<Icon icon=ChCross />}
+                }}
+
+            </label>
+        </div>
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::Utc;
-
-    #[test]
-    fn test_current_time_query_value_is_within_current_second() {
-        let before = Utc::now().timestamp();
-        let value = current_time_query_value().expect("now should produce a timestamp");
-        let after = Utc::now().timestamp();
-
-        assert!(
-            (before..=after).contains(&value),
-            "timestamp {value} should be between {before} and {after}"
-        );
-    }
 
     #[test]
     fn test_add_timezone_drawer_target_matches_drawer_switch_id() {
