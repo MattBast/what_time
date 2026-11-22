@@ -2,8 +2,8 @@
   "author": "",
   "description": "<picture>\r     <source srcset=\"https://raw.githubusercontent.com/leptos-rs/leptos/main/docs/logos/Leptos_logo_Solid_White.svg\" media=\"(prefers-color-scheme: dark)\">\r     <img src=\"https://raw.githubusercontent.com/leptos-rs/leptos/main/docs/logos/Leptos_logo_RGB.svg\" alt=\"Leptos Logo\">\r </picture>",
   "devDependencies": {
-    "@tailwindcss/cli": "^4.3.0",
-    "daisyui": "^5.5.20",
+    "@tailwindcss/cli": "^4.3.5",
+    "daisyui": "^5.8.2",
     "tailwindcss": "^4.3.0"
   },
   "keywords": [],
