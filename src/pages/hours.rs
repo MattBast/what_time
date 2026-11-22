@@ -73,7 +73,7 @@ pub fn Hours(cities_query: Memo<Option<String>>) -> impl IntoView {
                         set_hours_query.set(Some(hours))
                     }
                 >
-                    {move || if hours_query.get() == None || hours_query.get() == Some(5) {
+                    {move || if hours_query.get().is_none() || hours_query.get() == Some(5) {
                         "Show More"
                     } else {
                         "Show Less"
@@ -99,10 +99,7 @@ fn get_hours(cities: &Vec<City>, rows_count_query: Option<usize>) -> Vec<Vec<u32
 fn new_table_rows(rows_count_query: Option<usize>) -> Vec<Vec<u32>> {
     let mut table_rows = Vec::new();
 
-    let rows_count = match rows_count_query {
-        Some(rows_count) => rows_count,
-        None => 5,
-    };
+    let rows_count = rows_count_query.unwrap_or(5);
 
     for _ in 0..rows_count {
         table_rows.push(Vec::new());
@@ -113,10 +110,10 @@ fn new_table_rows(rows_count_query: Option<usize>) -> Vec<Vec<u32>> {
 
 fn add_hours(mut local_time: DateTime<Tz>, table_rows: &mut Vec<Vec<u32>>) {
     // so the loop shows the current hour at the top of the table
-    local_time = local_time - Duration::hours(1);
+    local_time -= Duration::hours(1);
 
     for row in table_rows {
-        local_time = local_time + Duration::hours(1);
+        local_time += Duration::hours(1);
         row.push(local_time.hour());
     }
 }
