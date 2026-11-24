@@ -120,14 +120,9 @@ fn add_hours(mut local_time: DateTime<Tz>, table_rows: &mut Vec<Vec<u32>>) {
 
 fn toggle_hours(current_hours: Option<usize>) -> usize {
     match current_hours {
-        Some(hours) => {
-            if hours == 24 {
-                5
-            } else {
-                24
-            }
-        }
-        None => 5,
+        Some(24) => 5,
+        Some(_) => 24,
+        None => 24,
     }
 }
 
@@ -137,7 +132,7 @@ mod tests {
 
     #[test]
     fn test_toggle_hours_to_5_with_no_input() {
-        assert_eq!(toggle_hours(None), 5);
+        assert_eq!(toggle_hours(None), 24);
     }
 
     #[test]
