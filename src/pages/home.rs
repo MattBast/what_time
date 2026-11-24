@@ -21,7 +21,7 @@ pub fn Home() -> impl IntoView {
     });
 
     // Start tracking time and check it every minute.
-    let (now, set_now) = signal(Some(Utc::now().timestamp()));
+    let (now, set_now) = signal(Utc::now().timestamp());
 
     // Initially tick once a second to ensure we change when the
     // operating system minute changes.
@@ -30,7 +30,7 @@ pub fn Home() -> impl IntoView {
     let _ = use_interval_fn(
         move || {
             let now_time = Utc::now();
-            set_now.set(Some(now_time.timestamp()));
+            set_now.set(now_time.timestamp());
 
             // Once we reach the first minute, tick once a minute.
             if now_time.second() == 0 {
@@ -57,7 +57,7 @@ pub fn Home() -> impl IntoView {
 #[component]
 pub fn HomeContent(
     timezones_query: Memo<Option<String>>,
-    time_query: ReadSignal<Option<i64>>,
+    time_query: ReadSignal<i64>,
 ) -> impl IntoView {
     let (drawer_query, set_drawer_query) = query_signal::<bool>(DRAWER);
 

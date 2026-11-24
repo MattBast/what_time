@@ -5,7 +5,7 @@ use leptos::prelude::*;
 use std::str::FromStr;
 
 #[component]
-pub fn TimezoneCard(city: City, time_query: ReadSignal<Option<i64>>) -> impl IntoView {
+pub fn TimezoneCard(city: City, time_query: ReadSignal<i64>) -> impl IntoView {
     let city_clone = city.clone();
     let header = move || timezone_card_header(time_query.get(), &city_clone);
     let tz = Tz::from_str(&city.timezone).unwrap_or(Tz::UTC);
@@ -22,7 +22,7 @@ pub fn TimezoneCard(city: City, time_query: ReadSignal<Option<i64>>) -> impl Int
 }
 
 /// City line shown at the top of each card (emoji, city, zone abbreviation).
-pub(crate) fn timezone_card_header(time_query: Option<i64>, city: &City) -> String {
+pub(crate) fn timezone_card_header(time_query: i64, city: &City) -> String {
     let tz = Tz::from_str(&city.timezone).unwrap_or(Tz::UTC);
     let local_time = utc_to_local_timezone(time_query, tz);
     format!("{} {} ({})", city.emoji, city.name, local_time.format("%Z"),)
@@ -30,7 +30,7 @@ pub(crate) fn timezone_card_header(time_query: Option<i64>, city: &City) -> Stri
 
 /// Local time string bound to the card's time input (`HH:MM`).
 #[cfg_attr(not(test), allow(dead_code))]
-pub(crate) fn timezone_card_local_time(time_query: Option<i64>, timezone: Tz) -> String {
+pub(crate) fn timezone_card_local_time(time_query: i64, timezone: Tz) -> String {
     utc_to_local_timezone(time_query, timezone)
         .format("%H:%M")
         .to_string()
@@ -38,7 +38,7 @@ pub(crate) fn timezone_card_local_time(time_query: Option<i64>, timezone: Tz) ->
 
 /// Local date string bound to the card's date input (`YYYY-MM-DD`).
 #[cfg_attr(not(test), allow(dead_code))]
-pub(crate) fn timezone_card_local_date(time_query: Option<i64>, timezone: Tz) -> String {
+pub(crate) fn timezone_card_local_date(time_query: i64, timezone: Tz) -> String {
     utc_to_local_timezone(time_query, timezone)
         .format("%Y-%m-%d")
         .to_string()
@@ -55,7 +55,7 @@ mod tests {
     #[test]
     fn test_timezone_card_header_uses_city_emoji_and_zone_in_winter() {
         let city = find_city_by_slug("london").unwrap();
-        let header = timezone_card_header(Some(1765920530), city);
+        let header = timezone_card_header(1765920530, city);
         assert_eq!(header, "🇬🇧 London (GMT)");
     }
 
@@ -63,21 +63,21 @@ mod tests {
     fn test_timezone_card_header_uses_bst_when_london_is_in_dst() {
         // 2025-06-15 14:00:00 UTC -> 15:00 BST
         let city = find_city_by_slug("london").unwrap();
-        let header = timezone_card_header(Some(1749996000), city);
+        let header = timezone_card_header(1749996000, city);
         assert_eq!(header, "🇬🇧 London (BST)");
     }
 
     #[test]
     fn test_timezone_card_header_for_paris_shows_cet() {
         let city = find_city_by_slug("paris").unwrap();
-        let header = timezone_card_header(Some(SAMPLE_TIMESTAMP), city);
+        let header = timezone_card_header(SAMPLE_TIMESTAMP, city);
         assert_eq!(header, "🇫🇷 Paris (CET)");
     }
 
     #[test]
     fn test_timezone_card_header_city_name_has_no_underscores() {
         let city = find_city_by_slug("los-angeles").unwrap();
-        let header = timezone_card_header(Some(SAMPLE_TIMESTAMP), city);
+        let header = timezone_card_header(SAMPLE_TIMESTAMP, city);
         assert_eq!(header, "🇺🇸 Los Angeles (PST)");
         assert!(!header.contains('_'));
     }
@@ -85,11 +85,11 @@ mod tests {
     #[test]
     fn test_timezone_card_local_time_and_date_for_london() {
         assert_eq!(
-            timezone_card_local_time(Some(SAMPLE_TIMESTAMP), Tz::Europe__London),
+            timezone_card_local_time(SAMPLE_TIMESTAMP, Tz::Europe__London),
             "16:08"
         );
         assert_eq!(
-            timezone_card_local_date(Some(SAMPLE_TIMESTAMP), Tz::Europe__London),
+            timezone_card_local_date(SAMPLE_TIMESTAMP, Tz::Europe__London),
             "2025-12-17"
         );
     }
@@ -97,18 +97,18 @@ mod tests {
     #[test]
     fn test_timezone_card_local_time_and_date_for_paris() {
         assert_eq!(
-            timezone_card_local_time(Some(SAMPLE_TIMESTAMP), Tz::Europe__Paris),
+            timezone_card_local_time(SAMPLE_TIMESTAMP, Tz::Europe__Paris),
             "17:08"
         );
         assert_eq!(
-            timezone_card_local_date(Some(SAMPLE_TIMESTAMP), Tz::Europe__Paris),
+            timezone_card_local_date(SAMPLE_TIMESTAMP, Tz::Europe__Paris),
             "2025-12-17"
         );
     }
 
     #[test]
     fn test_timezone_card_abidjan_values() {
-        let timestamp = Some(1766076397);
+        let timestamp = 1766076397;
         let city = find_city_by_slug("abidjan").unwrap();
 
         assert_eq!(timezone_card_header(timestamp, city), "🇨🇮 Abidjan (GMT)");
@@ -124,7 +124,7 @@ mod tests {
 
     #[test]
     fn test_same_utc_instant_produces_different_card_times_per_zone() {
-        let timestamp = Some(SAMPLE_TIMESTAMP);
+        let timestamp = SAMPLE_TIMESTAMP;
 
         let london = timezone_card_local_time(timestamp, Tz::Europe__London);
         let paris = timezone_card_local_time(timestamp, Tz::Europe__Paris);
@@ -137,7 +137,7 @@ mod tests {
     #[test]
     fn test_card_shows_different_calendar_dates_for_same_utc_instant() {
         // London 23:40 on 2025-12-18 is 00:40 on 2025-12-19 in Paris (see time_picker tests).
-        let timestamp = Some(1766101200);
+        let timestamp = 1766101200;
 
         assert_eq!(
             timezone_card_local_time(timestamp, Tz::Europe__London),

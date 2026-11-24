@@ -4,7 +4,7 @@ use leptos::html::div;
 use leptos::prelude::*;
 
 #[component]
-pub fn TimeInput(time_query: ReadSignal<Option<i64>>, timezone: Tz) -> impl IntoView {
+pub fn TimeInput(time_query: ReadSignal<i64>, timezone: Tz) -> impl IntoView {
     let input_time = move || {
         utc_to_local_timezone(time_query.get(), timezone)
             .format("%H:%M")
@@ -20,7 +20,7 @@ pub fn TimeInput(time_query: ReadSignal<Option<i64>>, timezone: Tz) -> impl Into
 }
 
 #[component]
-pub fn DateInput(time_query: ReadSignal<Option<i64>>, timezone: Tz) -> impl IntoView {
+pub fn DateInput(time_query: ReadSignal<i64>, timezone: Tz) -> impl IntoView {
     let input_date = move || {
         utc_to_local_timezone(time_query.get(), timezone)
             .format("%d/%m/%Y")
