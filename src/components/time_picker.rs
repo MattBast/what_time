@@ -3,6 +3,7 @@ use chrono::offset::LocalResult::Single;
 use chrono::prelude::*;
 use chrono::{DateTime, TimeDelta};
 use chrono_tz::Tz;
+use leptos::html::div;
 use leptos::prelude::*;
 
 #[component]
@@ -35,61 +36,13 @@ pub fn TimeInput(
 }
 
 #[component]
-pub fn DateInput(
-    time_query: Memo<Option<i64>>,
-    set_time_query: SignalSetter<Option<i64>>,
-    timezone: Tz,
-) -> impl IntoView {
-    let (input_date, set_input_date) = signal(String::new());
-
-    // Listen for the `current_time` url query to change and when it does, re-render the time in the inputs.
-    Effect::new(move || {
-        let now = utc_to_local_timezone(time_query.get(), timezone);
-        set_input_date.set(now.format("%Y-%m-%d").to_string());
-    });
-
-    view! {
-        <input
-            class="input input-ghost input-sm max-w-full w-fit"
-            type="date"
-            name=format!("date_picker_{}", timezone.name().replace("/", "__"))
-            id=format!("date_picker_{}", timezone.name().replace("/", "__"))
-            prop:value=input_date
-            on:input:target=move |ev| {
-                let new_utc = update_current_date(ev.target().value(), time_query.get_untracked(), timezone);
-                set_time_query.set(Some(new_utc))
-            }
-        />
-    }
-}
-
-/// Get a date as string in this format: "%Y-%m-%d".
-/// Figure out the offset datetime with the timezone, convert it to
-/// UTC and return the UTC timestamp (formatted as a i64 number).
-fn update_current_date(new_date: String, last_timestamp: Option<i64>, timezone: Tz) -> i64 {
-    let last_date = utc_to_local_timezone(last_timestamp, timezone);
-
-    let diff = get_date_diff(new_date, last_date, timezone);
-
-    let utc = utc_to_local_timezone(last_timestamp, Tz::UTC);
-    let new_utc = utc + diff;
-
-    new_utc.timestamp()
-}
-
-/// Return the time difference between `new_date` and `last_date`.
-/// It is assumed that `new_date` is at the same time as `last_date`.
-fn get_date_diff(new_date: String, last_date: DateTime<Tz>, timezone: Tz) -> TimeDelta {
-    if let Ok(naive_date) = NaiveDate::parse_from_str(&new_date, "%Y-%m-%d") {
-        if let Single(new_date) = naive_date
-            .and_time(last_date.time())
-            .and_local_timezone(timezone)
-        {
-            return new_date - last_date;
-        }
-    };
-
-    TimeDelta::zero()
+pub fn DateInput(time_query: Option<i64>, timezone: Tz) -> impl IntoView {
+    let input_date = utc_to_local_timezone(time_query, timezone)
+        .format("%d/%m/%Y")
+        .to_string();
+    div()
+        .attr("class", "text-sm max-w-full w-fit")
+        .child(input_date)
 }
 
 /// Get a time as string in this format: "%H:%M".
@@ -122,95 +75,65 @@ fn get_time_diff(new_time: String, last_date: DateTime<Tz>) -> TimeDelta {
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_add_gmt_day() {
-        // The utc time is: 2025-12-30 22:28:00
-        let new_utc = update_current_date(
-            "2025-12-31".to_string(),
-            Some(1767133680),
-            Tz::Europe__London,
-        );
-
-        assert_eq!(
-            DateTime::from_timestamp(new_utc, 0).unwrap(),
-            DateTime::parse_from_str("2025-12-31 22:28:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
-        );
-    }
-
-    #[test]
-    fn test_add_cet_day() {
-        // The utc time is: 2025-12-30 22:28:00
-        let new_utc = update_current_date(
-            "2025-12-31".to_string(),
-            Some(1767133680),
-            Tz::Europe__Paris,
-        );
-
-        assert_eq!(
-            DateTime::from_timestamp(new_utc, 0).unwrap(),
-            DateTime::parse_from_str("2025-12-31 22:28:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
-        );
-    }
-
-    #[test]
-    fn test_move_to_new_year() {
-        // The utc time is: 2025-12-31 22:28:00
-        let new_utc = update_current_date(
-            "2026-01-01".to_string(),
-            Some(1767220080),
-            Tz::Europe__Paris,
-        );
-
-        assert_eq!(
-            DateTime::from_timestamp(new_utc, 0).unwrap(),
-            DateTime::parse_from_str("2026-01-01 22:28:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
-        );
-    }
-
-    #[test]
-    fn test_add_two_cet_days() {
-        // The utc time is: 2025-12-29 22:28:00
-        let new_utc = update_current_date(
-            "2025-12-31".to_string(),
-            Some(1767047280),
-            Tz::Europe__Paris,
-        );
-
-        assert_eq!(
-            DateTime::from_timestamp(new_utc, 0).unwrap(),
-            DateTime::parse_from_str("2025-12-31 22:28:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
-        );
-    }
-
-    #[test]
-    fn test_remove_gmt_day() {
-        // The utc time is: 2025-12-30 22:28:00
-        let new_utc = update_current_date(
-            "2025-12-29".to_string(),
-            Some(1767133680),
-            Tz::Europe__London,
-        );
-
-        assert_eq!(
-            DateTime::from_timestamp(new_utc, 0).unwrap(),
-            DateTime::parse_from_str("2025-12-29 22:28:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
-        );
-    }
-
-    #[test]
-    fn test_move_back_a_year() {
-        // The utc time is: 2026-01-01 22:28:00
-        let new_utc = update_current_date(
-            "2025-12-31".to_string(),
-            Some(1767306480),
-            Tz::Europe__Paris,
-        );
-
-        assert_eq!(
-            DateTime::from_timestamp(new_utc, 0).unwrap(),
-            DateTime::parse_from_str("2025-12-31 22:28:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
-        );
-    }
+    //     #[test]
+    //     fn test_move_to_new_year() {
+    //         // The utc time is: 2025-12-31 22:28:00
+    //         let new_utc = update_current_date(
+    //             "2026-01-01".to_string(),
+    //             Some(1767220080),
+    //             Tz::Europe__Paris,
+    //         );
+    //
+    //         assert_eq!(
+    //             DateTime::from_timestamp(new_utc, 0).unwrap(),
+    //             DateTime::parse_from_str("2026-01-01 22:28:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
+    //         );
+    //     }
+    //
+    //     #[test]
+    //     fn test_add_two_cet_days() {
+    //         // The utc time is: 2025-12-29 22:28:00
+    //         let new_utc = update_current_date(
+    //             "2025-12-31".to_string(),
+    //             Some(1767047280),
+    //             Tz::Europe__Paris,
+    //         );
+    //
+    //         assert_eq!(
+    //             DateTime::from_timestamp(new_utc, 0).unwrap(),
+    //             DateTime::parse_from_str("2025-12-31 22:28:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
+    //         );
+    //     }
+    //
+    //     #[test]
+    //     fn test_remove_gmt_day() {
+    //         // The utc time is: 2025-12-30 22:28:00
+    //         let new_utc = update_current_date(
+    //             "2025-12-29".to_string(),
+    //             Some(1767133680),
+    //             Tz::Europe__London,
+    //         );
+    //
+    //         assert_eq!(
+    //             DateTime::from_timestamp(new_utc, 0).unwrap(),
+    //             DateTime::parse_from_str("2025-12-29 22:28:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
+    //         );
+    //     }
+    //
+    //     #[test]
+    //     fn test_move_back_a_year() {
+    //         // The utc time is: 2026-01-01 22:28:00
+    //         let new_utc = update_current_date(
+    //             "2025-12-31".to_string(),
+    //             Some(1767306480),
+    //             Tz::Europe__Paris,
+    //         );
+    //
+    //         assert_eq!(
+    //             DateTime::from_timestamp(new_utc, 0).unwrap(),
+    //             DateTime::parse_from_str("2025-12-31 22:28:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap()
+    //         );
+    //     }
 
     #[test]
     fn test_add_one_minute_to_utc_from_gmt() {
@@ -281,35 +204,35 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_london_time_then_date_updates_to_expected_utc() {
-        let anchor = Some(1765987708);
-        let after_time = update_current_time("09:40".to_string(), anchor, Tz::Europe__London);
-
-        let timestamp = update_current_date(
-            "2025-12-18".to_string(),
-            Some(after_time),
-            Tz::Europe__London,
-        );
-
-        assert_eq!(timestamp, 1766050800);
-    }
-
-    #[test]
-    fn test_london_evening_shows_as_paris_morning_next_day() {
-        use crate::timezone::utc_to_local_timezone;
-
-        let anchor = Some(1765987708);
-        let after_time = update_current_time("23:40".to_string(), anchor, Tz::Europe__London);
-
-        let timestamp = update_current_date(
-            "2025-12-18".to_string(),
-            Some(after_time),
-            Tz::Europe__London,
-        );
-
-        let paris = utc_to_local_timezone(Some(timestamp), Tz::Europe__Paris);
-        assert_eq!(paris.format("%H:%M").to_string(), "00:40");
-        assert_eq!(paris.format("%Y-%m-%d").to_string(), "2025-12-19");
-    }
+    //     #[test]
+    //     fn test_london_time_then_date_updates_to_expected_utc() {
+    //         let anchor = Some(1765987708);
+    //         let after_time = update_current_time("09:40".to_string(), anchor, Tz::Europe__London);
+    //
+    //         let timestamp = update_current_date(
+    //             "2025-12-18".to_string(),
+    //             Some(after_time),
+    //             Tz::Europe__London,
+    //         );
+    //
+    //         assert_eq!(timestamp, 1766050800);
+    //     }
+    //
+    //     #[test]
+    //     fn test_london_evening_shows_as_paris_morning_next_day() {
+    //         use crate::timezone::utc_to_local_timezone;
+    //
+    //         let anchor = Some(1765987708);
+    //         let after_time = update_current_time("23:40".to_string(), anchor, Tz::Europe__London);
+    //
+    //         let timestamp = update_current_date(
+    //             "2025-12-18".to_string(),
+    //             Some(after_time),
+    //             Tz::Europe__London,
+    //         );
+    //
+    //         let paris = utc_to_local_timezone(Some(timestamp), Tz::Europe__Paris);
+    //         assert_eq!(paris.format("%H:%M").to_string(), "00:40");
+    //         assert_eq!(paris.format("%Y-%m-%d").to_string(), "2025-12-19");
+    //     }
 }

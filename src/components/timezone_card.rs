@@ -19,7 +19,7 @@ pub fn TimezoneCard(
             <div class="card-body items-center gap-4 p-6">
                 <h2 class="card-title">{header}</h2>
                 <TimeInput time_query set_time_query timezone=tz />
-                <DateInput time_query set_time_query timezone=tz />
+                <DateInput time_query=time_query.get() timezone=tz />
             </div>
         </div>
     }
