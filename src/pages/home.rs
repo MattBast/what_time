@@ -4,7 +4,7 @@ use crate::components::{
 };
 use crate::pages::{Compare, Hours};
 use crate::url_parse::url_query_to_cities;
-use crate::{CURRENT_TIME, ZONE};
+use crate::{CURRENT_TIME, DRAWER, ZONE};
 use leptos::prelude::*;
 use leptos_router::hooks::query_signal;
 
@@ -24,8 +24,10 @@ pub fn HomeContent(
     time_query: Memo<Option<i64>>,
     set_time_query: SignalSetter<Option<i64>>,
 ) -> impl IntoView {
+    let (drawer_query, set_drawer_query) = query_signal::<bool>(DRAWER);
+
     view! {
-        <TimezoneDrawer timezones_query set_timezones_query>
+        <TimezoneDrawer timezones_query set_timezones_query set_drawer_query>
             <Show
                 when=move || should_show_compare(timezones_query.get())
                 fallback=|| view! {
@@ -45,7 +47,7 @@ pub fn HomeContent(
             >
                 <Compare cities_query=timezones_query time_query set_time_query/>
                 <Hours cities_query=timezones_query/>
-                <AddTimezoneButtonFab/>
+                <AddTimezoneButtonFab drawer_query/>
             </Show>
         </TimezoneDrawer>
     }
@@ -73,6 +75,7 @@ pub fn WelcomeText() -> impl IntoView {
 fn TimezoneDrawer(
     timezones_query: Memo<Option<String>>,
     set_timezones_query: SignalSetter<Option<String>>,
+    set_drawer_query: SignalSetter<Option<bool>>,
     children: Children,
 ) -> impl IntoView {
     // Used to focus the search input after the drawer opens.
@@ -86,11 +89,18 @@ fn TimezoneDrawer(
             class="drawer-toggle"
             on:change=move |ev| {
                 if event_target_checked(&ev) {
+                    // Set URL query to show other components that the drawer is open.
+                    set_drawer_query.set(Some(true));
+
+                    // Focus on the drawer search bar.
                     set_timeout(move || {
                         if let Some(input) = search_input_ref.get() {
                             let _ = input.focus();
                         }
                     }, std::time::Duration::from_millis(150));
+                } else {
+                    // Set URL query to show other components that the drawer is closed.
+                    set_drawer_query.set(Some(false));
                 }
             }
           />

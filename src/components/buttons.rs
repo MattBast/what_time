@@ -1,4 +1,4 @@
-use icondata::{BiPlusRegular, ChCross, ChPlus};
+use icondata::{BiPlusRegular, ChCross, ChPlus, Icon};
 use leptos::prelude::*;
 use leptos_icons::Icon;
 
@@ -71,9 +71,7 @@ pub fn AddTimezoneButton() -> impl IntoView {
 }
 
 #[component]
-pub fn AddTimezoneButtonFab() -> impl IntoView {
-    let (fab_toggle, set_fab_toggle) = signal(true);
-
+pub fn AddTimezoneButtonFab(drawer_query: Memo<Option<bool>>) -> impl IntoView {
     view! {
         <div class="fab">
             <label
@@ -82,16 +80,21 @@ pub fn AddTimezoneButtonFab() -> impl IntoView {
                 aria-label="Add City"
                 class="btn btn-xl btn-circle btn-neutral drawer-button"
                 role="button"
-                on:click=move |_| {set_fab_toggle.set(!fab_toggle.get_untracked())}
             >
-                {move || if fab_toggle.get() {
-                    view! {<Icon icon=ChPlus />}
-                } else {
-                    view!{<Icon icon=ChCross />}
+                {move || view! {
+                    <Icon icon=get_fab_icon(drawer_query.get()) />
                 }}
 
             </label>
         </div>
+    }
+}
+
+fn get_fab_icon(drawer_open: Option<bool>) -> Icon {
+    if drawer_open.unwrap_or(false) {
+        ChCross
+    } else {
+        ChPlus
     }
 }
 
@@ -103,5 +106,20 @@ mod tests {
     fn test_add_timezone_drawer_target_matches_drawer_switch_id() {
         assert_eq!(add_timezone_drawer_target(), DRAWER_SWITCH_ID);
         assert_eq!(add_timezone_drawer_target(), "drawer-switch");
+    }
+
+    #[test]
+    fn returns_plus_when_drawer_is_closed() {
+        assert_eq!(get_fab_icon(Some(false)), ChPlus);
+    }
+
+    #[test]
+    fn returns_cross_when_drawer_is_open() {
+        assert_eq!(get_fab_icon(Some(true)), ChCross);
+    }
+
+    #[test]
+    fn returns_plus_when_drawer_state_is_none() {
+        assert_eq!(get_fab_icon(None), ChPlus);
     }
 }
