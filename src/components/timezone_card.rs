@@ -5,7 +5,7 @@ use leptos::prelude::*;
 use std::str::FromStr;
 
 #[component]
-pub fn TimezoneCard(city: City, time_query: Memo<Option<i64>>) -> impl IntoView {
+pub fn TimezoneCard(city: City, time_query: ReadSignal<Option<i64>>) -> impl IntoView {
     let city_clone = city.clone();
     let header = move || timezone_card_header(time_query.get(), &city_clone);
     let tz = Tz::from_str(&city.timezone).unwrap_or(Tz::UTC);
@@ -14,8 +14,8 @@ pub fn TimezoneCard(city: City, time_query: Memo<Option<i64>>) -> impl IntoView 
         <div class="card bg-base-100 border border-base-300 shadow-sm w-full sm:w-auto min-w-[14rem]">
             <div class="card-body items-center gap-4 p-6">
                 <h2 class="card-title">{header}</h2>
-                <TimeInput time_query=time_query.get() timezone=tz />
-                <DateInput time_query=time_query.get() timezone=tz />
+                <TimeInput time_query=time_query timezone=tz />
+                <DateInput time_query=time_query timezone=tz />
             </div>
         </div>
     }

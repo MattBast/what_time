@@ -4,23 +4,41 @@ use crate::components::{
 };
 use crate::pages::{Compare, Hours};
 use crate::url_parse::{find_city_by_slug, route_cities_slugs, url_query_to_cities};
-use crate::{CURRENT_TIME, DRAWER};
+use crate::{CITIES, DRAWER};
+use chrono::{Timelike, Utc};
 use leptos::prelude::*;
 use leptos_meta::Title;
 use leptos_router::hooks::{query_signal, use_params_map};
-
-const CITIES: &str = "cities";
+use leptos_use_interval_fn::use_interval_fn;
 
 #[component]
 pub fn Home() -> impl IntoView {
     let params = use_params_map();
 
-    // Watch the url queries
-    let (time_query, set_time_query) = query_signal::<i64>(CURRENT_TIME);
-
+    // Discover which cities are in the URL route
     let timezones_query = Memo::new(move |_| {
         Some(params.with(|params| route_cities_slugs(params.get(CITIES), None)))
     });
+
+    // Start tracking time and check it every minute.
+    let (now, set_now) = signal(Some(Utc::now().timestamp()));
+
+    // Initially tick once a second to ensure we change when the
+    // operating system minute changes.
+    let (interval, set_interval) = signal(1000);
+
+    let _ = use_interval_fn(
+        move || {
+            let now_time = Utc::now();
+            set_now.set(Some(now_time.timestamp()));
+
+            // Once we reach the first minute, tick once a minute.
+            if now_time.second() == 0 {
+                set_interval.set(60_000);
+            }
+        },
+        interval,
+    );
 
     let page_title = Memo::new(move |_| {
         params.with(|params| {
@@ -32,14 +50,14 @@ pub fn Home() -> impl IntoView {
 
     view! {
         <Title text=move || page_title.get()/>
-        <HomeContent timezones_query time_query/>
+        <HomeContent timezones_query time_query=now/>
     }
 }
 
 #[component]
 pub fn HomeContent(
     timezones_query: Memo<Option<String>>,
-    time_query: Memo<Option<i64>>,
+    time_query: ReadSignal<Option<i64>>,
 ) -> impl IntoView {
     let (drawer_query, set_drawer_query) = query_signal::<bool>(DRAWER);
 

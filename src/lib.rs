@@ -11,6 +11,9 @@ use leptos_meta::*;
 use leptos_router::components::{ParentRoute, Route, Router, Routes};
 use leptos_router::path;
 
+/// The city parameters in the URL.
+const CITIES: &str = "cities";
+
 /// Defines the name of the "current_time" url parameter
 pub const CURRENT_TIME: &str = "current_time";
 
