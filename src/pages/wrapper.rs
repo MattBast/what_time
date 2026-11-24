@@ -19,7 +19,7 @@ pub fn Wrapper() -> impl IntoView {
                 "bg-[radial-gradient(var(--color-base-300)_1px,transparent_1px)]"
             ),
         )
-        .child((header(), Outlet()))
+        .child((header(), div().attr("class", "my-16").child(Outlet())))
 }
 
 fn header() -> impl IntoView {
