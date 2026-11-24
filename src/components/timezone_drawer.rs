@@ -9,13 +9,8 @@ use leptos_router::hooks::{use_navigate, use_query_map};
 #[component]
 pub fn TimezoneDrawerContent(
     timezones_query: Memo<Option<String>>,
-    set_timezones_query: SignalSetter<Option<String>>,
     search_input_ref: NodeRef<leptos::html::Input>,
 ) -> impl IntoView {
-    // `set_timezones_query` is kept as a prop for API compatibility but navigation
-    // is now handled by route-based URLs instead of query-string mutations.
-    let _ = set_timezones_query;
-
     let navigate = use_navigate();
     let query_map = use_query_map();
 

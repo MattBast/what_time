@@ -11,9 +11,6 @@ use leptos_meta::*;
 use leptos_router::components::{ParentRoute, Route, Router, Routes};
 use leptos_router::path;
 
-/// Defines the name of the "zone" url parameter
-pub const ZONE: &str = "zone";
-
 /// Defines the name of the "current_time" url parameter
 pub const CURRENT_TIME: &str = "current_time";
 
@@ -64,8 +61,8 @@ pub fn App() -> impl IntoView {
                     <ParentRoute path=path!("") view=Wrapper>
                         <Route path=path!("/") view=Home/>
                         <Route path=path!("/what_time") view=Home/> // <-- Needed for GitHub pages which uses the base path `/what_time`
-                        <Route path=path!("/compare/*cities") view=CompareCityPair/>
-                        <Route path=path!("/what_time/compare/*cities") view=CompareCityPair/>
+                        <Route path=path!("/compare/*cities") view=Home/>
+                        <Route path=path!("/what_time/compare/*cities") view=Home/>
                     </ParentRoute>
                 </Routes>
             </main>
