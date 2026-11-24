@@ -77,7 +77,7 @@ pub fn AddTimezoneButtonFab() -> impl IntoView {
     view! {
         <div class="fab">
             <label
-                for="drawer-switch"
+                for=DRAWER_SWITCH_ID
                 id="add_timezone_button"
                 aria-label="Add City"
                 class="btn btn-xl btn-circle btn-neutral drawer-button"
