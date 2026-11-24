@@ -4,10 +4,7 @@ use crate::url_parse::url_query_to_cities;
 use leptos::prelude::*;
 
 #[component]
-pub fn Compare(
-    cities_query: Memo<Option<String>>,
-    time_query: ReadSignal<Option<i64>>,
-) -> impl IntoView {
+pub fn Compare(cities_query: Memo<Option<String>>, time_query: ReadSignal<i64>) -> impl IntoView {
     let (get_cities, set_cities) = signal(Vec::new());
 
     // Listen for the `zone` url query to change and when it does, re-render the cities.
@@ -96,7 +93,7 @@ mod tests {
 
     #[test]
     fn test_each_sorted_city_has_expected_card_content() {
-        let timestamp = Some(SAMPLE_TIMESTAMP);
+        let timestamp = SAMPLE_TIMESTAMP;
         let cities = sorted_cities_from_query("paris,london".to_string());
 
         assert_eq!(cities.len(), 2);
@@ -132,7 +129,7 @@ mod tests {
 
     #[test]
     fn test_abidjan_card_content_after_sorting_from_url() {
-        let timestamp = Some(1766076397);
+        let timestamp = 1766076397;
         let cities = sorted_cities_from_query("abidjan".to_string());
 
         assert_eq!(cities.len(), 1);
