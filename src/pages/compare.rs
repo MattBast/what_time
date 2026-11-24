@@ -1,19 +1,10 @@
 use crate::components::{BackgroundBlur, TimezoneCard};
 use crate::timezone::{sort_cities, City};
-use crate::url_parse::{find_city_by_slug, route_cities_slugs, url_query_to_cities};
-use crate::{CURRENT_TIME, ZONE};
+use crate::url_parse::url_query_to_cities;
 use leptos::prelude::*;
-use leptos_meta::Title;
-use leptos_router::hooks::{query_signal, use_params_map};
-
-const EXTRA_CITIES: &str = "cities";
 
 #[component]
-pub fn Compare(
-    cities_query: Memo<Option<String>>,
-    time_query: Memo<Option<i64>>,
-    set_time_query: SignalSetter<Option<i64>>,
-) -> impl IntoView {
+pub fn Compare(cities_query: Memo<Option<String>>, time_query: Memo<Option<i64>>) -> impl IntoView {
     let (get_cities, set_cities) = signal(Vec::new());
 
     // Listen for the `zone` url query to change and when it does, re-render the cities.
@@ -36,7 +27,6 @@ pub fn Compare(
                                 <TimezoneCard
                                     city=c
                                     time_query
-                                    set_time_query
                                 />
                             }
                         }
@@ -47,85 +37,11 @@ pub fn Compare(
     }
 }
 
-#[component]
-pub fn CompareCityPair() -> impl IntoView {
-    let params = use_params_map();
-    let (extra_cities_query, _) = query_signal::<String>(EXTRA_CITIES);
-    let (zone_query, set_zone_query) = query_signal::<String>(ZONE);
-    let (time_query, set_time_query) = query_signal::<i64>(CURRENT_TIME);
-
-    let route_cities_query = Memo::new(move |_| {
-        params.with(|params| route_cities_slugs(params.get("cities"), extra_cities_query.get()))
-    });
-
-    let cities_query = Memo::new(move |_| {
-        let mut slugs = Vec::new();
-        let rc = route_cities_query.get();
-        if !rc.is_empty() {
-            slugs.push(rc);
-        }
-        if let Some(zone) = zone_query.get() {
-            slugs.push(zone);
-        }
-        let merged = slugs.join(",");
-
-        (!merged.is_empty()).then_some(merged)
-    });
-
-    let page_title = Memo::new(move |_| {
-        params.with(|params| {
-            let cities_param = params.get("cities").unwrap_or_default();
-            let slugs: Vec<&str> = cities_param.split('/').filter(|s| !s.is_empty()).collect();
-            route_cities_page_title(&slugs)
-        })
-    });
-
-    view! {
-        <Title text=move || page_title.get()/>
-        <crate::pages::HomeContent
-            timezones_query=cities_query
-            set_timezones_query=set_zone_query
-            time_query
-            set_time_query
-        />
-    }
-}
-
 /// Parse the URL query and return cities sorted west to east.
 pub(crate) fn sorted_cities_from_query(query: String) -> Vec<City> {
     let mut cities = url_query_to_cities(query);
     sort_cities(&mut cities);
     cities
-}
-
-fn route_cities_page_title(slugs: &[&str]) -> String {
-    if slugs.is_empty() {
-        "What Time".to_string()
-    } else {
-        let titles: Vec<String> = slugs
-            .iter()
-            .map(|slug| format!("{} Time", city_slug_to_title(slug)))
-            .collect();
-        format!("{} | What Time", titles.join(" vs "))
-    }
-}
-
-fn city_slug_to_title(slug: &str) -> String {
-    if let Some(city) = find_city_by_slug(slug) {
-        city.name.clone()
-    } else {
-        slug.split(['-', '_'])
-            .filter(|word| !word.is_empty())
-            .map(|word| {
-                let mut chars = word.chars();
-                match chars.next() {
-                    Some(first) => format!("{}{}", first.to_uppercase(), chars.as_str()),
-                    None => String::new(),
-                }
-            })
-            .collect::<Vec<_>>()
-            .join(" ")
-    }
 }
 
 #[cfg(test)]
@@ -173,22 +89,6 @@ mod tests {
         assert_eq!(cities[0].name, "New York City");
         assert_eq!(cities[1].name, "London");
         assert_eq!(cities[2].name, "Paris");
-    }
-
-    #[test]
-    fn test_route_cities_page_title_from_slugs() {
-        assert_eq!(
-            route_cities_page_title(&["london"]),
-            "London Time | What Time"
-        );
-        assert_eq!(
-            route_cities_page_title(&["london", "new-york"]),
-            "London Time vs New York City Time | What Time"
-        );
-        assert_eq!(
-            route_cities_page_title(&["london", "new-york", "paris"]),
-            "London Time vs New York City Time vs Paris Time | What Time"
-        );
     }
 
     #[test]

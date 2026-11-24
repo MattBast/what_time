@@ -3,31 +3,48 @@ use crate::components::{
     Introtext, TimezoneDrawerContent, DRAWER_SWITCH_ID,
 };
 use crate::pages::{Compare, Hours};
-use crate::url_parse::url_query_to_cities;
-use crate::{CURRENT_TIME, DRAWER, ZONE};
+use crate::url_parse::{find_city_by_slug, route_cities_slugs, url_query_to_cities};
+use crate::{CURRENT_TIME, DRAWER};
 use leptos::prelude::*;
-use leptos_router::hooks::query_signal;
+use leptos_meta::Title;
+use leptos_router::hooks::{query_signal, use_params_map};
+
+const CITIES: &str = "cities";
 
 #[component]
 pub fn Home() -> impl IntoView {
+    let params = use_params_map();
+
     // Watch the url queries
-    let (cities_query, set_cities_query) = query_signal::<String>(ZONE);
     let (time_query, set_time_query) = query_signal::<i64>(CURRENT_TIME);
 
-    view! { <HomeContent timezones_query=cities_query set_timezones_query=set_cities_query time_query set_time_query/> }
+    let timezones_query = Memo::new(move |_| {
+        Some(params.with(|params| route_cities_slugs(params.get(CITIES), None)))
+    });
+
+    let page_title = Memo::new(move |_| {
+        params.with(|params| {
+            let cities_param = params.get(CITIES).unwrap_or_default();
+            let slugs: Vec<&str> = cities_param.split('/').filter(|s| !s.is_empty()).collect();
+            route_cities_page_title(&slugs)
+        })
+    });
+
+    view! {
+        <Title text=move || page_title.get()/>
+        <HomeContent timezones_query time_query/>
+    }
 }
 
 #[component]
 pub fn HomeContent(
     timezones_query: Memo<Option<String>>,
-    set_timezones_query: SignalSetter<Option<String>>,
     time_query: Memo<Option<i64>>,
-    set_time_query: SignalSetter<Option<i64>>,
 ) -> impl IntoView {
     let (drawer_query, set_drawer_query) = query_signal::<bool>(DRAWER);
 
     view! {
-        <TimezoneDrawer timezones_query set_timezones_query set_drawer_query>
+        <TimezoneDrawer timezones_query set_drawer_query>
             <Show
                 when=move || should_show_compare(timezones_query.get())
                 fallback=|| view! {
@@ -45,7 +62,7 @@ pub fn HomeContent(
                     </BackgroundBlur>
                 }
             >
-                <Compare cities_query=timezones_query time_query set_time_query/>
+                <Compare cities_query=timezones_query time_query/>
                 <Hours cities_query=timezones_query/>
                 <AddTimezoneButtonFab drawer_query/>
             </Show>
@@ -69,12 +86,41 @@ pub fn WelcomeText() -> impl IntoView {
     }
 }
 
+fn route_cities_page_title(slugs: &[&str]) -> String {
+    if slugs.is_empty() {
+        "What Time".to_string()
+    } else {
+        let titles: Vec<String> = slugs
+            .iter()
+            .map(|slug| format!("{} Time", city_slug_to_title(slug)))
+            .collect();
+        format!("{} | What Time", titles.join(" vs "))
+    }
+}
+
+fn city_slug_to_title(slug: &str) -> String {
+    if let Some(city) = find_city_by_slug(slug) {
+        city.name.clone()
+    } else {
+        slug.split(['-', '_'])
+            .filter(|word| !word.is_empty())
+            .map(|word| {
+                let mut chars = word.chars();
+                match chars.next() {
+                    Some(first) => format!("{}{}", first.to_uppercase(), chars.as_str()),
+                    None => String::new(),
+                }
+            })
+            .collect::<Vec<_>>()
+            .join(" ")
+    }
+}
+
 /// Wraps page content and the timezone drawer. A control with class `drawer-button` and
 /// `for` pointing at the drawer checkbox opens the drawer.
 #[component]
 fn TimezoneDrawer(
     timezones_query: Memo<Option<String>>,
-    set_timezones_query: SignalSetter<Option<String>>,
     set_drawer_query: SignalSetter<Option<bool>>,
     children: Children,
 ) -> impl IntoView {
@@ -111,7 +157,6 @@ fn TimezoneDrawer(
             <label for=DRAWER_SWITCH_ID aria-label="close sidebar" class="drawer-overlay"></label>
             <TimezoneDrawerContent
                 timezones_query
-                set_timezones_query
                 search_input_ref
             />
           </div>
@@ -149,5 +194,21 @@ mod tests {
     #[test]
     fn test_should_show_compare_when_zone_query_has_valid_and_invalid_segments() {
         assert!(should_show_compare(Some("Bad_City,london".into())));
+    }
+
+    #[test]
+    fn test_route_cities_page_title_from_slugs() {
+        assert_eq!(
+            route_cities_page_title(&["london"]),
+            "London Time | What Time"
+        );
+        assert_eq!(
+            route_cities_page_title(&["london", "new-york"]),
+            "London Time vs New York City Time | What Time"
+        );
+        assert_eq!(
+            route_cities_page_title(&["london", "new-york", "paris"]),
+            "London Time vs New York City Time vs Paris Time | What Time"
+        );
     }
 }
