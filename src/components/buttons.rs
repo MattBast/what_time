@@ -1,4 +1,5 @@
 use icondata::{BiPlusRegular, ChCross, ChPlus, Icon};
+use leptos::html::{div, label};
 use leptos::prelude::*;
 use leptos_icons::Icon;
 
@@ -72,22 +73,21 @@ pub fn AddTimezoneButton() -> impl IntoView {
 
 #[component]
 pub fn AddTimezoneButtonFab(drawer_query: Memo<Option<bool>>) -> impl IntoView {
-    view! {
-        <div class="fab">
-            <label
-                for=DRAWER_SWITCH_ID
-                id="add_timezone_button"
-                aria-label="Add City"
-                class="btn btn-xl btn-circle btn-neutral drawer-button"
-                role="button"
-            >
-                {move || view! {
-                    <Icon icon=get_fab_icon(drawer_query.get()) />
-                }}
-
-            </label>
-        </div>
-    }
+    div().attr("class", "fab").child(
+        label()
+            .attr("for", DRAWER_SWITCH_ID)
+            .attr("id", "add_timezone_button")
+            .attr("aria-label", "Add City")
+            .attr("class", "btn btn-xl btn-circle btn-neutral drawer-button")
+            .attr("role", "button")
+            .child({
+                move || {
+                    view! {
+                        <Icon icon=get_fab_icon(drawer_query.get()) />
+                    }
+                }
+            }),
+    )
 }
 
 fn get_fab_icon(drawer_open: Option<bool>) -> Icon {
