@@ -85,6 +85,15 @@ npm install
 npm init playwright@latest
 ```
 
+If playwright or another dependency is out of date, try these commands:
+```bash
+npm update
+npm install -g npm-check-updates
+ncu # check for updates for the package.json file
+ncu -u # update package.json file
+npm update --save # update package-lock.json from package.json
+```
+
 To inspect what each test is doing, open the Playwright UI:
 ```bash
 npx playwright test --ui
