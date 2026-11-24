@@ -4,7 +4,7 @@ use leptos::html::{div, input, li, ul};
 use leptos::prelude::*;
 use leptos::svg::{path, svg};
 use leptos::tachys::html::event::change;
-use leptos_use::storage::use_local_storage;
+use leptos_use_storage::use_local_storage;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 

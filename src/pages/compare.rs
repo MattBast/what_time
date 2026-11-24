@@ -4,7 +4,10 @@ use crate::url_parse::url_query_to_cities;
 use leptos::prelude::*;
 
 #[component]
-pub fn Compare(cities_query: Memo<Option<String>>, time_query: Memo<Option<i64>>) -> impl IntoView {
+pub fn Compare(
+    cities_query: Memo<Option<String>>,
+    time_query: ReadSignal<Option<i64>>,
+) -> impl IntoView {
     let (get_cities, set_cities) = signal(Vec::new());
 
     // Listen for the `zone` url query to change and when it does, re-render the cities.

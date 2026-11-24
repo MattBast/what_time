@@ -4,10 +4,12 @@ use leptos::html::div;
 use leptos::prelude::*;
 
 #[component]
-pub fn TimeInput(time_query: Option<i64>, timezone: Tz) -> impl IntoView {
-    let input_time = utc_to_local_timezone(time_query, timezone)
-        .format("%H:%M")
-        .to_string();
+pub fn TimeInput(time_query: ReadSignal<Option<i64>>, timezone: Tz) -> impl IntoView {
+    let input_time = move || {
+        utc_to_local_timezone(time_query.get(), timezone)
+            .format("%H:%M")
+            .to_string()
+    };
 
     div()
         .attr(
@@ -18,10 +20,12 @@ pub fn TimeInput(time_query: Option<i64>, timezone: Tz) -> impl IntoView {
 }
 
 #[component]
-pub fn DateInput(time_query: Option<i64>, timezone: Tz) -> impl IntoView {
-    let input_date = utc_to_local_timezone(time_query, timezone)
-        .format("%d/%m/%Y")
-        .to_string();
+pub fn DateInput(time_query: ReadSignal<Option<i64>>, timezone: Tz) -> impl IntoView {
+    let input_date = move || {
+        utc_to_local_timezone(time_query.get(), timezone)
+            .format("%d/%m/%Y")
+            .to_string()
+    };
 
     div()
         .attr("class", "text-sm max-w-full w-fit")
