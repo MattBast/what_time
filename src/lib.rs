@@ -21,6 +21,9 @@ pub const CURRENT_TIME: &str = "current_time";
 /// how many hours are presented on the page.
 pub const HOURS: &str = "hours";
 
+/// Defines if the app drawer is open or closed.
+pub const DRAWER: &str = "drawer";
+
 /// Document title shown in the browser tab and search results.
 const APP_TITLE: &str = "What Time - Compare timezones, fast";
 
